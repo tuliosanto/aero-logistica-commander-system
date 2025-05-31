@@ -53,7 +53,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         nomeGuerra: 'admin',
         nomeCompleto: 'Administrador do Sistema',
         baseAerea: 'BASM',
-        perfil: 'Administrador',
+        perfil: 'Supervisor',
         senha: 'admin',
         username: 'admin'
       };
