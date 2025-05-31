@@ -9,24 +9,24 @@ import { Mission, Passenger } from '../types/Mission';
 import { User } from '../types/User';
 import PassengerList from './PassengerList';
 import { toast } from '@/hooks/use-toast';
-
 interface MissionFormProps {
   onSave: (mission: Mission) => void;
   currentUser: User;
   mission?: Mission;
 }
-
-const MissionForm = ({ onSave, currentUser, mission }: MissionFormProps) => {
+const MissionForm = ({
+  onSave,
+  currentUser,
+  mission
+}: MissionFormProps) => {
   const [aeronave, setAeronave] = useState(mission?.aeronave || '');
   const [matricula, setMatricula] = useState(mission?.matricula || '');
   const [trechos, setTrechos] = useState(mission?.trechos.join('\n') || '');
   const [dataVoo, setDataVoo] = useState(mission?.dataVoo || '');
   const [ofrag, setOfrag] = useState(mission?.ofrag || '');
   const [passageiros, setPassageiros] = useState<Passenger[]>(mission?.passageiros || []);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     const missionData: Mission = {
       id: mission?.id || Date.now().toString(),
       aeronave,
@@ -36,11 +36,9 @@ const MissionForm = ({ onSave, currentUser, mission }: MissionFormProps) => {
       ofrag: ofrag || '',
       operadorId: currentUser.id,
       passageiros,
-      createdAt: mission?.createdAt || new Date().toISOString(),
+      createdAt: mission?.createdAt || new Date().toISOString()
     };
-
     onSave(missionData);
-    
     if (!mission) {
       // Reset form for new mission
       setAeronave('');
@@ -50,13 +48,11 @@ const MissionForm = ({ onSave, currentUser, mission }: MissionFormProps) => {
       setOfrag('');
       setPassageiros([]);
     }
-
     toast({
       title: mission ? "Missão atualizada" : "Missão cadastrada",
-      description: `OFRAG ${ofrag || 'sem número'} ${mission ? 'atualizada' : 'cadastrada'} com sucesso!`,
+      description: `OFRAG ${ofrag || 'sem número'} ${mission ? 'atualizada' : 'cadastrada'} com sucesso!`
     });
   };
-
   const calculateTotalWeights = () => {
     const totalPassengers = passageiros.reduce((sum, p) => sum + p.peso, 0);
     const totalBaggage = passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0);
@@ -66,63 +62,33 @@ const MissionForm = ({ onSave, currentUser, mission }: MissionFormProps) => {
       totalCombined: totalPassengers + totalBaggage
     };
   };
-
   const weights = calculateTotalWeights();
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="aeronave">Aeronave *</Label>
-            <Input
-              id="aeronave"
-              value={aeronave}
-              onChange={(e) => setAeronave(e.target.value)}
-              placeholder="Ex: KC-390, C-130, etc."
-              required
-            />
+            <Input id="aeronave" value={aeronave} onChange={e => setAeronave(e.target.value)} placeholder="Ex: KC-390, C-130, etc." required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="matricula">Matrícula</Label>
-            <Input
-              id="matricula"
-              value={matricula}
-              onChange={(e) => setMatricula(e.target.value)}
-              placeholder="Ex: FAB2855"
-            />
+            <Input id="matricula" value={matricula} onChange={e => setMatricula(e.target.value)} placeholder="Ex: FAB2855" />
           </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="trechos">Trechos (um por linha)</Label>
-          <Textarea
-            id="trechos"
-            value={trechos}
-            onChange={(e) => setTrechos(e.target.value)}
-            placeholder="Ex:&#10;SBGL-SBRF&#10;SBRF-SBCO&#10;SBCO-SBGL"
-            rows={3}
-          />
+          <Textarea id="trechos" value={trechos} onChange={e => setTrechos(e.target.value)} placeholder="Ex:&#10;SBGL-SBRF&#10;SBRF-SBCO&#10;SBCO-SBGL" rows={3} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="dataVoo">Data do Voo</Label>
-            <Input
-              id="dataVoo"
-              type="date"
-              value={dataVoo}
-              onChange={(e) => setDataVoo(e.target.value)}
-            />
+            <Input id="dataVoo" type="date" value={dataVoo} onChange={e => setDataVoo(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="ofrag">OFRAG</Label>
-            <Input
-              id="ofrag"
-              value={ofrag}
-              onChange={(e) => setOfrag(e.target.value)}
-              placeholder="Ex: 2024/001"
-            />
+            <Input id="ofrag" value={ofrag} onChange={e => setOfrag(e.target.value)} placeholder="Ex: 2024/001" />
           </div>
         </div>
 
@@ -143,13 +109,9 @@ const MissionForm = ({ onSave, currentUser, mission }: MissionFormProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <PassengerList 
-            passengers={passageiros}
-            onPassengersChange={setPassageiros}
-          />
+          <PassengerList passengers={passageiros} onPassengersChange={setPassageiros} />
           
-          {passageiros.length > 0 && (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          {passageiros.length > 0 && <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="bg-blue-50">
                 <CardContent className="p-4 text-center">
                   <p className="text-sm font-medium text-blue-800">Peso Total PAX</p>
@@ -164,16 +126,13 @@ const MissionForm = ({ onSave, currentUser, mission }: MissionFormProps) => {
               </Card>
               <Card className="bg-green-50">
                 <CardContent className="p-4 text-center">
-                  <p className="text-sm font-medium text-green-800">Peso Total Geral</p>
+                  <p className="text-sm font-medium text-green-800">Peso Total</p>
                   <p className="text-2xl font-bold text-green-900">{weights.totalCombined} kg</p>
                 </CardContent>
               </Card>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default MissionForm;
