@@ -21,6 +21,17 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Tentativa de login:', { username, senha: '***', baseAerea });
+    
+    if (!username || !senha) {
+      toast({
+        title: "Erro no login",
+        description: "Por favor, preencha username e senha.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!baseAerea) {
       toast({
         title: "Erro no login",
@@ -32,6 +43,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     
     // Get users from localStorage
     const users = JSON.parse(localStorage.getItem('users') || '[]');
+    console.log('Usuários encontrados:', users);
     
     // For demo purposes, create default admin if no users exist
     if (users.length === 0) {
@@ -47,13 +59,22 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       };
       users.push(defaultAdmin);
       localStorage.setItem('users', JSON.stringify(users));
+      console.log('Usuário admin padrão criado');
     }
     
-    const user = users.find((u: User) => 
-      u.username.toLowerCase() === username.toLowerCase() && 
-      u.senha === senha &&
-      u.baseAerea === baseAerea
-    );
+    const user = users.find((u: User) => {
+      // Add validation to ensure properties exist before calling toLowerCase
+      if (!u.username || !u.senha || !u.baseAerea) {
+        console.log('Usuário com dados incompletos encontrado:', u);
+        return false;
+      }
+      
+      return u.username.toLowerCase() === username.toLowerCase() && 
+             u.senha === senha &&
+             u.baseAerea === baseAerea;
+    });
+    
+    console.log('Usuário encontrado:', user);
     
     if (user) {
       onLogin(user);
