@@ -52,7 +52,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         posto: 'TC',
         nomeGuerra: 'admin',
         nomeCompleto: 'Administrador do Sistema',
-        baseAerea: 'BAGL',
+        baseAerea: 'BABR',
         perfil: 'Administrador',
         senha: 'admin123',
         username: 'admin'
@@ -155,7 +155,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             </Button>
           </form>
           <div className="mt-6 p-3 bg-gray-50 rounded-md text-xs text-gray-600">
-            <strong>Demo:</strong> Use "admin" / "admin123" e selecione uma base para acesso inicial
+            <strong>Demo:</strong> Use "admin" / "admin123" e selecione BABR - BASE AÉREA DE BRASÍLIA para acesso inicial
           </div>
         </CardContent>
       </Card>
