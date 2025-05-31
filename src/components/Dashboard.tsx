@@ -19,6 +19,8 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
     return JSON.parse(localStorage.getItem('missions') || '[]');
   });
   const [activeTab, setActiveTab] = useState('missions');
+  const [isCreatingMission, setIsCreatingMission] = useState(false);
+  const [editingMission, setEditingMission] = useState<Mission | null>(null);
 
   const handleMissionSave = (mission: Mission) => {
     const updatedMissions = missions.some(m => m.id === mission.id)
@@ -27,12 +29,24 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
     
     setMissions(updatedMissions);
     localStorage.setItem('missions', JSON.stringify(updatedMissions));
+    setIsCreatingMission(false);
+    setEditingMission(null);
   };
 
   const handleMissionDelete = (missionId: string) => {
     const updatedMissions = missions.filter(m => m.id !== missionId);
     setMissions(updatedMissions);
     localStorage.setItem('missions', JSON.stringify(updatedMissions));
+  };
+
+  const handleEditMission = (mission: Mission) => {
+    setEditingMission(mission);
+    setIsCreatingMission(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsCreatingMission(false);
+    setEditingMission(null);
   };
 
   return (
@@ -70,9 +84,8 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-1/2">
+          <TabsList className={`grid w-full ${user.perfil === 'Administrador' ? 'grid-cols-2' : 'grid-cols-1'} lg:w-1/2`}>
             <TabsTrigger value="missions">Missões</TabsTrigger>
-            <TabsTrigger value="new-mission">Nova Missão</TabsTrigger>
             {user.perfil === 'Administrador' && (
               <TabsTrigger value="users">Usuários</TabsTrigger>
             )}
@@ -81,34 +94,46 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
           <TabsContent value="missions">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center justify-between">
                   <span>Missões Cadastradas</span>
+                  {!isCreatingMission && (
+                    <Button 
+                      onClick={() => setIsCreatingMission(true)}
+                      className="bg-green-700 hover:bg-green-800"
+                    >
+                      Nova Missão
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <MissionList 
-                  missions={missions}
-                  onEdit={(mission) => {
-                    // TODO: Implement edit functionality
-                    console.log('Edit mission:', mission);
-                  }}
-                  onDelete={handleMissionDelete}
-                  currentUser={user}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="new-mission">
-            <Card>
-              <CardHeader>
-                <CardTitle>Cadastrar Nova Missão</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <MissionForm 
-                  onSave={handleMissionSave}
-                  currentUser={user}
-                />
+                {isCreatingMission ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">
+                        {editingMission ? 'Editar Missão' : 'Cadastrar Nova Missão'}
+                      </h3>
+                      <Button 
+                        variant="outline"
+                        onClick={handleCancelEdit}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                    <MissionForm 
+                      onSave={handleMissionSave}
+                      currentUser={user}
+                      mission={editingMission}
+                    />
+                  </div>
+                ) : (
+                  <MissionList 
+                    missions={missions}
+                    onEdit={handleEditMission}
+                    onDelete={handleMissionDelete}
+                    currentUser={user}
+                  />
+                )}
               </CardContent>
             </Card>
           </TabsContent>

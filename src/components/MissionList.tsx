@@ -136,7 +136,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
     return (
       <div className="text-center py-8 text-gray-500">
         <p className="text-lg">Nenhuma missão cadastrada ainda.</p>
-        <p className="text-sm">Clique na aba "Nova Missão" para começar.</p>
+        <p className="text-sm">Clique em "Nova Missão" para começar.</p>
       </div>
     );
   }
