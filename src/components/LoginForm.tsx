@@ -49,12 +49,12 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     if (users.length === 0) {
       const defaultAdmin: User = {
         id: '1',
-        posto: 'TC',
+        posto: 'TB',
         nomeGuerra: 'admin',
         nomeCompleto: 'Administrador do Sistema',
-        baseAerea: 'BABR',
+        baseAerea: 'BASM',
         perfil: 'Administrador',
-        senha: 'admin123',
+        senha: 'admin',
         username: 'admin'
       };
       users.push(defaultAdmin);
@@ -154,9 +154,6 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
               Entrar
             </Button>
           </form>
-          <div className="mt-6 p-3 bg-gray-50 rounded-md text-xs text-gray-600">
-            <strong>Demo:</strong> Use "admin" / "admin123" e selecione BABR - BASE AÉREA DE BRASÍLIA para acesso inicial
-          </div>
         </CardContent>
       </Card>
     </div>
