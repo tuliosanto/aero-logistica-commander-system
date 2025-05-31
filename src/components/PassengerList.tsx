@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Check } from 'lucide-react';
 import { Passenger } from '../types/Mission';
 import { MILITARY_RANKS, PRIORITIES, getRankOrder } from '../utils/constants';
 import { toast } from '@/hooks/use-toast';
@@ -54,12 +56,13 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
       peso: Number(formData.peso),
       pesoBagagem: Number(formData.pesoBagagem),
       pesoBagagemMao: Number(formData.pesoBagagemMao),
-      prioridade: Number(formData.prioridade)
+      prioridade: Number(formData.prioridade),
+      checkedIn: false
     };
 
     if (editingPassenger) {
       const updatedPassengers = passengers.map(p => 
-        p.id === editingPassenger ? passengerData : p
+        p.id === editingPassenger ? { ...passengerData, checkedIn: p.checkedIn } : p
       );
       onPassengersChange(updatedPassengers);
       setEditingPassenger(null);
@@ -101,6 +104,21 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
       title: "Passageiro removido",
       description: "O passageiro foi removido da lista.",
     });
+  };
+
+  const toggleCheckIn = (passengerId: string) => {
+    const updatedPassengers = passengers.map(p => 
+      p.id === passengerId ? { ...p, checkedIn: !p.checkedIn } : p
+    );
+    onPassengersChange(updatedPassengers);
+    
+    const passenger = passengers.find(p => p.id === passengerId);
+    if (passenger) {
+      toast({
+        title: passenger.checkedIn ? "Check-in desfeito" : "Check-in realizado",
+        description: `${passenger.posto} ${passenger.nome}`,
+      });
+    }
   };
 
   const sortedPassengers = [...passengers].sort((a, b) => {
@@ -198,7 +216,7 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Passageiros</h3>
+        <h3 className="text-lg font-semibold">Lista de Passageiros</h3>
         <div className="space-x-2">
           {passengers.length > 0 && (
             <Button 
@@ -209,144 +227,164 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
               Gerar Relatório
             </Button>
           )}
-          <Button 
-            onClick={() => {
-              setIsAddingPassenger(true);
-              resetForm();
-              setEditingPassenger(null);
-            }}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            Adicionar Passageiro
-          </Button>
+          <Dialog open={isAddingPassenger} onOpenChange={setIsAddingPassenger}>
+            <DialogTrigger asChild>
+              <Button 
+                onClick={() => {
+                  resetForm();
+                  setEditingPassenger(null);
+                }}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Adicionar Passageiro
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingPassenger ? 'Editar Passageiro' : 'Adicionar Novo Passageiro'}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="posto">Posto Militar *</Label>
+                    <Select value={formData.posto} onValueChange={(value) => setFormData({...formData, posto: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o posto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MILITARY_RANKS.map(rank => (
+                          <SelectItem key={rank} value={rank}>{rank}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nome">Nome Completo *</Label>
+                    <Input
+                      id="nome"
+                      value={formData.nome}
+                      onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cpf">CPF *</Label>
+                    <Input
+                      id="cpf"
+                      value={formData.cpf}
+                      onChange={(e) => setFormData({...formData, cpf: e.target.value})}
+                      placeholder="000.000.000-00"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="destino">Destino *</Label>
+                    <Input
+                      id="destino"
+                      value={formData.destino}
+                      onChange={(e) => setFormData({...formData, destino: e.target.value})}
+                      placeholder="Ex: SBRF, SBCO"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="peso">Peso PAX (kg) *</Label>
+                    <Input
+                      id="peso"
+                      type="number"
+                      value={formData.peso}
+                      onChange={(e) => setFormData({...formData, peso: e.target.value})}
+                      min="0"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pesoBagagem">Bagagem (kg) *</Label>
+                    <Input
+                      id="pesoBagagem"
+                      type="number"
+                      value={formData.pesoBagagem}
+                      onChange={(e) => setFormData({...formData, pesoBagagem: e.target.value})}
+                      min="0"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pesoBagagemMao">Bag. Mão (kg) *</Label>
+                    <Input
+                      id="pesoBagagemMao"
+                      type="number"
+                      value={formData.pesoBagagemMao}
+                      onChange={(e) => setFormData({...formData, pesoBagagemMao: e.target.value})}
+                      min="0"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="prioridade">Prioridade *</Label>
+                    <Select value={formData.prioridade} onValueChange={(value) => setFormData({...formData, prioridade: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="1-13" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRIORITIES.map(priority => (
+                          <SelectItem key={priority} value={priority.toString()}>{priority}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex space-x-2 pt-4">
+                  <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                    {editingPassenger ? 'Atualizar' : 'Adicionar'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={() => {
+                      setIsAddingPassenger(false);
+                      setEditingPassenger(null);
+                      resetForm();
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
-      {isAddingPassenger && (
-        <Card className="border-green-200">
-          <CardHeader>
-            <CardTitle>
-              {editingPassenger ? 'Editar Passageiro' : 'Adicionar Novo Passageiro'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="posto">Posto Militar *</Label>
-                  <Select value={formData.posto} onValueChange={(value) => setFormData({...formData, posto: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o posto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {MILITARY_RANKS.map(rank => (
-                        <SelectItem key={rank} value={rank}>{rank}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="nome">Nome Completo *</Label>
-                  <Input
-                    id="nome"
-                    value={formData.nome}
-                    onChange={(e) => setFormData({...formData, nome: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cpf">CPF *</Label>
-                  <Input
-                    id="cpf"
-                    value={formData.cpf}
-                    onChange={(e) => setFormData({...formData, cpf: e.target.value})}
-                    placeholder="000.000.000-00"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="destino">Destino *</Label>
-                  <Input
-                    id="destino"
-                    value={formData.destino}
-                    onChange={(e) => setFormData({...formData, destino: e.target.value})}
-                    placeholder="Ex: SBRF, SBCO"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="peso">Peso PAX (kg) *</Label>
-                  <Input
-                    id="peso"
-                    type="number"
-                    value={formData.peso}
-                    onChange={(e) => setFormData({...formData, peso: e.target.value})}
-                    min="0"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="pesoBagagem">Bagagem (kg) *</Label>
-                  <Input
-                    id="pesoBagagem"
-                    type="number"
-                    value={formData.pesoBagagem}
-                    onChange={(e) => setFormData({...formData, pesoBagagem: e.target.value})}
-                    min="0"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="pesoBagagemMao">Bag. Mão (kg) *</Label>
-                  <Input
-                    id="pesoBagagemMao"
-                    type="number"
-                    value={formData.pesoBagagemMao}
-                    onChange={(e) => setFormData({...formData, pesoBagagemMao: e.target.value})}
-                    min="0"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="prioridade">Prioridade *</Label>
-                  <Select value={formData.prioridade} onValueChange={(value) => setFormData({...formData, prioridade: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="1-13" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PRIORITIES.map(priority => (
-                        <SelectItem key={priority} value={priority.toString()}>{priority}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex space-x-2">
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">
-                  {editingPassenger ? 'Atualizar' : 'Adicionar'}
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={() => {
-                    setIsAddingPassenger(false);
-                    setEditingPassenger(null);
-                    resetForm();
-                  }}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+      {/* Weight Summary */}
+      {passengers.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="text-center p-4 bg-gray-50 rounded-lg">
+            <p className="text-2xl font-bold text-gray-800">{passengers.length}</p>
+            <p className="text-sm text-gray-600">Passageiros</p>
+          </div>
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <p className="text-2xl font-bold text-blue-800">
+              {passengers.reduce((sum, p) => sum + p.peso, 0)} kg
+            </p>
+            <p className="text-sm text-blue-600">Peso PAX</p>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded-lg">
+            <p className="text-2xl font-bold text-green-800">
+              {passengers.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg
+            </p>
+            <p className="text-sm text-green-600">Peso Total</p>
+          </div>
+        </div>
       )}
 
       {sortedPassengers.length > 0 && (
@@ -372,7 +410,15 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
                     <p>PAX: {passenger.peso}kg | Bag: {passenger.pesoBagagem}kg | BM: {passenger.pesoBagagemMao}kg</p>
                     <p>Prioridade: {passenger.prioridade}</p>
                   </div>
-                  <div className="space-x-2">
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      size="sm" 
+                      variant={passenger.checkedIn ? "default" : "outline"}
+                      onClick={() => toggleCheckIn(passenger.id)}
+                      className={passenger.checkedIn ? "bg-green-600 hover:bg-green-700" : ""}
+                    >
+                      {passenger.checkedIn ? <Check className="h-4 w-4" /> : "Check-in"}
+                    </Button>
                     <Button 
                       size="sm" 
                       variant="outline"
@@ -388,6 +434,11 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
                       Remover
                     </Button>
                   </div>
+                  {passenger.checkedIn && (
+                    <div className="flex items-center text-green-600">
+                      <Check className="h-5 w-5" />
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -395,7 +446,7 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
         </div>
       )}
 
-      {sortedPassengers.length === 0 && !isAddingPassenger && (
+      {sortedPassengers.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <p>Nenhum passageiro cadastrado ainda.</p>
           <p className="text-sm">Clique em "Adicionar Passageiro" para começar.</p>

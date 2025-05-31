@@ -21,4 +21,5 @@ export interface Passenger {
   pesoBagagem: number;
   pesoBagagemMao: number;
   prioridade: number;
+  checkedIn?: boolean;
 }
