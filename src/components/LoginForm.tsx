@@ -46,7 +46,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     console.log('Usuários encontrados:', users);
     
     // For demo purposes, create default admin if no users exist
-    if (users.length === 0) {
+   // if (users.length === 0) {
       const defaultAdmin: User = {
         id: '1',
         posto: 'TB',
@@ -60,7 +60,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       users.push(defaultAdmin);
       localStorage.setItem('users', JSON.stringify(users));
       console.log('Usuário admin padrão criado');
-    }
+   // }
     
     const user = users.find((u: User) => {
       // Add validation to ensure properties exist before calling toLowerCase
