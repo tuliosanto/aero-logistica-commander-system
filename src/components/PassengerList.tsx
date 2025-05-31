@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,12 +50,12 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
       id: editingPassenger || Date.now().toString(),
       posto: formData.posto,
       nome: formData.nome,
-      cpf: formData.cpf,
-      destino: formData.destino,
-      peso: Number(formData.peso),
-      pesoBagagem: Number(formData.pesoBagagem),
-      pesoBagagemMao: Number(formData.pesoBagagemMao),
-      prioridade: Number(formData.prioridade),
+      cpf: formData.cpf || '',
+      destino: formData.destino || '',
+      peso: Number(formData.peso) || 0,
+      pesoBagagem: Number(formData.pesoBagagem) || 0,
+      pesoBagagemMao: Number(formData.pesoBagagemMao) || 0,
+      prioridade: Number(formData.prioridade) || 1,
       checkedIn: false
     };
 
@@ -273,63 +272,58 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="cpf">CPF *</Label>
+                    <Label htmlFor="cpf">CPF</Label>
                     <Input
                       id="cpf"
                       value={formData.cpf}
                       onChange={(e) => setFormData({...formData, cpf: e.target.value})}
                       placeholder="000.000.000-00"
-                      required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="destino">Destino *</Label>
+                    <Label htmlFor="destino">Destino</Label>
                     <Input
                       id="destino"
                       value={formData.destino}
                       onChange={(e) => setFormData({...formData, destino: e.target.value})}
                       placeholder="Ex: SBRF, SBCO"
-                      required
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="peso">Peso PAX (kg) *</Label>
+                    <Label htmlFor="peso">Peso PAX (kg)</Label>
                     <Input
                       id="peso"
                       type="number"
                       value={formData.peso}
                       onChange={(e) => setFormData({...formData, peso: e.target.value})}
                       min="0"
-                      required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pesoBagagem">Bagagem (kg) *</Label>
+                    <Label htmlFor="pesoBagagem">Bagagem (kg)</Label>
                     <Input
                       id="pesoBagagem"
                       type="number"
                       value={formData.pesoBagagem}
                       onChange={(e) => setFormData({...formData, pesoBagagem: e.target.value})}
                       min="0"
-                      required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pesoBagagemMao">Bag. Mão (kg) *</Label>
+                    <Label htmlFor="pesoBagagemMao">Bag. Mão (kg)</Label>
                     <Input
                       id="pesoBagagemMao"
                       type="number"
                       value={formData.pesoBagagemMao}
                       onChange={(e) => setFormData({...formData, pesoBagagemMao: e.target.value})}
                       min="0"
-                      required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="prioridade">Prioridade *</Label>
+                    <Label htmlFor="prioridade">Prioridade</Label>
                     <Select value={formData.prioridade} onValueChange={(value) => setFormData({...formData, prioridade: value})}>
                       <SelectTrigger>
                         <SelectValue placeholder="1-13" />
@@ -401,7 +395,7 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
                       {passenger.posto} {passenger.nome}
                     </p>
                     <p className="text-sm text-gray-600">
-                      CPF: {passenger.cpf} | Destino: {passenger.destino}
+                      CPF: {passenger.cpf || 'Não informado'} | Destino: {passenger.destino || 'Não informado'}
                     </p>
                   </div>
                 </div>

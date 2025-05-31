@@ -7,7 +7,7 @@ export const MILITARY_RANKS = [
 export const AIR_BASES = [
   'SBGL', 'SBCO', 'SBBR', 'SBFL', 'SBSP', 'SBGR', 'SBRF', 
   'SBCT', 'SBSV', 'SBPA', 'SBPV', 'SBAN', 'SBFZ', 'SBMO', 
-  'SBCG', 'SBBH', 'SBVT', 'SBMG', 'SBAT', 'SBCY'
+  'SBCG', 'SBBH', 'SBVT', 'SBMG', 'SBAT', 'SBCY', 'SBSM'
 ];
 
 export const PRIORITIES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];

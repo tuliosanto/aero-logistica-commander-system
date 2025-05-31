@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,10 +30,10 @@ const MissionForm = ({ onSave, currentUser, mission }: MissionFormProps) => {
     const missionData: Mission = {
       id: mission?.id || Date.now().toString(),
       aeronave,
-      matricula,
-      trechos: trechos.split('\n').filter(t => t.trim()),
-      dataVoo,
-      ofrag,
+      matricula: matricula || '',
+      trechos: trechos ? trechos.split('\n').filter(t => t.trim()) : [],
+      dataVoo: dataVoo || new Date().toISOString().split('T')[0],
+      ofrag: ofrag || '',
       operadorId: currentUser.id,
       passageiros,
       createdAt: mission?.createdAt || new Date().toISOString(),
@@ -54,7 +53,7 @@ const MissionForm = ({ onSave, currentUser, mission }: MissionFormProps) => {
 
     toast({
       title: mission ? "Missão atualizada" : "Missão cadastrada",
-      description: `OFRAG ${ofrag} ${mission ? 'atualizada' : 'cadastrada'} com sucesso!`,
+      description: `OFRAG ${ofrag || 'sem número'} ${mission ? 'atualizada' : 'cadastrada'} com sucesso!`,
     });
   };
 
@@ -85,48 +84,44 @@ const MissionForm = ({ onSave, currentUser, mission }: MissionFormProps) => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="matricula">Matrícula *</Label>
+            <Label htmlFor="matricula">Matrícula</Label>
             <Input
               id="matricula"
               value={matricula}
               onChange={(e) => setMatricula(e.target.value)}
               placeholder="Ex: FAB2855"
-              required
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="trechos">Trechos * (um por linha)</Label>
+          <Label htmlFor="trechos">Trechos (um por linha)</Label>
           <Textarea
             id="trechos"
             value={trechos}
             onChange={(e) => setTrechos(e.target.value)}
             placeholder="Ex:&#10;SBGL-SBRF&#10;SBRF-SBCO&#10;SBCO-SBGL"
             rows={3}
-            required
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="dataVoo">Data do Voo *</Label>
+            <Label htmlFor="dataVoo">Data do Voo</Label>
             <Input
               id="dataVoo"
               type="date"
               value={dataVoo}
               onChange={(e) => setDataVoo(e.target.value)}
-              required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ofrag">OFRAG *</Label>
+            <Label htmlFor="ofrag">OFRAG</Label>
             <Input
               id="ofrag"
               value={ofrag}
               onChange={(e) => setOfrag(e.target.value)}
               placeholder="Ex: 2024/001"
-              required
             />
           </div>
         </div>

@@ -276,9 +276,12 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                   <Badge variant="outline" className="bg-blue-50">
                     {mission.matricula}
                   </Badge>
+                  <Badge variant="outline" className="bg-orange-50 text-orange-700 font-semibold">
+                    {new Date(mission.dataVoo).toLocaleDateString('pt-BR')}
+                  </Badge>
                 </CardTitle>
                 <p className="text-sm text-gray-600 mt-1">
-                  OFRAG {mission.ofrag} • {new Date(mission.dataVoo).toLocaleDateString('pt-BR')}
+                  OFRAG {mission.ofrag}
                 </p>
                 <p className="text-sm text-gray-600">
                   {mission.trechos.join(' → ')}
@@ -314,7 +317,6 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
             <div className="flex justify-between items-center text-sm text-gray-600">
               <span>{mission.passageiros.length} passageiros</span>
               <div className="flex space-x-4">
-                <span>PAX: {mission.passageiros.reduce((sum, p) => sum + p.peso, 0)} kg</span>
                 <span>Total: {mission.passageiros.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg</span>
               </div>
             </div>
