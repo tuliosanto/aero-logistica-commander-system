@@ -3,8 +3,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { User } from '../types/User';
+import { AIR_BASES } from '../utils/constants';
 import { toast } from '@/hooks/use-toast';
 
 interface LoginFormProps {
@@ -12,11 +14,21 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ onLogin }: LoginFormProps) => {
-  const [nomeGuerra, setNomeGuerra] = useState('');
+  const [username, setUsername] = useState('');
   const [senha, setSenha] = useState('');
+  const [baseAerea, setBaseAerea] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!baseAerea) {
+      toast({
+        title: "Erro no login",
+        description: "Por favor, selecione sua base aérea.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Get users from localStorage
     const users = JSON.parse(localStorage.getItem('users') || '[]');
@@ -28,16 +40,19 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         posto: 'TC',
         nomeGuerra: 'admin',
         nomeCompleto: 'Administrador do Sistema',
-        baseAerea: 'SBGL',
+        baseAerea: 'BAGL',
         perfil: 'Administrador',
-        senha: 'admin123'
+        senha: 'admin123',
+        username: 'admin'
       };
       users.push(defaultAdmin);
       localStorage.setItem('users', JSON.stringify(users));
     }
     
     const user = users.find((u: User) => 
-      u.nomeGuerra.toLowerCase() === nomeGuerra.toLowerCase() && u.senha === senha
+      u.username.toLowerCase() === username.toLowerCase() && 
+      u.senha === senha &&
+      u.baseAerea === baseAerea
     );
     
     if (user) {
@@ -49,7 +64,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     } else {
       toast({
         title: "Erro no login",
-        description: "Nome de guerra ou senha incorretos.",
+        description: "Username, senha ou base aérea incorretos.",
         variant: "destructive",
       });
     }
@@ -73,13 +88,13 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="nomeGuerra">Nome de Guerra</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="nomeGuerra"
+                id="username"
                 type="text"
-                value={nomeGuerra}
-                onChange={(e) => setNomeGuerra(e.target.value)}
-                placeholder="Digite seu nome de guerra"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Digite seu username"
                 required
                 className="focus:ring-green-500 focus:border-green-500"
               />
@@ -96,6 +111,21 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 className="focus:ring-green-500 focus:border-green-500"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="baseAerea">Base Aérea *</Label>
+              <Select value={baseAerea} onValueChange={setBaseAerea}>
+                <SelectTrigger className="focus:ring-green-500 focus:border-green-500">
+                  <SelectValue placeholder="Selecione sua base" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AIR_BASES.map(base => (
+                    <SelectItem key={base.code} value={base.code}>
+                      {base.code} - {base.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Button 
               type="submit" 
               className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition-colors"
@@ -104,7 +134,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             </Button>
           </form>
           <div className="mt-6 p-3 bg-gray-50 rounded-md text-xs text-gray-600">
-            <strong>Demo:</strong> Use "admin" / "admin123" para acesso inicial
+            <strong>Demo:</strong> Use "admin" / "admin123" e selecione uma base para acesso inicial
           </div>
         </CardContent>
       </Card>

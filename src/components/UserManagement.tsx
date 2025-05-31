@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +23,8 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     nomeCompleto: '',
     baseAerea: '',
     perfil: 'Operador' as 'Operador' | 'Administrador',
-    senha: ''
+    senha: '',
+    username: ''
   });
 
   useEffect(() => {
@@ -43,23 +43,24 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       nomeCompleto: '',
       baseAerea: '',
       perfil: 'Operador',
-      senha: ''
+      senha: '',
+      username: ''
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check if nome de guerra is already taken (excluding current editing user)
+    // Check if username is already taken (excluding current editing user)
     const existingUser = users.find(u => 
-      u.nomeGuerra.toLowerCase() === formData.nomeGuerra.toLowerCase() && 
+      u.username.toLowerCase() === formData.username.toLowerCase() && 
       u.id !== editingUser
     );
     
     if (existingUser) {
       toast({
         title: "Erro",
-        description: "Este nome de guerra já está em uso.",
+        description: "Este username já está em uso.",
         variant: "destructive",
       });
       return;
@@ -72,7 +73,8 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       nomeCompleto: formData.nomeCompleto,
       baseAerea: formData.baseAerea,
       perfil: formData.perfil,
-      senha: formData.senha
+      senha: formData.senha,
+      username: formData.username
     };
 
     let updatedUsers;
@@ -105,7 +107,8 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       nomeCompleto: user.nomeCompleto,
       baseAerea: user.baseAerea,
       perfil: user.perfil,
-      senha: user.senha
+      senha: user.senha,
+      username: user.username
     });
     setEditingUser(user.id);
     setIsAddingUser(true);
@@ -158,6 +161,11 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     });
   };
 
+  const getBaseInfo = (baseCode: string) => {
+    const base = AIR_BASES.find(b => b.code === baseCode);
+    return base ? `${base.code} - ${base.name}` : baseCode;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -198,25 +206,37 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nomeGuerra">Nome de Guerra *</Label>
+                  <Label htmlFor="username">Username *</Label>
                   <Input
-                    id="nomeGuerra"
-                    value={formData.nomeGuerra}
-                    onChange={(e) => setFormData({...formData, nomeGuerra: e.target.value})}
-                    placeholder="Nome de guerra único"
+                    id="username"
+                    value={formData.username}
+                    onChange={(e) => setFormData({...formData, username: e.target.value})}
+                    placeholder="Username único para login"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="nomeCompleto">Nome Completo *</Label>
-                <Input
-                  id="nomeCompleto"
-                  value={formData.nomeCompleto}
-                  onChange={(e) => setFormData({...formData, nomeCompleto: e.target.value})}
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nomeGuerra">Nome de Guerra *</Label>
+                  <Input
+                    id="nomeGuerra"
+                    value={formData.nomeGuerra}
+                    onChange={(e) => setFormData({...formData, nomeGuerra: e.target.value})}
+                    placeholder="Nome de guerra"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nomeCompleto">Nome Completo *</Label>
+                  <Input
+                    id="nomeCompleto"
+                    value={formData.nomeCompleto}
+                    onChange={(e) => setFormData({...formData, nomeCompleto: e.target.value})}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -228,7 +248,9 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                     </SelectTrigger>
                     <SelectContent>
                       {AIR_BASES.map(base => (
-                        <SelectItem key={base} value={base}>{base}</SelectItem>
+                        <SelectItem key={base.code} value={base.code}>
+                          {base.code} - {base.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -304,7 +326,8 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                       )}
                     </div>
                     <p className="text-sm text-gray-600">{user.nomeCompleto}</p>
-                    <p className="text-sm text-gray-500">Base: {user.baseAerea}</p>
+                    <p className="text-sm text-gray-500">Username: {user.username}</p>
+                    <p className="text-sm text-gray-500">Base: {getBaseInfo(user.baseAerea)}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">

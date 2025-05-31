@@ -7,4 +7,5 @@ export interface User {
   baseAerea: string;
   perfil: 'Operador' | 'Administrador';
   senha: string;
+  username: string;
 }
