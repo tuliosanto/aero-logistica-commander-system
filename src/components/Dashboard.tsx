@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,49 +7,41 @@ import MissionList from './MissionList';
 import UserManagement from './UserManagement';
 import MissionForm from './MissionForm';
 import { Mission } from '../types/Mission';
-
 interface DashboardProps {
   user: User;
   onLogout: () => void;
 }
-
-const Dashboard = ({ user, onLogout }: DashboardProps) => {
+const Dashboard = ({
+  user,
+  onLogout
+}: DashboardProps) => {
   const [missions, setMissions] = useState<Mission[]>(() => {
     return JSON.parse(localStorage.getItem('missions') || '[]');
   });
   const [activeTab, setActiveTab] = useState('missions');
   const [isCreatingMission, setIsCreatingMission] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
-
   const handleMissionSave = (mission: Mission) => {
-    const updatedMissions = missions.some(m => m.id === mission.id)
-      ? missions.map(m => m.id === mission.id ? mission : m)
-      : [...missions, mission];
-    
+    const updatedMissions = missions.some(m => m.id === mission.id) ? missions.map(m => m.id === mission.id ? mission : m) : [...missions, mission];
     setMissions(updatedMissions);
     localStorage.setItem('missions', JSON.stringify(updatedMissions));
     setIsCreatingMission(false);
     setEditingMission(null);
   };
-
   const handleMissionDelete = (missionId: string) => {
     const updatedMissions = missions.filter(m => m.id !== missionId);
     setMissions(updatedMissions);
     localStorage.setItem('missions', JSON.stringify(updatedMissions));
   };
-
   const handleEditMission = (mission: Mission) => {
     setEditingMission(mission);
     setIsCreatingMission(true);
   };
-
   const handleCancelEdit = () => {
     setIsCreatingMission(false);
     setEditingMission(null);
   };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-green-800 text-white shadow-lg">
         <div className="container mx-auto px-4 py-4">
@@ -69,11 +60,7 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
                 <p className="font-semibold">{user.posto} {user.nomeGuerra}</p>
                 <p className="text-green-200 text-sm">{user.baseAerea} - {user.perfil}</p>
               </div>
-              <Button 
-                onClick={onLogout}
-                variant="outline"
-                className="bg-transparent border-green-300 text-green-100 hover:bg-green-700"
-              >
+              <Button onClick={onLogout} variant="outline" className="bg-transparent border-green-300 text-green-100 hover:bg-green-700">
                 Sair
               </Button>
             </div>
@@ -84,62 +71,38 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${(user.perfil === 'Administrador' || user.perfil === 'Supervisor') ? 'grid-cols-2' : 'grid-cols-1'} lg:w-1/2`}>
+          <TabsList className={`grid w-full ${user.perfil === 'Administrador' || user.perfil === 'Supervisor' ? 'grid-cols-2' : 'grid-cols-1'} lg:w-1/2`}>
             <TabsTrigger value="missions">Missões</TabsTrigger>
-            {(user.perfil === 'Administrador' || user.perfil === 'Supervisor') && (
-              <TabsTrigger value="users">Usuários</TabsTrigger>
-            )}
+            {(user.perfil === 'Administrador' || user.perfil === 'Supervisor') && <TabsTrigger value="users">Usuários</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="missions">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <span>Missões Cadastradas</span>
-                  {!isCreatingMission && (
-                    <Button 
-                      onClick={() => setIsCreatingMission(true)}
-                      className="bg-green-700 hover:bg-green-800"
-                    >
+                  <span>Missões Ativas</span>
+                  {!isCreatingMission && <Button onClick={() => setIsCreatingMission(true)} className="bg-green-700 hover:bg-green-800">
                       Nova Missão
-                    </Button>
-                  )}
+                    </Button>}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {isCreatingMission ? (
-                  <div className="space-y-4">
+                {isCreatingMission ? <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold">
                         {editingMission ? 'Editar Missão' : 'Cadastrar Nova Missão'}
                       </h3>
-                      <Button 
-                        variant="outline"
-                        onClick={handleCancelEdit}
-                      >
+                      <Button variant="outline" onClick={handleCancelEdit}>
                         Cancelar
                       </Button>
                     </div>
-                    <MissionForm 
-                      onSave={handleMissionSave}
-                      currentUser={user}
-                      mission={editingMission}
-                    />
-                  </div>
-                ) : (
-                  <MissionList 
-                    missions={missions}
-                    onEdit={handleEditMission}
-                    onDelete={handleMissionDelete}
-                    currentUser={user}
-                  />
-                )}
+                    <MissionForm onSave={handleMissionSave} currentUser={user} mission={editingMission} />
+                  </div> : <MissionList missions={missions} onEdit={handleEditMission} onDelete={handleMissionDelete} currentUser={user} />}
               </CardContent>
             </Card>
           </TabsContent>
 
-          {(user.perfil === 'Administrador' || user.perfil === 'Supervisor') && (
-            <TabsContent value="users">
+          {(user.perfil === 'Administrador' || user.perfil === 'Supervisor') && <TabsContent value="users">
               <Card>
                 <CardHeader>
                   <CardTitle>Gerenciamento de Usuários</CardTitle>
@@ -148,12 +111,9 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
                   <UserManagement currentUser={user} />
                 </CardContent>
               </Card>
-            </TabsContent>
-          )}
+            </TabsContent>}
         </Tabs>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
