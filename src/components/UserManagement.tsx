@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +23,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     nomeGuerra: '',
     nomeCompleto: '',
     baseAerea: '',
-    perfil: 'Operador' as 'Operador' | 'Administrador',
+    perfil: 'Operador' as 'Operador' | 'Administrador' | 'Supervisor',
     senha: '',
     username: ''
   });
@@ -36,12 +37,24 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     setUsers(savedUsers);
   };
 
+  const getFilteredUsers = () => {
+    if (currentUser.perfil === 'Supervisor') {
+      // Supervisor can see all users
+      return users;
+    } else if (currentUser.perfil === 'Administrador') {
+      // Administrador can only see users from their base
+      return users.filter(user => user.baseAerea === currentUser.baseAerea);
+    }
+    // Operadores shouldn't access this component, but just in case
+    return [];
+  };
+
   const resetForm = () => {
     setFormData({
       posto: '',
       nomeGuerra: '',
       nomeCompleto: '',
-      baseAerea: '',
+      baseAerea: currentUser.perfil === 'Administrador' ? currentUser.baseAerea : '',
       perfil: 'Operador',
       senha: '',
       username: ''
@@ -61,6 +74,26 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       toast({
         title: "Erro",
         description: "Este username já está em uso.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validation: Administrador can only create users for their base
+    if (currentUser.perfil === 'Administrador' && formData.baseAerea !== currentUser.baseAerea) {
+      toast({
+        title: "Erro",
+        description: "Você só pode cadastrar usuários para sua própria base aérea.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validation: Only Supervisor can create Administrador or Supervisor profiles
+    if ((formData.perfil === 'Administrador' || formData.perfil === 'Supervisor') && currentUser.perfil !== 'Supervisor') {
+      toast({
+        title: "Erro",
+        description: "Apenas Supervisores podem criar perfis de Administrador ou Supervisor.",
         variant: "destructive",
       });
       return;
@@ -101,6 +134,16 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
   };
 
   const handleEdit = (user: User) => {
+    // Check permissions before allowing edit
+    if (currentUser.perfil === 'Administrador' && user.baseAerea !== currentUser.baseAerea) {
+      toast({
+        title: "Erro",
+        description: "Você só pode editar usuários da sua própria base aérea.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setFormData({
       posto: user.posto,
       nomeGuerra: user.nomeGuerra,
@@ -124,24 +167,59 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       return;
     }
 
-    const user = users.find(u => u.id === userId);
-    if (confirm(`Tem certeza que deseja excluir o usuário ${user?.posto} ${user?.nomeGuerra}?`)) {
+    const userToDelete = users.find(u => u.id === userId);
+    if (!userToDelete) return;
+
+    // Check permissions before allowing delete
+    if (currentUser.perfil === 'Administrador' && userToDelete.baseAerea !== currentUser.baseAerea) {
+      toast({
+        title: "Erro",
+        description: "Você só pode excluir usuários da sua própria base aérea.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (confirm(`Tem certeza que deseja excluir o usuário ${userToDelete?.posto} ${userToDelete?.nomeGuerra}?`)) {
       const updatedUsers = users.filter(u => u.id !== userId);
       setUsers(updatedUsers);
       localStorage.setItem('users', JSON.stringify(updatedUsers));
       
       toast({
         title: "Usuário excluído",
-        description: `${user?.posto} ${user?.nomeGuerra} foi excluído.`,
+        description: `${userToDelete?.posto} ${userToDelete?.nomeGuerra} foi excluído.`,
       });
     }
   };
 
-  const changeUserProfile = (userId: string, newProfile: 'Operador' | 'Administrador') => {
+  const changeUserProfile = (userId: string, newProfile: 'Operador' | 'Administrador' | 'Supervisor') => {
     if (userId === currentUser.id) {
       toast({
         title: "Erro",
         description: "Você não pode alterar seu próprio perfil.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const userToChange = users.find(u => u.id === userId);
+    if (!userToChange) return;
+
+    // Check permissions before allowing profile change
+    if (currentUser.perfil === 'Administrador' && userToChange.baseAerea !== currentUser.baseAerea) {
+      toast({
+        title: "Erro",
+        description: "Você só pode alterar perfis de usuários da sua própria base aérea.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Only Supervisor can set Administrador or Supervisor profiles
+    if ((newProfile === 'Administrador' || newProfile === 'Supervisor') && currentUser.perfil !== 'Supervisor') {
+      toast({
+        title: "Erro",
+        description: "Apenas Supervisores podem definir perfis de Administrador ou Supervisor.",
         variant: "destructive",
       });
       return;
@@ -154,10 +232,9 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     setUsers(updatedUsers);
     localStorage.setItem('users', JSON.stringify(updatedUsers));
     
-    const user = users.find(u => u.id === userId);
     toast({
       title: "Perfil alterado",
-      description: `${user?.posto} ${user?.nomeGuerra} agora é ${newProfile}.`,
+      description: `${userToChange?.posto} ${userToChange?.nomeGuerra} agora é ${newProfile}.`,
     });
   };
 
@@ -166,10 +243,28 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     return base ? `${base.code} - ${base.name}` : baseCode;
   };
 
+  const getAvailableProfiles = () => {
+    if (currentUser.perfil === 'Supervisor') {
+      return ['Operador', 'Administrador', 'Supervisor'];
+    } else {
+      return ['Operador'];
+    }
+  };
+
+  const filteredUsers = getFilteredUsers();
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Gerenciamento de Usuários</h3>
+        <div>
+          <h3 className="text-lg font-semibold">Gerenciamento de Usuários</h3>
+          <p className="text-sm text-gray-600">
+            {currentUser.perfil === 'Supervisor' 
+              ? 'Gerenciando usuários de todas as bases aéreas' 
+              : `Gerenciando usuários da ${currentUser.baseAerea}`
+            }
+          </p>
+        </div>
         <Button 
           onClick={() => {
             setIsAddingUser(true);
@@ -242,28 +337,39 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="baseAerea">Base Aérea *</Label>
-                  <Select value={formData.baseAerea} onValueChange={(value) => setFormData({...formData, baseAerea: value})}>
+                  <Select 
+                    value={formData.baseAerea} 
+                    onValueChange={(value) => setFormData({...formData, baseAerea: value})}
+                    disabled={currentUser.perfil === 'Administrador'}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione a base" />
                     </SelectTrigger>
                     <SelectContent>
-                      {AIR_BASES.map(base => (
-                        <SelectItem key={base.code} value={base.code}>
-                          {base.code} - {base.name}
+                      {currentUser.perfil === 'Supervisor' ? (
+                        AIR_BASES.map(base => (
+                          <SelectItem key={base.code} value={base.code}>
+                            {base.code} - {base.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value={currentUser.baseAerea}>
+                          {getBaseInfo(currentUser.baseAerea)}
                         </SelectItem>
-                      ))}
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="perfil">Perfil de Acesso *</Label>
-                  <Select value={formData.perfil} onValueChange={(value: 'Operador' | 'Administrador') => setFormData({...formData, perfil: value})}>
+                  <Select value={formData.perfil} onValueChange={(value: 'Operador' | 'Administrador' | 'Supervisor') => setFormData({...formData, perfil: value})}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Operador">Operador</SelectItem>
-                      <SelectItem value="Administrador">Administrador</SelectItem>
+                      {getAvailableProfiles().map(profile => (
+                        <SelectItem key={profile} value={profile}>{profile}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -303,7 +409,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       )}
 
       <div className="space-y-4">
-        {users.map((user) => (
+        {filteredUsers.map((user) => (
           <Card key={user.id} className={`${user.id === currentUser.id ? 'border-green-300 bg-green-50' : ''}`}>
             <CardContent className="p-4">
               <div className="flex justify-between items-center">
@@ -314,8 +420,11 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                         {user.posto} {user.nomeGuerra}
                       </p>
                       <Badge 
-                        variant={user.perfil === 'Administrador' ? 'default' : 'secondary'}
-                        className={user.perfil === 'Administrador' ? 'bg-red-100 text-red-800' : ''}
+                        variant={user.perfil === 'Supervisor' ? 'default' : user.perfil === 'Administrador' ? 'secondary' : 'outline'}
+                        className={
+                          user.perfil === 'Supervisor' ? 'bg-purple-100 text-purple-800' :
+                          user.perfil === 'Administrador' ? 'bg-red-100 text-red-800' : ''
+                        }
                       >
                         {user.perfil}
                       </Badge>
@@ -335,14 +444,15 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                     <>
                       <Select 
                         value={user.perfil} 
-                        onValueChange={(value: 'Operador' | 'Administrador') => changeUserProfile(user.id, value)}
+                        onValueChange={(value: 'Operador' | 'Administrador' | 'Supervisor') => changeUserProfile(user.id, value)}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Operador">Operador</SelectItem>
-                          <SelectItem value="Administrador">Admin</SelectItem>
+                          {getAvailableProfiles().map(profile => (
+                            <SelectItem key={profile} value={profile}>{profile}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <Button 
@@ -368,7 +478,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
         ))}
       </div>
 
-      {users.length === 0 && (
+      {filteredUsers.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <p>Nenhum usuário cadastrado ainda.</p>
         </div>

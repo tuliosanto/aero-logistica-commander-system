@@ -5,7 +5,7 @@ export interface User {
   nomeGuerra: string;
   nomeCompleto: string;
   baseAerea: string;
-  perfil: 'Operador' | 'Administrador';
+  perfil: 'Operador' | 'Administrador' | 'Supervisor';
   senha: string;
   username: string;
 }

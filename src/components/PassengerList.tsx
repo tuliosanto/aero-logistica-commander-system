@@ -359,28 +359,6 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
         </div>
       </div>
 
-      {/* Weight Summary */}
-      {passengers.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <p className="text-2xl font-bold text-gray-800">{passengers.length}</p>
-            <p className="text-sm text-gray-600">Passageiros</p>
-          </div>
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <p className="text-2xl font-bold text-blue-800">
-              {passengers.reduce((sum, p) => sum + p.peso, 0)} kg
-            </p>
-            <p className="text-sm text-blue-600">Peso PAX</p>
-          </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <p className="text-2xl font-bold text-green-800">
-              {passengers.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg
-            </p>
-            <p className="text-sm text-green-600">Peso Total</p>
-          </div>
-        </div>
-      )}
-
       {sortedPassengers.length > 0 && (
         <div className="space-y-2">
           {sortedPassengers.map((passenger, index) => (

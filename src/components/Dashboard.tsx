@@ -84,9 +84,9 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${user.perfil === 'Administrador' ? 'grid-cols-2' : 'grid-cols-1'} lg:w-1/2`}>
+          <TabsList className={`grid w-full ${(user.perfil === 'Administrador' || user.perfil === 'Supervisor') ? 'grid-cols-2' : 'grid-cols-1'} lg:w-1/2`}>
             <TabsTrigger value="missions">Missões</TabsTrigger>
-            {user.perfil === 'Administrador' && (
+            {(user.perfil === 'Administrador' || user.perfil === 'Supervisor') && (
               <TabsTrigger value="users">Usuários</TabsTrigger>
             )}
           </TabsList>
@@ -138,7 +138,7 @@ const Dashboard = ({ user, onLogout }: DashboardProps) => {
             </Card>
           </TabsContent>
 
-          {user.perfil === 'Administrador' && (
+          {(user.perfil === 'Administrador' || user.perfil === 'Supervisor') && (
             <TabsContent value="users">
               <Card>
                 <CardHeader>
