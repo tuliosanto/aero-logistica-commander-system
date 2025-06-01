@@ -24,7 +24,6 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
   };
 
   const getCodigoBase = () => {
-    // Extrai os dois últimos caracteres da base aérea
     return currentUser.baseAerea.slice(-2);
   };
 
@@ -53,6 +52,66 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
     const codigoBase = getCodigoBase();
     const chefePCAN = getChefePCAN();
     const despachante = `${currentUser.posto} ${currentUser.nomeGuerra}`;
+    
+    // Divide passengers into pages
+    const firstPagePassengers = sortedPassengers.slice(0, 25);
+    const secondPagePassengers = sortedPassengers.slice(25);
+    const needsSecondPage = sortedPassengers.length > 25;
+
+    const generatePassengerRows = (passengers: any[], startIndex: number, totalRows: number) => {
+      const rows = [];
+      
+      // Add passenger rows
+      for (let i = 0; i < passengers.length; i++) {
+        const passenger = passengers[i];
+        rows.push(`
+          <tr style='height:14.25pt'>
+            <td class='x47' style='height:12.75pt;'>${startIndex + i + 1}</td>
+            <td colspan='3' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>${passenger.posto} ${passenger.nome}</td>
+            <td class='x60'>${passenger.cpf}</td>
+            <td class='x65'>${passenger.destino}</td>
+            <td class='x65'>${passenger.prioridade}</td>
+            <td class='x65'>${passenger.peso}</td>
+            <td class='x65'>${passenger.pesoBagagem + passenger.pesoBagagemMao}</td>
+            <td class='x65'></td>
+            <td class='x65'>${passenger.responsavelInscricao || 'O PRÓPRIO'}</td>
+            <td class='x76'>${passenger.parentesco || ''}</td>
+            <td class='x50'></td>
+            <td class='x50'></td>
+            <td class='x53'></td>
+          </tr>
+        `);
+      }
+      
+      // Add empty rows to fill the page
+      for (let i = passengers.length; i < totalRows; i++) {
+        const rowNumber = startIndex + i + 1;
+        const isLastRows = i >= 15; // Last 10 rows have different styling
+        
+        rows.push(`
+          <tr style='height:14.25pt'>
+            <td class='x47' style='height:12.75pt;'>${rowNumber}</td>
+            <td colspan='3' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'></td>
+            <td class='x60'></td>
+            <td class='x65'></td>
+            <td class='x65'></td>
+            <td class='x65'></td>
+            <td class='x65'></td>
+            <td class='x${isLastRows ? '70' : '65'}'></td>
+            <td class='x${isLastRows ? '70' : '65'}'></td>
+            <td class='x${isLastRows ? '77' : '76'}'></td>
+            <td class='x50'></td>
+            <td class='x50'></td>
+            <td class='x53'></td>
+          </tr>
+        `);
+      }
+      
+      return rows.join('');
+    };
+
+    const firstPageRows = generatePassengerRows(firstPagePassengers, 0, 25);
+    const secondPageRows = needsSecondPage ? generatePassengerRows(secondPagePassengers, 25, 25) : '';
 
     const reportContent = `
       <!DOCTYPE html>
@@ -66,104 +125,304 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
               font-family: Arial, sans-serif; 
               margin: 0; 
               padding: 0;
-              font-size: 9px;
+              font-size: 10pt;
               line-height: 1.2;
             }
-            .header { 
-              text-align: center; 
-              margin-bottom: 15px;
-              font-weight: bold;
-              border: 2px solid black;
-              padding: 8px;
-            }
-            .header-title {
-              font-size: 11px;
-              font-weight: bold;
-              margin: 1px 0;
-            }
-            .info-section {
-              display: flex;
-              margin-bottom: 15px;
-              gap: 0;
-              height: 50px;
-            }
-            .aviao-box {
-              border: 2px solid black;
-              padding: 8px 3px;
-              writing-mode: vertical-lr;
-              text-orientation: mixed;
-              text-align: center;
-              font-weight: bold;
-              width: 40px;
-              background-color: #f8f8f8;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 8px;
-            }
-            .info-group {
-              border: 2px solid black;
-              border-left: 0;
-              padding: 4px 6px;
-              flex: 1;
-              font-size: 8px;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-around;
-            }
-            .info-group:last-child {
-              max-width: 180px;
-            }
-            .info-row {
-              margin-bottom: 2px;
-            }
-            .info-label {
-              font-weight: bold;
-              display: inline-block;
-              min-width: 70px;
-            }
             table { 
-              width: 100%; 
               border-collapse: collapse; 
-              margin-bottom: 15px;
-              font-size: 7px;
+              table-layout: fixed; 
+              width: 978pt;
+              margin-bottom: 20px;
             }
-            th, td { 
-              border: 1px solid black; 
-              padding: 1px 3px; 
+            .col1 { width: 23.25pt; }
+            .col2 { width: 161.25pt; }
+            .col3 { width: 89.25pt; }
+            .col4 { width: 51.75pt; }
+            .col5 { width: 75pt; }
+            .col6 { width: 61.5pt; }
+            .col7 { width: 45.75pt; }
+            .col8 { width: 52.5pt; }
+            .col9 { width: 43.5pt; }
+            .col10 { width: 21.75pt; }
+            .col11 { width: 86.25pt; }
+            .col12 { width: 86.25pt; }
+            .col13 { width: 80.25pt; }
+            .col14 { width: 50.25pt; }
+            .col15 { width: 50.25pt; }
+            
+            .x40 {
               text-align: center;
               vertical-align: middle;
-              height: 12px;
+              white-space: nowrap;
+              font-size: 12pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border: 3px solid #000000;
+              border-bottom: none;
+              height: 14.25pt;
             }
-            th { 
-              background-color: #f0f0f0; 
-              font-weight: bold;
-              font-size: 6px;
-              padding: 2px 3px;
+            .x41 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 12pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border-top: none;
+              border-right: 3px solid #000000;
+              border-bottom: none;
+              border-left: 3px solid #000000;
+              height: 16.5pt;
             }
-            .nome-col { 
-              text-align: left; 
-              max-width: 140px; 
-              font-size: 6px;
+            .x42 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 12pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border-top: 1px solid #000000;
+              border-right: 3px solid #000000;
+              border-bottom: none;
+              border-left: 3px solid #000000;
+              height: 15.75pt;
             }
-            .cpf-col { 
-              font-family: monospace; 
-              font-size: 5px; 
+            .x43 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border-left: 3px solid #000000;
+              height: 7.5pt;
             }
-            .footer-info {
-              display: flex;
-              justify-content: space-between;
-              margin-top: 8px;
-              font-size: 8px;
-              font-weight: bold;
-              border: 2px solid black;
-              padding: 4px 8px;
-              background-color: #f8f8f8;
+            .x44 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              writing-mode: vertical-lr;
+              text-orientation: mixed;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+              border-left: 3px solid #000000;
+              height: 40.5pt;
             }
-            .footer-info:last-child {
-              border-top: 0;
-              margin-top: 0;
+            .x45 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 9pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+              border-left: 3px solid #000000;
+              height: 24pt;
             }
+            .x47 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+              border-left: 3px solid #000000;
+              height: 12.75pt;
+            }
+            .x48 {
+              text-align: left;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+              border-left: 3px solid #000000;
+              height: 15pt;
+            }
+            .x49 {
+              text-align: left;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border-top: 1px solid #000000;
+              border-right: 1px solid #000000;
+              border-bottom: 3px solid #000000;
+              border-left: 3px solid #000000;
+              height: 13.5pt;
+            }
+            .x50 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+            }
+            .x51 {
+              text-align: left;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+            }
+            .x52 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: normal;
+              word-wrap: break-word;
+              font-size: 9pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+            }
+            .x53 {
+              text-align: left;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+            }
+            .x55 {
+              text-align: left;
+              vertical-align: middle;
+              white-space: normal;
+              word-wrap: break-word;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+            }
+            .x60 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+            }
+            .x61 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: normal;
+              word-wrap: break-word;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+            }
+            .x65 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+            }
+            .x66 {
+              text-align: left;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 9pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+            }
+            .x68 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 9pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+            }
+            .x69 {
+              text-align: left;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 9pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border-top: 1px solid #000000;
+              border-right: 3px solid #000000;
+              border-bottom: 1px solid #000000;
+              border-left: 1px solid #000000;
+            }
+            .x70 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border: 1px solid #000000;
+            }
+            .x71 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border-right: 3px solid #000000;
+            }
+            .x72 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border-top: 1px solid #000000;
+              border-right: 3px solid #000000;
+              border-bottom: 1px solid #000000;
+              border-left: 1px solid #000000;
+            }
+            .x73 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border-top: 1px solid #000000;
+              border-right: 3px solid #000000;
+              border-bottom: 1px solid #000000;
+              border-left: 1px solid #000000;
+            }
+            .x74 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: normal;
+              word-wrap: break-word;
+              font-size: 9pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border-top: 1px solid #000000;
+              border-right: 3px solid #000000;
+              border-bottom: 1px solid #000000;
+              border-left: 1px solid #000000;
+            }
+            .x76 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-family: Arial, sans-serif;
+              border-top: 1px solid #000000;
+              border-right: 3px solid #000000;
+              border-bottom: 1px solid #000000;
+              border-left: 1px solid #000000;
+            }
+            .x77 {
+              text-align: center;
+              vertical-align: middle;
+              white-space: nowrap;
+              font-size: 10pt;
+              font-weight: 700;
+              font-family: Arial, sans-serif;
+              border-top: 1px solid #000000;
+              border-right: 3px solid #000000;
+              border-bottom: 1px solid #000000;
+              border-left: 1px solid #000000;
+            }
+            .page-break { page-break-before: always; }
             @media print { 
               body { margin: 0; } 
               .no-print { display: none; }
@@ -171,112 +430,220 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
           </style>
         </head>
         <body>
-          <div class="header">
-            <div class="header-title">COMANDO DA AERONÁUTICA</div>
-            <div class="header-title">${currentUser.baseAerea}</div>
-            <div class="header-title">SISTEMA DO CORREIO AÉREO NACIONAL</div>
-            <div class="header-title">RELAÇÃO DE PASSAGEIROS</div>
-          </div>
-          
-          <div class="info-section">
-            <div class="aviao-box">AVIÃO</div>
-            <div class="info-group">
-              <div class="info-row">
-                <span class="info-label">MODELO:</span>
-                <span>${mission.aeronave}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">MATRÍCULA:</span>
-                <span>${mission.matricula}</span>
-              </div>
-            </div>
-            <div class="info-group">
-              <div class="info-row">
-                <span class="info-label">TERMINAL:</span>
-                <span>POSTO CAN ${codigoBase}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">ROTA:</span>
-                <span>${mission.trechos}</span>
-              </div>
-            </div>
-            <div class="info-group">
-              <div class="info-row">
-                <span class="info-label">DATA DO VOO:</span>
-                <span>${new Date(mission.dataVoo).toLocaleDateString('pt-BR')}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">CHAMADA (H):</span>
-                <span>12:30</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">DECOLAGEM (H):</span>
-                <span>13:30</span>
-              </div>
-            </div>
-          </div>
-
+          <!-- PRIMEIRA PÁGINA -->
           <table>
-            <thead>
-              <tr>
-                <th rowspan="2">Nº</th>
-                <th rowspan="2" colspan="3">NOME DOS PASSAGEIROS</th>
-                <th rowspan="2">CPF</th>
-                <th rowspan="2">DESTINO</th>
-                <th rowspan="2">PRIOR</th>
-                <th colspan="2">PESO</th>
-                <th rowspan="2">Nº</th>
-                <th rowspan="2">RESPONSÁVEL PELA INSCRIÇÃO</th>
-                <th rowspan="2">PARENTESCO</th>
-              </tr>
-              <tr>
-                <th>PAX</th>
-                <th>BAG</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${sortedPassengers.map((passenger, index) => `
-                <tr>
-                  <td>${index + 1}</td>
-                  <td class="nome-col" colspan="3">${passenger.posto} ${passenger.nome}</td>
-                  <td class="cpf-col">${passenger.cpf}</td>
-                  <td>${passenger.destino}</td>
-                  <td>${passenger.prioridade}</td>
-                  <td>${passenger.peso}</td>
-                  <td>${passenger.pesoBagagem + passenger.pesoBagagemMao}</td>
-                  <td></td>
-                  <td>${passenger.responsavelInscricao || 'O PRÓPRIO'}</td>
-                  <td>${passenger.parentesco || ''}</td>
-                </tr>
-              `).join('')}
-              ${Array.from({ length: Math.max(0, 25 - sortedPassengers.length) }, (_, i) => `
-                <tr>
-                  <td>${sortedPassengers.length + i + 1}</td>
-                  <td colspan="3"></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              `).join('')}
-            </tbody>
+            <colgroup>
+              <col class="col1"><col class="col2"><col class="col3"><col class="col4"><col class="col5">
+              <col class="col6"><col class="col7"><col class="col8"><col class="col9"><col class="col10">
+              <col class="col11"><col class="col12"><col class="col13"><col class="col14"><col class="col15">
+            </colgroup>
+            
+            <!-- Header -->
+            <tr style='height:16.5pt'>
+              <td colspan='12' class='x40'>COMANDO DA AERONÁUTICA</td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td>
+            </tr>
+            <tr style='height:16.5pt'>
+              <td colspan='12' class='x41'>${currentUser.baseAerea}</td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td>
+            </tr>
+            <tr style='height:16.5pt'>
+              <td colspan='12' class='x41'>SISTEMA DO CORREIO AÉREO NACIONAL</td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td>
+            </tr>
+            <tr style='height:16.5pt'>
+              <td colspan='12' class='x42'>RELAÇÃO DE PASSAGEIROS</td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td>
+            </tr>
+            <tr style='height:7.5pt'>
+              <td class='x43'></td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td>
+              <td class='x50'></td><td class='x71'></td><td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            
+            <!-- Airplane info section -->
+            <tr style='height:15pt'>
+              <td rowspan='3' class='x44'>AVIÃO</td>
+              <td class='x51'>MODELO: ${mission.aeronave}</td>
+              <td class='x53'></td>
+              <td colspan='5' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>TERMINAL: POSTO CAN ${codigoBase}</td>
+              <td class='x53'></td>
+              <td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>DATA DO VOO:</td>
+              <td class='x72'>${new Date(mission.dataVoo).toLocaleDateString('pt-BR')}</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            <tr style='height:12.75pt'>
+              <td rowspan='2' class='x51' style='border-bottom:1px solid #000000;height:25.5pt;'>MATRÍCULA: ${mission.matricula}</td>
+              <td class='x53'></td>
+              <td rowspan='2' class='x55' style='border-bottom:1px solid #000000;height:25.5pt;'>ROTA:</td>
+              <td colspan='4' rowspan='2' class='x61' style='border-right:1px solid #000000;border-bottom:1px solid #000000;height:25.5pt;'>${mission.trechos}</td>
+              <td class='x53'></td>
+              <td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>CHAMADA (H):</td>
+              <td class='x73'>12:30</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            <tr style='height:14.25pt'>
+              <td class='x53'></td><td class='x53'></td>
+              <td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>DECOLAGEM (H):</td>
+              <td class='x73'>13:30</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            <tr style='height:14.25pt'>
+              <td class='x43'></td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td>
+              <td class='x50'></td><td class='x71'></td><td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            
+            <!-- Table headers -->
+            <tr style='height:12.75pt'>
+              <td rowspan='2' class='x45'>Nº</td>
+              <td colspan='3' rowspan='2' class='x52' style='border-right:1px solid #000000;border-bottom:1px solid #000000;height:24pt;'>NOME DOS PASSAGEIROS</td>
+              <td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>CPF</td>
+              <td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>DESTINO</td>
+              <td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>PRIOR</td>
+              <td colspan='2' class='x52' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>PESO</td>
+              <td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>Nº</td>
+              <td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>RESPONSÁVEL PELA INSCRIÇÃO</td>
+              <td rowspan='2' class='x74' style='border-bottom:1px solid #000000;height:24pt;'>PARENTESCO</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            <tr style='height:12.75pt'>
+              <td class='x52'>PAX</td>
+              <td class='x52'>BAG</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            
+            <!-- Passenger rows -->
+            ${firstPageRows}
+            
+            <!-- Footer -->
+            <tr style='height:16.5pt'>
+              <td colspan='6' class='x48'>CHEFE DO PCAN-${codigoBase}: ${chefePCAN}</td>
+              <td class='x66'>SOMA</td>
+              <td class='x68'>${needsSecondPage ? firstPagePassengers.reduce((sum, p) => sum + p.peso, 0) : totalPaxWeight}</td>
+              <td class='x68'>${needsSecondPage ? firstPagePassengers.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0) : totalBaggageWeight}</td>
+              <td colspan='3' class='x69'>CMT ANV:</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            <tr style='height:16.5pt'>
+              <td colspan='6' class='x49'>DESPACHANTE: ${despachante}</td>
+              <td class='x66'>TOTAL:</td>
+              <td colspan='2' class='x68' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>${needsSecondPage ? (firstPagePassengers.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)) : (totalPaxWeight + totalBaggageWeight)}</td>
+              <td colspan='3' class='x69'>MEC ANV:</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
           </table>
 
-          <div class="footer-info">
-            <div>CHEFE DO PCAN-${codigoBase}: ${chefePCAN}</div>
-            <div>SOMA&nbsp;&nbsp;&nbsp;&nbsp;${totalPaxWeight}&nbsp;&nbsp;&nbsp;&nbsp;${totalBaggageWeight}</div>
-            <div>CMT ANV:</div>
-          </div>
-
-          <div class="footer-info">
-            <div>DESPACHANTE: ${despachante}</div>
-            <div>TOTAL:&nbsp;&nbsp;&nbsp;&nbsp;${totalPaxWeight + totalBaggageWeight}</div>
-            <div>MEC ANV:</div>
-          </div>
+          ${needsSecondPage ? `
+          <!-- SEGUNDA PÁGINA -->
+          <div class="page-break"></div>
+          <table>
+            <colgroup>
+              <col class="col1"><col class="col2"><col class="col3"><col class="col4"><col class="col5">
+              <col class="col6"><col class="col7"><col class="col8"><col class="col9"><col class="col10">
+              <col class="col11"><col class="col12"><col class="col13"><col class="col14"><col class="col15">
+            </colgroup>
+            
+            <!-- Header -->
+            <tr style='height:16.5pt'>
+              <td colspan='12' class='x40'>COMANDO DA AERONÁUTICA</td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td>
+            </tr>
+            <tr style='height:16.5pt'>
+              <td colspan='12' class='x41'>${currentUser.baseAerea}</td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td>
+            </tr>
+            <tr style='height:16.5pt'>
+              <td colspan='12' class='x41'>SISTEMA DO CORREIO AÉREO NACIONAL</td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td>
+            </tr>
+            <tr style='height:16.5pt'>
+              <td colspan='12' class='x42'>RELAÇÃO DE PASSAGEIROS</td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td>
+            </tr>
+            <tr style='height:7.5pt'>
+              <td class='x43'></td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td>
+              <td class='x50'></td><td class='x71'></td><td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            
+            <!-- Airplane info section -->
+            <tr style='height:15pt'>
+              <td rowspan='3' class='x44'>AVIÃO</td>
+              <td class='x51'>MODELO: ${mission.aeronave}</td>
+              <td class='x53'></td>
+              <td colspan='5' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>TERMINAL: POSTO CAN ${codigoBase}</td>
+              <td class='x53'></td>
+              <td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>DATA DO VOO:</td>
+              <td class='x72'>${new Date(mission.dataVoo).toLocaleDateString('pt-BR')}</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            <tr style='height:12.75pt'>
+              <td rowspan='2' class='x51' style='border-bottom:1px solid #000000;height:25.5pt;'>MATRÍCULA: ${mission.matricula}</td>
+              <td class='x53'></td>
+              <td rowspan='2' class='x55' style='border-bottom:1px solid #000000;height:25.5pt;'>ROTA:</td>
+              <td colspan='4' rowspan='2' class='x61' style='border-right:1px solid #000000;border-bottom:1px solid #000000;height:25.5pt;'>${mission.trechos}</td>
+              <td class='x53'></td>
+              <td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>CHAMADA (H):</td>
+              <td class='x73'>12:30</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            <tr style='height:14.25pt'>
+              <td class='x53'></td><td class='x53'></td>
+              <td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>DECOLAGEM (H):</td>
+              <td class='x73'>13:30</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            <tr style='height:14.25pt'>
+              <td class='x43'></td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td>
+              <td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td><td class='x50'></td>
+              <td class='x50'></td><td class='x71'></td><td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            
+            <!-- Table headers -->
+            <tr style='height:12.75pt'>
+              <td rowspan='2' class='x45'>Nº</td>
+              <td colspan='3' rowspan='2' class='x52' style='border-right:1px solid #000000;border-bottom:1px solid #000000;height:24pt;'>NOME DOS PASSAGEIROS</td>
+              <td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>CPF</td>
+              <td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>DESTINO</td>
+              <td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>PRIOR</td>
+              <td colspan='2' class='x52' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>PESO</td>
+              <td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>Nº</td>
+              <td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>RESPONSÁVEL PELA INSCRIÇÃO</td>
+              <td rowspan='2' class='x74' style='border-bottom:1px solid #000000;height:24pt;'>PARENTESCO</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            <tr style='height:12.75pt'>
+              <td class='x52'>PAX</td>
+              <td class='x52'>BAG</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            
+            <!-- Passenger rows -->
+            ${secondPageRows}
+            
+            <!-- Footer -->
+            <tr style='height:16.5pt'>
+              <td colspan='6' class='x48'>CHEFE DO PCAN-${codigoBase}: ${chefePCAN}</td>
+              <td class='x66'>SOMA</td>
+              <td class='x68'>${totalPaxWeight}</td>
+              <td class='x68'>${totalBaggageWeight}</td>
+              <td colspan='3' class='x69'>CMT ANV:</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+            <tr style='height:16.5pt'>
+              <td colspan='6' class='x49'>DESPACHANTE: ${despachante}</td>
+              <td class='x66'>TOTAL:</td>
+              <td colspan='2' class='x68' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>${totalPaxWeight + totalBaggageWeight}</td>
+              <td colspan='3' class='x69'>MEC ANV:</td>
+              <td class='x50'></td><td class='x50'></td><td class='x53'></td>
+            </tr>
+          </table>
+          ` : ''}
 
           <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer;">Imprimir</button>
         </body>
