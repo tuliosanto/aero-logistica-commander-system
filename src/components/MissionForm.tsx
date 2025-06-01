@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +40,8 @@ const MissionForm = ({
   const [matricula, setMatricula] = useState(mission?.matricula || '');
   const [dataVoo, setDataVoo] = useState(mission?.dataVoo || '');
   const [ofrag, setOfrag] = useState(mission?.ofrag || '');
+  const [horarioChamada, setHorarioChamada] = useState(mission?.horarioChamada || '');
+  const [horarioDecolagem, setHorarioDecolagem] = useState(mission?.horarioDecolagem || '');
   const [passageiros, setPassageiros] = useState<Passenger[]>(mission?.passageiros || []);
   
   // Estados para os trechos como text inputs
@@ -211,7 +214,9 @@ const MissionForm = ({
       operadorId: currentUser.id,
       passageiros,
       createdAt: mission?.createdAt || new Date().toISOString(),
-      baseAerea: currentUser.baseAerea
+      baseAerea: currentUser.baseAerea,
+      horarioChamada: horarioChamada || undefined,
+      horarioDecolagem: horarioDecolagem || undefined
     };
 
     onSave(missionData);
@@ -221,6 +226,8 @@ const MissionForm = ({
       setMatricula('');
       setDataVoo('');
       setOfrag('');
+      setHorarioChamada('');
+      setHorarioDecolagem('');
       setPassageiros([]);
       const defaultOrigem = getAerodromoByBase(currentUser.baseAerea);
       setOrigem(defaultOrigem);
@@ -400,6 +407,29 @@ const MissionForm = ({
               value={ofrag} 
               onChange={e => setOfrag(e.target.value)} 
               placeholder="Ex: 2024/001" 
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="horarioChamada">Horário Chamada</Label>
+            <Input 
+              id="horarioChamada" 
+              type="time"
+              value={horarioChamada} 
+              onChange={e => setHorarioChamada(e.target.value)} 
+              placeholder="Ex: 14:30" 
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="horarioDecolagem">Horário Decolagem</Label>
+            <Input 
+              id="horarioDecolagem" 
+              type="time"
+              value={horarioDecolagem} 
+              onChange={e => setHorarioDecolagem(e.target.value)} 
+              placeholder="Ex: 15:00" 
             />
           </div>
         </div>
