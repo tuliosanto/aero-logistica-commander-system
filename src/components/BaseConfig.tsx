@@ -117,14 +117,14 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
               {isLoading ? 'Salvando...' : 'Salvar Configurações'}
             </Button>
           </div>  
-          <div className="flex justify-center items-center">
-            <div className="flex flex-col items-center justify-center h-full">
-              <img 
-                src={baseImage} 
-                alt={`Logo da ${currentUser.baseAerea}`}
-                className="max-w-full max-h-64 object-contain"
-              />
-            </div>
+          <div className="flex justify-center items-center h-[280px]">
+            <div className="flex items-center justify-center h-full">
+            <img 
+              src={baseImage} 
+              alt={`Logo da ${currentUser.baseAerea}`}
+              className="max-w-full max-h-64 object-contain"
+            />
+          </div>
           </div>
         </CardContent>
       </Card>
