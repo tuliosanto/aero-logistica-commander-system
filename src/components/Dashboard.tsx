@@ -99,7 +99,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
               alt={`Logo da ${currentUser.baseAerea}`}
               className="h-8 w-8 object-contain"
             />
-            <h1 className="text-xl font-bold text-blue-700">Sistema CAN</h1>
+            <h1 className="text-xl font-bold text-blue-700">Sistema de Gerenciamento de Passageiros</h1>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
