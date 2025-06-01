@@ -17,3 +17,6 @@ export interface CANWaitlistPassenger {
   isAllocated?: boolean; // Nova propriedade para indicar se está alocado em uma missão
   missionId?: string; // ID da missão onde está alocado
 }
+
+// Alias for backward compatibility
+export type CANWaitlistEntry = CANWaitlistPassenger;

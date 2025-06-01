@@ -5,13 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronRight, Trash2, UserPlus } from 'lucide-react';
-import { CANWaitlistEntry } from '../types/CANWaitlist';
+import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import { getRankOrder } from '../utils/constants';
 import PriorityTooltip from './PriorityTooltip';
 
 interface CANWaitlistProps {
-  waitlist: CANWaitlistEntry[];
-  onAddToMission: (entry: CANWaitlistEntry) => void;
+  waitlist: CANWaitlistPassenger[];
+  onAddToMission: (entry: CANWaitlistPassenger) => void;
   onRemove: (id: string) => void;
 }
 
@@ -36,7 +36,7 @@ const CANWaitlist = ({ waitlist, onAddToMission, onRemove }: CANWaitlistProps) =
       }
       acc[entry.destino].push(entry);
       return acc;
-    }, {} as Record<string, CANWaitlistEntry[]>);
+    }, {} as Record<string, CANWaitlistPassenger[]>);
 
     // Sort each group by priority first, then by military rank
     Object.keys(groups).forEach(destino => {
