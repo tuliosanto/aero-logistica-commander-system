@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,17 +5,18 @@ import { Mission } from '../types/Mission';
 import { User } from '../types/User';
 import { toast } from '@/hooks/use-toast';
 import { AIR_BASES } from '../utils/constants';
-import { Check } from 'lucide-react';
+import { Check, Archive } from 'lucide-react';
 
 interface MissionListProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
   onDelete: (missionId: string) => void;
   onComplete: (missionId: string) => void;
+  onArchive: (missionId: string) => void;
   currentUser: User;
 }
 
-const MissionList = ({ missions, onEdit, onDelete, onComplete, currentUser }: MissionListProps) => {
+const MissionList = ({ missions, onEdit, onDelete, onComplete, onArchive, currentUser }: MissionListProps) => {
   const handleDelete = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja excluir a missão OFRAG ${mission.ofrag}?`)) {
       onDelete(mission.id);
@@ -33,6 +33,16 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, currentUser }: Mi
       toast({
         title: "Missão concluída",
         description: `OFRAG ${mission.ofrag} foi marcada como concluída.`,
+      });
+    }
+  };
+
+  const handleArchive = (mission: Mission) => {
+    if (confirm(`Tem certeza que deseja arquivar a missão OFRAG ${mission.ofrag}?`)) {
+      onArchive(mission.id);
+      toast({
+        title: "Missão arquivada",
+        description: `OFRAG ${mission.ofrag} foi arquivada com sucesso.`,
       });
     }
   };
@@ -706,6 +716,11 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, currentUser }: Mi
                       Concluída
                     </Badge>
                   )}
+                  {mission.isArchived && (
+                    <Badge variant="outline" className="bg-gray-50 text-gray-700 font-semibold">
+                      Arquivada
+                    </Badge>
+                  )}
                 </CardTitle>
                 <p className="text-sm text-gray-600 mt-1">
                   OFRAG {mission.ofrag}
@@ -723,7 +738,7 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, currentUser }: Mi
                 >
                   Visualizar Impressão
                 </Button>
-                {!mission.isCompleted && (
+                {!mission.isCompleted && !mission.isArchived && (
                   <Button 
                     size="sm" 
                     variant="outline"
@@ -734,13 +749,26 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, currentUser }: Mi
                     Concluir
                   </Button>
                 )}
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => onEdit(mission)}
-                >
-                  Editar
-                </Button>
+                {mission.isCompleted && !mission.isArchived && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleArchive(mission)}
+                    className="bg-gray-50 hover:bg-gray-100 text-gray-700"
+                  >
+                    <Archive className="w-4 h-4 mr-1" />
+                    Arquivar
+                  </Button>
+                )}
+                {!mission.isArchived && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => onEdit(mission)}
+                  >
+                    Editar
+                  </Button>
+                )}
                 <Button 
                   size="sm" 
                   variant="destructive"
