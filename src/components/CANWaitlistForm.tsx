@@ -30,29 +30,44 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
   const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || 'O PRÓPRIO');
   const [parentesco, setParentesco] = useState(passenger?.parentesco || '');
 
-  // Additional validation and filtering at component level
-  const validRanks = MILITARY_RANKS.filter(rank => {
+  // Enhanced validation and filtering at component level
+  const validRanks = MILITARY_RANKS.filter((rank, index) => {
+    console.log(`CANWaitlistForm - Checking rank ${index}:`, rank, typeof rank);
     const isValid = rank && typeof rank === 'string' && rank.trim().length > 0;
     if (!isValid) {
-      console.warn('Filtering invalid rank in component:', rank);
+      console.error('CANWaitlistForm - Filtering invalid rank:', rank, 'at index:', index);
     }
     return isValid;
   });
 
-  const validAerodromos = AERODROMOS.filter(aero => {
+  const validAerodromos = AERODROMOS.filter((aero, index) => {
+    console.log(`CANWaitlistForm - Checking aerodrome ${index}:`, aero);
     const isValid = aero && aero.code && typeof aero.code === 'string' && aero.code.trim().length > 0;
     if (!isValid) {
-      console.warn('Filtering invalid aerodrome in component:', aero);
+      console.error('CANWaitlistForm - Filtering invalid aerodrome:', aero, 'at index:', index);
     }
     return isValid;
   });
 
-  const validPriorities = PRIORITIES.filter(priority => {
+  const validPriorities = PRIORITIES.filter((priority, index) => {
+    console.log(`CANWaitlistForm - Checking priority ${index}:`, priority);
     const isValid = priority && priority.value && typeof priority.value === 'number' && priority.value > 0;
     if (!isValid) {
-      console.warn('Filtering invalid priority in component:', priority);
+      console.error('CANWaitlistForm - Filtering invalid priority:', priority, 'at index:', index);
     }
     return isValid;
+  });
+
+  console.log('CANWaitlistForm - Final validation results:', {
+    validRanks: validRanks.length,
+    validAerodromos: validAerodromos.length,
+    validPriorities: validPriorities.length,
+    originalRanks: MILITARY_RANKS.length,
+    originalAerodromos: AERODROMOS.length,
+    originalPriorities: PRIORITIES.length,
+    firstRank: validRanks[0],
+    firstAerodrome: validAerodromos[0]?.code,
+    firstPriority: validPriorities[0]?.value
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -102,15 +117,6 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
     setTelefone(formatted);
   };
 
-  console.log('Component validation results:', {
-    validRanks: validRanks.length,
-    validAerodromos: validAerodromos.length,
-    validPriorities: validPriorities.length,
-    originalRanks: MILITARY_RANKS.length,
-    originalAerodromos: AERODROMOS.length,
-    originalPriorities: PRIORITIES.length
-  });
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -122,12 +128,12 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             </SelectTrigger>
             <SelectContent>
               {validRanks.map((rank, index) => {
-                // Extra validation before rendering
+                console.log(`CANWaitlistForm - About to render rank ${index}:`, rank);
+                // Final safety check
                 if (!rank || typeof rank !== 'string' || rank.trim() === '') {
-                  console.error('Attempting to render invalid rank:', rank, 'at index:', index);
+                  console.error('CANWaitlistForm - CRITICAL: Attempting to render invalid rank:', rank, 'at index:', index);
                   return null;
                 }
-                console.log(`Rendering valid rank ${index}:`, rank);
                 return (
                   <SelectItem key={`rank-${index}-${rank}`} value={rank}>
                     {rank}
@@ -183,12 +189,12 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
           </SelectTrigger>
           <SelectContent>
             {validAerodromos.map((aero, index) => {
-              // Extra validation before rendering
+              console.log(`CANWaitlistForm - About to render aerodrome ${index}:`, aero?.code);
+              // Final safety check
               if (!aero || !aero.code || typeof aero.code !== 'string' || aero.code.trim() === '') {
-                console.error('Attempting to render invalid aerodrome:', aero, 'at index:', index);
+                console.error('CANWaitlistForm - CRITICAL: Attempting to render invalid aerodrome:', aero, 'at index:', index);
                 return null;
               }
-              console.log(`Rendering valid aerodrome ${index}:`, aero.code);
               return (
                 <SelectItem key={`aero-${index}-${aero.code}`} value={aero.code}>
                   {aero.code} - {aero.location}
@@ -242,12 +248,12 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
           </SelectTrigger>
           <SelectContent>
             {validPriorities.map((priority, index) => {
-              // Extra validation before rendering
+              console.log(`CANWaitlistForm - About to render priority ${index}:`, priority?.value);
+              // Final safety check
               if (!priority || !priority.value || typeof priority.value !== 'number' || priority.value < 1) {
-                console.error('Attempting to render invalid priority:', priority, 'at index:', index);
+                console.error('CANWaitlistForm - CRITICAL: Attempting to render invalid priority:', priority, 'at index:', index);
                 return null;
               }
-              console.log(`Rendering valid priority ${index}:`, priority.value);
               return (
                 <SelectItem key={`priority-${index}-${priority.value}`} value={priority.value.toString()}>
                   <PriorityTooltip priority={priority.value}>

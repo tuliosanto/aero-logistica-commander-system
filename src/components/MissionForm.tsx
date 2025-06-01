@@ -30,6 +30,8 @@ const MissionForm = ({
   mission,
   onComplete
 }: MissionFormProps) => {
+  console.log('MissionForm - Component rendering, checking AERODROMOS:', AERODROMOS?.slice(0, 3));
+  
   const [aeronave, setAeronave] = useState(mission?.aeronave || '');
   const [matricula, setMatricula] = useState(mission?.matricula || '');
   const [dataVoo, setDataVoo] = useState(mission?.dataVoo || '');
@@ -65,8 +67,10 @@ const MissionForm = ({
   };
 
   useEffect(() => {
+    console.log('MissionForm - useEffect running');
     // Define origem padrão baseada na base aérea do usuário
     const defaultOrigem = getAerodromoByBase(currentUser.baseAerea);
+    console.log('MissionForm - Default origem:', defaultOrigem);
     setOrigem(defaultOrigem);
 
     // Se estiver editando uma missão, carrega os trechos existentes
@@ -86,10 +90,12 @@ const MissionForm = ({
   }, [currentUser.baseAerea, mission]);
 
   const loadWaitlistPassengers = () => {
+    console.log('MissionForm - Loading waitlist passengers');
     const allPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
     const basePassengers = allPassengers.filter((passenger: CANWaitlistPassenger) => 
       passenger.baseAerea === currentUser.baseAerea
     );
+    console.log('MissionForm - Loaded waitlist passengers:', basePassengers.length);
     setWaitlistPassengers(basePassengers);
   };
 
@@ -211,6 +217,29 @@ const MissionForm = ({
     setDataVoo(today);
   };
 
+  const calculateTotalWeights = () => {
+    const totalPassengers = passageiros.reduce((sum, p) => sum + p.peso, 0);
+    const totalBaggage = passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0);
+    return {
+      totalPassengers,
+      totalBaggage,
+      totalCombined: totalPassengers + totalBaggage
+    };
+  };
+
+  const formatFlightRoute = () => {
+    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
+    return trechos.join(' - ');
+  };
+
+  const getPriorityColor = (priority: number) => {
+    if (priority <= 3) return 'bg-red-100 text-red-800';
+    if (priority <= 6) return 'bg-orange-100 text-orange-800';
+    if (priority <= 9) return 'bg-yellow-100 text-yellow-800';
+    if (priority <= 12) return 'bg-green-100 text-green-800';
+    return 'bg-blue-100 text-blue-800';
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -253,31 +282,7 @@ const MissionForm = ({
     });
   };
 
-  const calculateTotalWeights = () => {
-    const totalPassengers = passageiros.reduce((sum, p) => sum + p.peso, 0);
-    const totalBaggage = passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0);
-    return {
-      totalPassengers,
-      totalBaggage,
-      totalCombined: totalPassengers + totalBaggage
-    };
-  };
-
   const weights = calculateTotalWeights();
-
-  const formatFlightRoute = () => {
-    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
-    return trechos.join(' - ');
-  };
-
-  const getPriorityColor = (priority: number) => {
-    if (priority <= 3) return 'bg-red-100 text-red-800';
-    if (priority <= 6) return 'bg-orange-100 text-orange-800';
-    if (priority <= 9) return 'bg-yellow-100 text-yellow-800';
-    if (priority <= 12) return 'bg-green-100 text-green-800';
-    return 'bg-blue-100 text-blue-800';
-  };
-
   const compatiblePassengers = getCompatibleWaitlistPassengers();
 
   return (
