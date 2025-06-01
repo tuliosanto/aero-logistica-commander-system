@@ -18,11 +18,28 @@ interface CANWaitlistFormProps {
 }
 
 const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }: CANWaitlistFormProps) => {
-  const [posto, setPosto] = useState(passenger?.posto || '');
+  // Ensure initial values are never empty strings for Select components
+  const getInitialSelectValue = (value: string | undefined, fallback: string) => {
+    const cleanValue = value?.trim();
+    return cleanValue && cleanValue.length > 0 ? cleanValue : fallback;
+  };
+
+  const [posto, setPosto] = useState(() => {
+    const initialPosto = getInitialSelectValue(passenger?.posto, MILITARY_RANKS[0] || 'CV');
+    console.log('CANWaitlistForm - Initial posto:', initialPosto);
+    return initialPosto;
+  });
+  
   const [nome, setNome] = useState(passenger?.nome || '');
   const [cpf, setCpf] = useState(passenger?.cpf || '');
   const [telefone, setTelefone] = useState(passenger?.telefone || '');
-  const [destino, setDestino] = useState(passenger?.destino || '');
+  
+  const [destino, setDestino] = useState(() => {
+    const initialDestino = getInitialSelectValue(passenger?.destino, AERODROMOS[0]?.code || 'SBAN');
+    console.log('CANWaitlistForm - Initial destino:', initialDestino);
+    return initialDestino;
+  });
+  
   const [peso, setPeso] = useState<number>(passenger?.peso || 70);
   const [pesoBagagem, setPesoBagagem] = useState<number>(passenger?.pesoBagagem || 0);
   const [pesoBagagemMao, setPesoBagagemMao] = useState(passenger?.pesoBagagemMao || 0);
@@ -67,8 +84,23 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
     originalPriorities: PRIORITIES.length,
     firstRank: validRanks[0],
     firstAerodrome: validAerodromos[0]?.code,
-    firstPriority: validPriorities[0]?.value
+    firstPriority: validPriorities[0]?.value,
+    currentPosto: posto,
+    currentDestino: destino
   });
+
+  // Ensure current values exist in valid options, if not reset to first valid option
+  useEffect(() => {
+    if (validRanks.length > 0 && !validRanks.includes(posto)) {
+      console.log('CANWaitlistForm - Current posto not in valid ranks, resetting:', posto, 'to:', validRanks[0]);
+      setPosto(validRanks[0]);
+    }
+    
+    if (validAerodromos.length > 0 && !validAerodromos.some(aero => aero.code === destino)) {
+      console.log('CANWaitlistForm - Current destino not in valid aerodromos, resetting:', destino, 'to:', validAerodromos[0].code);
+      setDestino(validAerodromos[0].code);
+    }
+  }, [validRanks, validAerodromos, posto, destino]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
