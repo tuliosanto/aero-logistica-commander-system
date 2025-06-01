@@ -110,9 +110,19 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-800 via-blue-700 to-blue-900 p-4">
-      <div className="absolute inset-0 bg-black/20"></div>
-      <Card className="w-full max-w-md relative z-10 shadow-2xl bg-white/95 backdrop-blur-sm">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative"
+      style={{
+        backgroundImage: `url('/lovable-uploads/57b71783-7dc8-48e9-adec-147ff37406e2.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Overlay para escurecer o fundo e melhorar a legibilidade */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+      
+      <Card className="w-full max-w-md relative z-10 shadow-2xl bg-white/95 backdrop-blur-sm border-0">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto mb-4 w-20 h-20 flex items-center justify-center overflow-hidden">
             <img 

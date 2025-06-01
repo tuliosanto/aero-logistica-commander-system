@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -117,11 +118,13 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
             </Button>
           </div>  
           <div className="flex justify-center items-center">
-            <img 
-              src={baseImage} 
-              alt={`Logo da ${currentUser.baseAerea}`}
-              className="max-w-full max-h-64 object-contain mx-auto"
-            />
+            <div className="flex flex-col items-center justify-center h-full">
+              <img 
+                src={baseImage} 
+                alt={`Logo da ${currentUser.baseAerea}`}
+                className="max-w-full max-h-64 object-contain"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
