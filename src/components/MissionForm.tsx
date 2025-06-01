@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { UserPlus, ArrowLeft, Calendar, CheckCircle } from 'lucide-react';
+import { UserPlus, Calendar, CheckCircle } from 'lucide-react';
 import { Mission, Passenger } from '../types/Mission';
 import { User } from '../types/User';
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
@@ -159,36 +157,6 @@ const MissionForm = ({
     });
   };
 
-  const handleCompleteMission = () => {
-    if (!mission) return;
-
-    const completedMission: Mission = {
-      ...mission,
-      isCompleted: true,
-      passageiros
-    };
-
-    // Remover passageiros da lista de espera que estão na missão
-    const allWaitlistPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
-    const passageirosFromWaitlist = passageiros.filter(p => p.fromWaitlist && p.waitlistId);
-    const waitlistIdsToRemove = passageirosFromWaitlist.map(p => p.waitlistId);
-    
-    const updatedWaitlistPassengers = allWaitlistPassengers.filter((p: CANWaitlistPassenger) => 
-      !waitlistIdsToRemove.includes(p.id)
-    );
-    localStorage.setItem('canWaitlist', JSON.stringify(updatedWaitlistPassengers));
-    onUpdateWaitlist();
-
-    if (onComplete) {
-      onComplete(completedMission);
-    }
-
-    toast({
-      title: "Missão concluída",
-      description: `OFRAG ${mission.ofrag} foi concluída com sucesso. Passageiros da lista de espera foram removidos.`,
-    });
-  };
-
   const handleAddDirectPassenger = (passenger: Passenger) => {
     setPassageiros([...passageiros, passenger]);
   };
@@ -253,8 +221,6 @@ const MissionForm = ({
       totalCombined: totalPassengers + totalBaggage
     };
   };
-
-  const weights = calculateTotalWeights();
 
   const formatFlightRoute = () => {
     const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
@@ -512,35 +478,6 @@ const MissionForm = ({
             showMoveToWaitlist={true}
             onMoveToWaitlist={moveFromMissionToWaitlist}
           />
-          
-          {/* Botão de concluir missão fora da lista de passageiros */}
-          {mission && !mission.isCompleted && passageiros.length > 0 && (
-            <div className="mt-6 flex justify-end">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button className="bg-green-600 hover:bg-green-700">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Concluir Missão
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Concluir Missão</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Tem certeza que deseja concluir esta missão? Esta ação não pode ser desfeita.
-                      Os passageiros da lista de espera serão removidos permanentemente.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleCompleteMission} className="bg-green-600 hover:bg-green-700">
-                      Concluir
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          )}
           
           {passageiros.length > 0 && (
             <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
