@@ -3,7 +3,7 @@ export interface Mission {
   id: string;
   aeronave: string;
   matricula: string;
-  trechos: string; // Changed from string[] to string to match how it's used
+  trechos: string[];
   dataVoo: string;
   ofrag: string;
   operadorId: string;
@@ -11,8 +11,6 @@ export interface Mission {
   createdAt: string;
   baseAerea: string; // Adicionando campo para identificar a base aérea
   isCompleted?: boolean; // Nova propriedade para indicar se a missão foi concluída
-  isArchived?: boolean; // Nova propriedade para indicar se a missão foi arquivada
-  archivedAt?: string; // Data de arquivamento
 }
 
 export interface Passenger {
@@ -20,7 +18,6 @@ export interface Passenger {
   posto: string;
   nome: string;
   cpf: string;
-  telefone?: string; // Adding telefone field
   destino: string;
   peso: number;
   pesoBagagem: number;

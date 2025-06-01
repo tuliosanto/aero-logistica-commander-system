@@ -4,159 +4,96 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronUp, UserPlus } from 'lucide-react';
-import { User } from '../types/User';
-import { CANWaitlistPassenger } from '../types/CANWaitlist';
-import { Mission } from '../types/Mission';
-import CANWaitlistForm from './CANWaitlistForm';
-import { AERODROMOS } from '../utils/constants';
+import { PlusCircle, UserPlus, Trash2, Plane } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import PriorityTooltip from './PriorityTooltip';
+import { CANWaitlistPassenger } from '../types/CANWaitlist';
+import { User } from '../types/User';
+import CANWaitlistForm from './CANWaitlistForm';
 
 interface CANWaitlistProps {
   currentUser: User;
-  missions?: Mission[];
-  onPassengerAllocated?: (passenger: CANWaitlistPassenger, missionId: string) => void;
 }
 
-const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWaitlistProps) => {
+const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
   const [waitlistPassengers, setWaitlistPassengers] = useState<CANWaitlistPassenger[]>([]);
-  const [compatiblePassengers, setCompatiblePassengers] = useState<CANWaitlistPassenger[]>([]);
-  const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [collapsedDestinations, setCollapsedDestinations] = useState<Record<string, boolean>>({});
-
-  // Helper function to safely parse trechos
-  const parseTrechos = (trechos: string | string[] | undefined): string[] => {
-    if (!trechos) return [];
-    
-    // If it's already an array, return it
-    if (Array.isArray(trechos)) {
-      return trechos;
-    }
-    
-    // If it's a string, split by comma
-    if (typeof trechos === 'string') {
-      return trechos.split(',').map(t => t.trim()).filter(t => t);
-    }
-    
-    // Fallback
-    return [];
-  };
+  const [showForm, setShowForm] = useState(false);
+  const [editingPassenger, setEditingPassenger] = useState<CANWaitlistPassenger | null>(null);
 
   useEffect(() => {
     loadWaitlistPassengers();
   }, [currentUser.baseAerea]);
 
-  useEffect(() => {
-    if (selectedMission) {
-      updateCompatiblePassengers();
-    }
-  }, [selectedMission, waitlistPassengers]);
-
   const loadWaitlistPassengers = () => {
-    const stored = localStorage.getItem(`waitlist_${currentUser.baseAerea}`);
-    if (stored) {
-      const passengers = JSON.parse(stored) as CANWaitlistPassenger[];
-      setWaitlistPassengers(passengers.filter(p => !p.isAllocated));
-    }
-  };
-
-  const updateCompatiblePassengers = () => {
-    if (!selectedMission) {
-      setCompatiblePassengers([]);
-      return;
-    }
-
-    // Use the safe parseTrechos function instead of direct .split()
-    const trechosArray = parseTrechos(selectedMission.trechos);
-    const missionDestinations = trechosArray
-      .flatMap(trecho => trecho.split('-').map(dest => dest.trim()))
-      .filter(dest => dest.length > 0);
-
-    const compatible = waitlistPassengers.filter(passenger => 
-      !passenger.isAllocated && 
-      missionDestinations.includes(passenger.destino)
+    const allPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
+    // Filtrar passageiros apenas da base aérea do usuário logado
+    const basePassengers = allPassengers.filter((passenger: CANWaitlistPassenger) => 
+      passenger.baseAerea === currentUser.baseAerea
     );
-
-    // Sort by priority first, then by military rank
-    compatible.sort((a, b) => {
-      if (a.prioridade !== b.prioridade) {
-        return a.prioridade - b.prioridade;
-      }
-      return a.posto.localeCompare(b.posto);
-    });
-
-    setCompatiblePassengers(compatible);
+    setWaitlistPassengers(basePassengers);
   };
 
-  const saveWaitlistPassengers = (passengers: CANWaitlistPassenger[]) => {
-    localStorage.setItem(`waitlist_${currentUser.baseAerea}`, JSON.stringify(passengers));
-    setWaitlistPassengers(passengers.filter(p => !p.isAllocated));
-  };
-
-  const addToWaitlist = (passenger: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => {
-    const newPassenger: CANWaitlistPassenger = {
-      ...passenger,
-      id: Date.now().toString(),
-      dataInscricao: new Date().toISOString(),
-      baseAerea: currentUser.baseAerea,
-    };
-
-    const allPassengers = [...waitlistPassengers, newPassenger];
-    saveWaitlistPassengers(allPassengers);
+  const handleSavePassenger = (passengerData: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => {
+    const allPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
     
-    setShowAddForm(false);
+    if (editingPassenger) {
+      const updatedPassengers = allPassengers.map((p: CANWaitlistPassenger) =>
+        p.id === editingPassenger.id 
+          ? { 
+              ...passengerData, 
+              id: editingPassenger.id, 
+              dataInscricao: editingPassenger.dataInscricao,
+              baseAerea: currentUser.baseAerea 
+            } 
+          : p
+      );
+      localStorage.setItem('canWaitlist', JSON.stringify(updatedPassengers));
+      
+      toast({
+        title: "Passageiro atualizado",
+        description: `${passengerData.posto} ${passengerData.nome} foi atualizado na lista de espera.`,
+      });
+    } else {
+      const newPassenger: CANWaitlistPassenger = {
+        ...passengerData,
+        id: Date.now().toString(),
+        dataInscricao: new Date().toISOString(),
+        baseAerea: currentUser.baseAerea,
+      };
+      
+      allPassengers.push(newPassenger);
+      localStorage.setItem('canWaitlist', JSON.stringify(allPassengers));
+      
+      toast({
+        title: "Passageiro cadastrado",
+        description: `${passengerData.posto} ${passengerData.nome} foi adicionado à lista de espera.`,
+      });
+    }
     
-    toast({
-      title: "Passageiro adicionado à lista de espera",
-      description: `${passenger.posto} ${passenger.nome} foi adicionado com sucesso.`,
-    });
+    loadWaitlistPassengers();
+    setShowForm(false);
+    setEditingPassenger(null);
   };
 
-  const removeFromWaitlist = (passengerId: string) => {
+  const handleEditPassenger = (passenger: CANWaitlistPassenger) => {
+    setEditingPassenger(passenger);
+    setShowForm(true);
+  };
+
+  const handleDeletePassenger = (passengerId: string) => {
     const passenger = waitlistPassengers.find(p => p.id === passengerId);
     if (!passenger) return;
 
     if (confirm(`Tem certeza que deseja remover ${passenger.posto} ${passenger.nome} da lista de espera?`)) {
-      const updated = waitlistPassengers.filter(p => p.id !== passengerId);
-      saveWaitlistPassengers(updated);
+      const allPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
+      const updatedPassengers = allPassengers.filter((p: CANWaitlistPassenger) => p.id !== passengerId);
+      localStorage.setItem('canWaitlist', JSON.stringify(updatedPassengers));
+      loadWaitlistPassengers();
       
       toast({
         title: "Passageiro removido",
         description: `${passenger.posto} ${passenger.nome} foi removido da lista de espera.`,
       });
     }
-  };
-
-  const allocateToMission = (passenger: CANWaitlistPassenger) => {
-    if (!selectedMission || !onPassengerAllocated) return;
-
-    // Mark passenger as allocated
-    const updatedPassengers = waitlistPassengers.map(p =>
-      p.id === passenger.id
-        ? { ...p, isAllocated: true, missionId: selectedMission.id }
-        : p
-    );
-
-    const allStoredPassengers = JSON.parse(localStorage.getItem(`waitlist_${currentUser.baseAerea}`) || '[]');
-    const allUpdatedPassengers = allStoredPassengers.map((p: CANWaitlistPassenger) =>
-      p.id === passenger.id
-        ? { ...p, isAllocated: true, missionId: selectedMission.id }
-        : p
-    );
-
-    localStorage.setItem(`waitlist_${currentUser.baseAerea}`, JSON.stringify(allUpdatedPassengers));
-    setWaitlistPassengers(updatedPassengers.filter(p => !p.isAllocated));
-
-    onPassengerAllocated(passenger, selectedMission.id);
-    
-    toast({
-      title: "Passageiro alocado à missão",
-      description: `${passenger.posto} ${passenger.nome} foi alocado à missão OFRAG ${selectedMission.ofrag}.`,
-    });
   };
 
   const getPriorityColor = (priority: number) => {
@@ -167,290 +104,139 @@ const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWa
     return 'bg-blue-100 text-blue-800';
   };
 
-  const toggleDestinationCollapse = (destination: string) => {
-    setCollapsedDestinations(prev => ({
-      ...prev,
-      [destination]: !prev[destination]
-    }));
-  };
-
-  // Group passengers by destination with colors
-  const groupedPassengers = waitlistPassengers.reduce((groups, passenger) => {
-    if (!groups[passenger.destino]) {
-      groups[passenger.destino] = [];
-    }
-    groups[passenger.destino].push(passenger);
-    return groups;
-  }, {} as Record<string, CANWaitlistPassenger[]>);
-
-  const destinationColors = [
-    'bg-blue-50 border-blue-200',
-    'bg-green-50 border-green-200',
-    'bg-yellow-50 border-yellow-200',
-    'bg-purple-50 border-purple-200',
-    'bg-pink-50 border-pink-200',
-    'bg-indigo-50 border-indigo-200',
-    'bg-red-50 border-red-200',
-    'bg-orange-50 border-orange-200'
-  ];
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Lista de Espera CAN</h2>
-          <p className="text-sm text-gray-600">Base: {currentUser.baseAerea}</p>
+          <h3 className="text-lg font-semibold">Lista de Espera CAN</h3>
+          <p className="text-sm text-gray-600">
+            {waitlistPassengers.length} passageiro{waitlistPassengers.length !== 1 ? 's' : ''} aguardando voo
+          </p>
         </div>
         <Button 
-          onClick={() => setShowAddForm(!showAddForm)}
+          onClick={() => {
+            setEditingPassenger(null);
+            setShowForm(true);
+          }}
           className="bg-blue-600 hover:bg-blue-700"
         >
-          <UserPlus className="w-4 h-4 mr-2" />
-          {showAddForm ? 'Cancelar' : 'Adicionar Passageiro'}
+          <PlusCircle className="w-4 h-4 mr-2" />
+          Novo Passageiro
         </Button>
       </div>
 
-      {showAddForm && (
+      {showForm && (
         <Card>
           <CardHeader>
-            <CardTitle>Adicionar Passageiro à Lista de Espera</CardTitle>
+            <CardTitle>
+              {editingPassenger ? 'Editar Passageiro' : 'Cadastrar Passageiro na Lista de Espera'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <CANWaitlistForm 
+            <CANWaitlistForm
+              passenger={editingPassenger}
+              onSave={handleSavePassenger}
+              onCancel={() => {
+                setShowForm(false);
+                setEditingPassenger(null);
+              }}
               currentUser={currentUser}
-              onSubmit={addToWaitlist}
             />
           </CardContent>
         </Card>
       )}
 
-      <Tabs defaultValue="waitlist" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="waitlist">Lista de Espera</TabsTrigger>
-          {missions.length > 0 && (
-            <TabsTrigger value="allocate">Alocar para Missões</TabsTrigger>
-          )}
-        </TabsList>
-
-        <TabsContent value="waitlist" className="space-y-4">
-          {Object.keys(groupedPassengers).length > 0 ? (
-            Object.entries(groupedPassengers).map(([destination, passengers], index) => {
-              const colorClass = destinationColors[index % destinationColors.length];
-              const aeroporto = AERODROMOS.find(a => a.code === destination);
-              const isCollapsed = collapsedDestinations[destination];
-              
-              return (
-                <Card key={destination} className={`border-2 ${colorClass}`}>
-                  <Collapsible>
-                    <CollapsibleTrigger 
-                      className="w-full"
-                      onClick={() => toggleDestinationCollapse(destination)}
-                    >
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center justify-between">
-                          <div className="flex items-center">
-                            Destino: {destination} - {aeroporto?.name || 'Aeroporto não identificado'}
-                            <Badge className="ml-2" variant="secondary">
-                              {passengers.length} passageiro{passengers.length !== 1 ? 's' : ''}
-                            </Badge>
-                          </div>
-                          {isCollapsed ? (
-                            <ChevronDown className="w-4 h-4" />
-                          ) : (
-                            <ChevronUp className="w-4 h-4" />
-                          )}
-                        </CardTitle>
-                      </CardHeader>
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent>
-                      <CardContent>
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Passageiro</TableHead>
-                              <TableHead>CPF</TableHead>
-                              <TableHead>Telefone</TableHead>
-                              <TableHead>Peso Total</TableHead>
-                              <TableHead>Prioridade</TableHead>
-                              <TableHead>Data Inscrição</TableHead>
-                              <TableHead>Ações</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {passengers
-                              .sort((a, b) => {
-                                if (a.prioridade !== b.prioridade) {
-                                  return a.prioridade - b.prioridade;
-                                }
-                                return a.posto.localeCompare(b.posto);
-                              })
-                              .map((passenger) => (
-                                <TableRow key={passenger.id}>
-                                  <TableCell>
-                                    <div>
-                                      <p className="font-medium">{passenger.posto} {passenger.nome}</p>
-                                      {passenger.parentesco && (
-                                        <p className="text-sm text-gray-500">({passenger.parentesco})</p>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <span className="font-mono text-sm">{passenger.cpf}</span>
-                                  </TableCell>
-                                  <TableCell>
-                                    <span className="font-mono text-sm">{passenger.telefone}</span>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div>
-                                      <p className="font-medium">
-                                        {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
-                                      </p>
-                                      <p className="text-xs text-gray-500">
-                                        PAX: {passenger.peso}kg | Desp: {passenger.pesoBagagem}kg | Mão: {passenger.pesoBagagemMao}kg
-                                      </p>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <PriorityTooltip priority={passenger.prioridade}>
-                                      <Badge className={getPriorityColor(passenger.prioridade)}>
-                                        {passenger.prioridade}
-                                      </Badge>
-                                    </PriorityTooltip>
-                                  </TableCell>
-                                  <TableCell>
-                                    {new Date(passenger.dataInscricao).toLocaleDateString('pt-BR')}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button
-                                      size="sm"
-                                      variant="destructive"
-                                      onClick={() => removeFromWaitlist(passenger.id)}
-                                    >
-                                      Remover
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                          </TableBody>
-                        </Table>
-                      </CardContent>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </Card>
-              );
-            })
-          ) : (
-            <Card>
-              <CardContent className="text-center py-8">
-                <p className="text-gray-500">Nenhum passageiro na lista de espera.</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        {missions.length > 0 && (
-          <TabsContent value="allocate" className="space-y-4">
-            <h3 className="text-xl font-semibold">Alocar Passageiros para Missões</h3>
-            {missions.length === 0 ? (
-              <p className="text-gray-500">Nenhuma missão cadastrada para alocação.</p>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <label htmlFor="missionSelect" className="text-sm font-medium text-gray-700">
-                    Selecione a Missão:
-                  </label>
-                  <select
-                    id="missionSelect"
-                    className="px-4 py-2 border rounded-md text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    onChange={(e) => {
-                      const missionId = e.target.value;
-                      const mission = missions.find(m => m.id === missionId);
-                      setSelectedMission(mission || null);
-                    }}
-                    value={selectedMission?.id || ''}
-                  >
-                    <option value="">Selecione...</option>
-                    {missions.map((mission) => (
-                      <option key={mission.id} value={mission.id}>
-                        {mission.ofrag} - {mission.aeronave} ({mission.matricula})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {selectedMission ? (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        Passageiros Compatíveis para OFRAG {selectedMission.ofrag}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {compatiblePassengers.length > 0 ? (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Passageiro</TableHead>
-                              <TableHead>CPF</TableHead>
-                              <TableHead>Telefone</TableHead>
-                              <TableHead>Peso Total</TableHead>
-                              <TableHead>Prioridade</TableHead>
-                              <TableHead>Ações</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {compatiblePassengers.map((passenger) => (
-                              <TableRow key={passenger.id}>
-                                <TableCell>
-                                  <div>
-                                    <p className="font-medium">{passenger.posto} {passenger.nome}</p>
-                                    {passenger.parentesco && (
-                                      <p className="text-sm text-gray-500">({passenger.parentesco})</p>
-                                    )}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <span className="font-mono text-sm">{passenger.cpf}</span>
-                                </TableCell>
-                                <TableCell>
-                                  <span className="font-mono text-sm">{passenger.telefone}</span>
-                                </TableCell>
-                                <TableCell>
-                                  {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
-                                </TableCell>
-                                <TableCell>
-                                  <Badge className={getPriorityColor(passenger.prioridade)}>
-                                    {passenger.prioridade}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => allocateToMission(passenger)}
-                                  >
-                                    Alocar
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      ) : (
-                        <p className="text-gray-500">
-                          Nenhum passageiro compatível encontrado para esta missão.
+      {waitlistPassengers.length > 0 ? (
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Passageiro</TableHead>
+                  <TableHead>CPF</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Destino</TableHead>
+                  <TableHead>Peso Total</TableHead>
+                  <TableHead>Prioridade</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Responsável</TableHead>
+                  <TableHead>Data Inscrição</TableHead>
+                  <TableHead>Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {waitlistPassengers
+                  .sort((a, b) => a.prioridade - b.prioridade)
+                  .map((passenger) => (
+                  <TableRow key={passenger.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{passenger.posto} {passenger.nome}</p>
+                        <p className="text-sm text-gray-500">
+                          {passenger.parentesco && `(${passenger.parentesco})`}
                         </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">{passenger.cpf}</TableCell>
+                    <TableCell className="font-mono text-sm">{passenger.telefone}</TableCell>
+                    <TableCell>{passenger.destino}</TableCell>
+                    <TableCell>
+                      {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getPriorityColor(passenger.prioridade)}>
+                        {passenger.prioridade}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {passenger.isAllocated ? (
+                        <Badge className="bg-orange-100 text-orange-800">
+                          <Plane className="w-3 h-3 mr-1" />
+                          Alocado em Voo
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-green-100 text-green-800">
+                          Aguardando
+                        </Badge>
                       )}
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <p className="text-gray-500">Selecione uma missão para ver os passageiros compatíveis.</p>
-                )}
-              </div>
-            )}
-          </TabsContent>
-        )}
-      </Tabs>
+                    </TableCell>
+                    <TableCell>{passenger.responsavelInscricao}</TableCell>
+                    <TableCell>
+                      {new Date(passenger.dataInscricao).toLocaleDateString('pt-BR')}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditPassenger(passenger)}
+                          disabled={passenger.isAllocated}
+                        >
+                          <UserPlus className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDeletePassenger(passenger.id)}
+                          disabled={passenger.isAllocated}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="text-center py-8">
+            <p className="text-gray-500">Nenhum passageiro na lista de espera.</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

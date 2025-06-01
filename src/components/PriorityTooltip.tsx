@@ -35,11 +35,9 @@ const PriorityTooltip = ({ priority, children }: PriorityTooltipProps) => {
         <TooltipTrigger asChild>
           {children}
         </TooltipTrigger>
-        <TooltipContent className="max-w-2xl p-4 text-sm bg-white border-2 border-gray-200 shadow-lg z-50">
-          <div className="font-semibold mb-2 text-blue-700">PRIORIDADE {priority}</div>
-          <div className="text-gray-700 leading-relaxed whitespace-normal break-words">
-            {description}
-          </div>
+        <TooltipContent className="max-w-md p-3 text-sm">
+          <div className="font-semibold mb-2">PRIORIDADE {priority}</div>
+          <div>{description}</div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

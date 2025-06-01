@@ -11,100 +11,27 @@ import PriorityTooltip from './PriorityTooltip';
 
 interface CANWaitlistFormProps {
   passenger?: CANWaitlistPassenger | null;
-  onSave?: (passenger: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => void;
-  onSubmit?: (passenger: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => void;
-  onCancel?: () => void;
+  onSave: (passenger: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => void;
+  onCancel: () => void;
   currentUser: User;
 }
 
-const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }: CANWaitlistFormProps) => {
-  // Ensure initial values are never empty strings for Select components
-  const getInitialSelectValue = (value: string | undefined, fallback: string) => {
-    const cleanValue = value?.trim();
-    return cleanValue && cleanValue.length > 0 ? cleanValue : fallback;
-  };
-
-  const [posto, setPosto] = useState(() => {
-    const initialPosto = getInitialSelectValue(passenger?.posto, MILITARY_RANKS[0] || 'CV');
-    console.log('CANWaitlistForm - Initial posto:', initialPosto);
-    return initialPosto;
-  });
-  
+const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitlistFormProps) => {
+  const [posto, setPosto] = useState(passenger?.posto || '');
   const [nome, setNome] = useState(passenger?.nome || '');
   const [cpf, setCpf] = useState(passenger?.cpf || '');
   const [telefone, setTelefone] = useState(passenger?.telefone || '');
-  
-  const [destino, setDestino] = useState(() => {
-    const initialDestino = getInitialSelectValue(passenger?.destino, AERODROMOS[0]?.code || 'SBAN');
-    console.log('CANWaitlistForm - Initial destino:', initialDestino);
-    return initialDestino;
-  });
-  
-  const [peso, setPeso] = useState<number>(passenger?.peso || 70);
-  const [pesoBagagem, setPesoBagagem] = useState<number>(passenger?.pesoBagagem || 0);
+  const [destino, setDestino] = useState(passenger?.destino || '');
+  const [peso, setPeso] = useState(passenger?.peso || '');
+  const [pesoBagagem, setPesoBagagem] = useState(passenger?.pesoBagagem || '');
   const [pesoBagagemMao, setPesoBagagemMao] = useState(passenger?.pesoBagagemMao || 0);
   const [prioridade, setPrioridade] = useState(passenger?.prioridade || 13);
   const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || 'O PRÓPRIO');
   const [parentesco, setParentesco] = useState(passenger?.parentesco || '');
 
-  // Enhanced validation and filtering at component level
-  const validRanks = MILITARY_RANKS.filter((rank, index) => {
-    console.log(`CANWaitlistForm - Checking rank ${index}:`, rank, typeof rank);
-    const isValid = rank && typeof rank === 'string' && rank.trim().length > 0;
-    if (!isValid) {
-      console.error('CANWaitlistForm - Filtering invalid rank:', rank, 'at index:', index);
-    }
-    return isValid;
-  });
-
-  const validAerodromos = AERODROMOS.filter((aero, index) => {
-    console.log(`CANWaitlistForm - Checking aerodrome ${index}:`, aero);
-    const isValid = aero && aero.code && typeof aero.code === 'string' && aero.code.trim().length > 0;
-    if (!isValid) {
-      console.error('CANWaitlistForm - Filtering invalid aerodrome:', aero, 'at index:', index);
-    }
-    return isValid;
-  });
-
-  const validPriorities = PRIORITIES.filter((priority, index) => {
-    console.log(`CANWaitlistForm - Checking priority ${index}:`, priority);
-    const isValid = priority && priority.value && typeof priority.value === 'number' && priority.value > 0;
-    if (!isValid) {
-      console.error('CANWaitlistForm - Filtering invalid priority:', priority, 'at index:', index);
-    }
-    return isValid;
-  });
-
-  console.log('CANWaitlistForm - Final validation results:', {
-    validRanks: validRanks.length,
-    validAerodromos: validAerodromos.length,
-    validPriorities: validPriorities.length,
-    originalRanks: MILITARY_RANKS.length,
-    originalAerodromos: AERODROMOS.length,
-    originalPriorities: PRIORITIES.length,
-    firstRank: validRanks[0],
-    firstAerodrome: validAerodromos[0]?.code,
-    firstPriority: validPriorities[0]?.value,
-    currentPosto: posto,
-    currentDestino: destino
-  });
-
-  // Ensure current values exist in valid options, if not reset to first valid option
-  useEffect(() => {
-    if (validRanks.length > 0 && !validRanks.includes(posto)) {
-      console.log('CANWaitlistForm - Current posto not in valid ranks, resetting:', posto, 'to:', validRanks[0]);
-      setPosto(validRanks[0]);
-    }
-    
-    if (validAerodromos.length > 0 && !validAerodromos.some(aero => aero.code === destino)) {
-      console.log('CANWaitlistForm - Current destino not in valid aerodromos, resetting:', destino, 'to:', validAerodromos[0].code);
-      setDestino(validAerodromos[0].code);
-    }
-  }, [validRanks, validAerodromos, posto, destino]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const passengerData = {
+    onSave({
       posto,
       nome,
       cpf,
@@ -116,14 +43,7 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
       prioridade,
       responsavelInscricao,
       parentesco
-    };
-    
-    if (onSave) {
-      onSave(passengerData);
-    }
-    if (onSubmit) {
-      onSubmit(passengerData);
-    }
+    });
   };
 
   const formatCPF = (value: string) => {
@@ -159,19 +79,9 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
               <SelectValue placeholder="Selecione o posto" />
             </SelectTrigger>
             <SelectContent>
-              {validRanks.map((rank, index) => {
-                console.log(`CANWaitlistForm - About to render rank ${index}:`, rank);
-                // Final safety check
-                if (!rank || typeof rank !== 'string' || rank.trim() === '') {
-                  console.error('CANWaitlistForm - CRITICAL: Attempting to render invalid rank:', rank, 'at index:', index);
-                  return null;
-                }
-                return (
-                  <SelectItem key={`rank-${index}-${rank}`} value={rank}>
-                    {rank}
-                  </SelectItem>
-                );
-              })}
+              {MILITARY_RANKS.map(rank => (
+                <SelectItem key={rank} value={rank}>{rank}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -220,19 +130,11 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             <SelectValue placeholder="Selecione o destino" />
           </SelectTrigger>
           <SelectContent>
-            {validAerodromos.map((aero, index) => {
-              console.log(`CANWaitlistForm - About to render aerodrome ${index}:`, aero?.code);
-              // Final safety check
-              if (!aero || !aero.code || typeof aero.code !== 'string' || aero.code.trim() === '') {
-                console.error('CANWaitlistForm - CRITICAL: Attempting to render invalid aerodrome:', aero, 'at index:', index);
-                return null;
-              }
-              return (
-                <SelectItem key={`aero-${index}-${aero.code}`} value={aero.code}>
-                  {aero.code} - {aero.location}
-                </SelectItem>
-              );
-            })}
+            {AERODROMOS.map(aero => (
+              <SelectItem key={aero.code} value={aero.code}>
+                {aero.code} - {aero.location}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -279,21 +181,13 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             <SelectValue placeholder="Selecione a prioridade" />
           </SelectTrigger>
           <SelectContent>
-            {validPriorities.map((priority, index) => {
-              console.log(`CANWaitlistForm - About to render priority ${index}:`, priority?.value);
-              // Final safety check
-              if (!priority || !priority.value || typeof priority.value !== 'number' || priority.value < 1) {
-                console.error('CANWaitlistForm - CRITICAL: Attempting to render invalid priority:', priority, 'at index:', index);
-                return null;
-              }
-              return (
-                <SelectItem key={`priority-${index}-${priority.value}`} value={priority.value.toString()}>
-                  <PriorityTooltip priority={priority.value}>
-                    <span>{priority.label}</span>
-                  </PriorityTooltip>
-                </SelectItem>
-              );
-            })}
+            {PRIORITIES.map(priority => (
+              <SelectItem key={priority.value} value={priority.value.toString()}>
+                <PriorityTooltip priority={priority.value}>
+                  <span>{priority.label}</span>
+                </PriorityTooltip>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -324,11 +218,9 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
         <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
           {passenger ? 'Atualizar' : 'Cadastrar'} Passageiro
         </Button>
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
-        )}
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancelar
+        </Button>
       </div>
     </form>
   );

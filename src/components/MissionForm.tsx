@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,8 +31,6 @@ const MissionForm = ({
   mission,
   onComplete
 }: MissionFormProps) => {
-  console.log('MissionForm - Component rendering, checking AERODROMOS:', AERODROMOS?.slice(0, 3));
-  
   const [aeronave, setAeronave] = useState(mission?.aeronave || '');
   const [matricula, setMatricula] = useState(mission?.matricula || '');
   const [dataVoo, setDataVoo] = useState(mission?.dataVoo || '');
@@ -48,41 +47,20 @@ const MissionForm = ({
   const [trecho5, setTrecho5] = useState('');
   const [trecho6, setTrecho6] = useState('');
 
-  // Helper function to safely parse trechos
-  const parseTrechos = (trechos: string | string[] | undefined): string[] => {
-    if (!trechos) return [];
-    
-    // If it's already an array, return it
-    if (Array.isArray(trechos)) {
-      return trechos;
-    }
-    
-    // If it's a string, split by comma
-    if (typeof trechos === 'string') {
-      return trechos.split(',').map(t => t.trim()).filter(t => t);
-    }
-    
-    // Fallback
-    return [];
-  };
-
   useEffect(() => {
-    console.log('MissionForm - useEffect running');
     // Define origem padrão baseada na base aérea do usuário
     const defaultOrigem = getAerodromoByBase(currentUser.baseAerea);
-    console.log('MissionForm - Default origem:', defaultOrigem);
     setOrigem(defaultOrigem);
 
     // Se estiver editando uma missão, carrega os trechos existentes
-    if (mission && mission.trechos) {
-      const trechosArray = parseTrechos(mission.trechos);
-      setOrigem(trechosArray[0] || defaultOrigem);
-      setTrecho1(trechosArray[1] || '');
-      setTrecho2(trechosArray[2] || '');
-      setTrecho3(trechosArray[3] || '');
-      setTrecho4(trechosArray[4] || '');
-      setTrecho5(trechosArray[5] || '');
-      setTrecho6(trechosArray[6] || '');
+    if (mission && mission.trechos.length > 0) {
+      setOrigem(mission.trechos[0] || defaultOrigem);
+      setTrecho1(mission.trechos[1] || '');
+      setTrecho2(mission.trechos[2] || '');
+      setTrecho3(mission.trechos[3] || '');
+      setTrecho4(mission.trechos[4] || '');
+      setTrecho5(mission.trechos[5] || '');
+      setTrecho6(mission.trechos[6] || '');
     }
 
     // Carregar lista de espera
@@ -90,12 +68,10 @@ const MissionForm = ({
   }, [currentUser.baseAerea, mission]);
 
   const loadWaitlistPassengers = () => {
-    console.log('MissionForm - Loading waitlist passengers');
     const allPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
     const basePassengers = allPassengers.filter((passenger: CANWaitlistPassenger) => 
       passenger.baseAerea === currentUser.baseAerea
     );
-    console.log('MissionForm - Loaded waitlist passengers:', basePassengers.length);
     setWaitlistPassengers(basePassengers);
   };
 
@@ -121,7 +97,6 @@ const MissionForm = ({
       posto: waitlistPassenger.posto,
       nome: waitlistPassenger.nome,
       cpf: waitlistPassenger.cpf,
-      telefone: waitlistPassenger.telefone,
       destino: waitlistPassenger.destino,
       peso: waitlistPassenger.peso,
       pesoBagagem: waitlistPassenger.pesoBagagem,
@@ -217,40 +192,17 @@ const MissionForm = ({
     setDataVoo(today);
   };
 
-  const calculateTotalWeights = () => {
-    const totalPassengers = passageiros.reduce((sum, p) => sum + p.peso, 0);
-    const totalBaggage = passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0);
-    return {
-      totalPassengers,
-      totalBaggage,
-      totalCombined: totalPassengers + totalBaggage
-    };
-  };
-
-  const formatFlightRoute = () => {
-    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
-    return trechos.join(' - ');
-  };
-
-  const getPriorityColor = (priority: number) => {
-    if (priority <= 3) return 'bg-red-100 text-red-800';
-    if (priority <= 6) return 'bg-orange-100 text-orange-800';
-    if (priority <= 9) return 'bg-yellow-100 text-yellow-800';
-    if (priority <= 12) return 'bg-green-100 text-green-800';
-    return 'bg-blue-100 text-blue-800';
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Monta array de trechos, incluindo apenas os preenchidos
-    const trechosArray = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
+    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
     
     const missionData: Mission = {
       id: mission?.id || Date.now().toString(),
       aeronave,
       matricula: matricula || '',
-      trechos: trechosArray.join(','), // Convert array to string
+      trechos,
       dataVoo: dataVoo || new Date().toISOString().split('T')[0],
       ofrag: ofrag || '',
       operadorId: currentUser.id,
@@ -282,7 +234,31 @@ const MissionForm = ({
     });
   };
 
+  const calculateTotalWeights = () => {
+    const totalPassengers = passageiros.reduce((sum, p) => sum + p.peso, 0);
+    const totalBaggage = passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0);
+    return {
+      totalPassengers,
+      totalBaggage,
+      totalCombined: totalPassengers + totalBaggage
+    };
+  };
+
   const weights = calculateTotalWeights();
+
+  const formatFlightRoute = () => {
+    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
+    return trechos.join(' - ');
+  };
+
+  const getPriorityColor = (priority: number) => {
+    if (priority <= 3) return 'bg-red-100 text-red-800';
+    if (priority <= 6) return 'bg-orange-100 text-orange-800';
+    if (priority <= 9) return 'bg-yellow-100 text-yellow-800';
+    if (priority <= 12) return 'bg-green-100 text-green-800';
+    return 'bg-blue-100 text-blue-800';
+  };
+
   const compatiblePassengers = getCompatibleWaitlistPassengers();
 
   return (
@@ -439,6 +415,7 @@ const MissionForm = ({
 
       <Separator />
 
+      {/* Lista de Espera Compatível */}
       {compatiblePassengers.length > 0 && (
         <Card>
           <CardHeader>

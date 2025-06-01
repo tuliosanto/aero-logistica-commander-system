@@ -2,13 +2,7 @@
 export const MILITARY_RANKS = [
   'CV', 'S2', 'S1', 'CB', 'AL', 'CAD', '3S', '2S', '1S', 'SO', 
   'ASP', '2T', '1T', 'CP', 'MJ', 'TC', 'CL', 'BR', 'MB', 'TB'
-].filter(rank => {
-  if (!rank || typeof rank !== 'string' || rank.trim() === '') {
-    console.warn('Filtered out invalid rank:', rank);
-    return false;
-  }
-  return true;
-});
+];
 
 export const AIR_BASES = [
   { code: 'BAAN', name: 'BASE AÉREA DE ANÁPOLIS', location: 'Anápolis - GO' },
@@ -47,7 +41,7 @@ export const AERODROMOS = [
   { code: 'SBPV', name: 'Governador Jorge Teixeira de Oliveira', location: 'Porto Velho/RO', baseAerea: 'BAPV' },
   { code: 'SBRF', name: 'Guararapes', location: 'Recife/PE', baseAerea: 'BARF' },
   { code: 'SBSV', name: 'Deputado Luís Eduardo Magalhães', location: 'Salvador/BA', baseAerea: 'BASV' },
-  { code: 'SBSD', name: 'Santos Dumont', location: 'Rio de Janeiro/RJ', baseAerea: 'BASC' },
+  { code: 'SBAF', name: 'Santos Dumont', location: 'Rio de Janeiro/RJ', baseAerea: 'BASC' },
   { code: 'SBSM', name: 'Base Aérea de Santa Maria', location: 'Santa Maria/RS', baseAerea: 'BASM' },
   { code: 'SBST', name: 'Base Aérea de Santos', location: 'Guarujá/SP', baseAerea: 'BAST' },
   { code: 'SBGR', name: 'Guarulhos', location: 'São Paulo/SP', baseAerea: 'BASP' },
@@ -71,7 +65,7 @@ export const AERODROMOS = [
   { code: 'SBJP', name: 'Presidente Castro Pinto', location: 'João Pessoa/PB' },
   { code: 'SBAC', name: 'Plácido de Castro', location: 'Rio Branco/AC' },
   { code: 'SBCZ', name: 'Campo Grande', location: 'Corumbá/MS' },
-  { code: 'SBJI', name: 'Presidente Itamar Franco', location: 'Juiz de Fora/MG' },
+  { code: 'SBji', name: 'Presidente Itamar Franco', location: 'Juiz de Fora/MG' },
   { code: 'SBLO', name: 'Coronel Horácio de Mattos', location: 'Lençóis/BA' },
   { code: 'SBMN', name: 'Zumbi dos Palmares', location: 'Maceió/AL' },
   { code: 'SBAQ', name: 'Dix-Sept Rosado', location: 'Mossoró/RN' },
@@ -79,13 +73,7 @@ export const AERODROMOS = [
   { code: 'SBRB', name: 'Plácido de Castro', location: 'Rio Branco/AC' },
   { code: 'SBUG', name: 'Rubem Berta', location: 'Uruguaiana/RS' },
   { code: 'SBCC', name: 'Cabo Frio', location: 'Cabo Frio/RJ' }
-].filter(aero => {
-  if (!aero?.code || typeof aero.code !== 'string' || aero.code.trim() === '') {
-    console.warn('Filtered out invalid aerodrome:', aero);
-    return false;
-  }
-  return true;
-});
+];
 
 export const PRIORITIES = [
   { value: 1, label: 'Prioridade 1 - Emergência Médica' },
@@ -101,13 +89,7 @@ export const PRIORITIES = [
   { value: 11, label: 'Prioridade 11 - Forças Auxiliares' },
   { value: 12, label: 'Prioridade 12 - Dependentes Servidores' },
   { value: 13, label: 'Prioridade 13 - Cidadãos Brasileiros' }
-].filter(priority => {
-  if (!priority?.value || typeof priority.value !== 'number' || priority.value < 1) {
-    console.warn('Filtered out invalid priority:', priority);
-    return false;
-  }
-  return true;
-});
+];
 
 export const getRankOrder = (rank: string): number => {
   return MILITARY_RANKS.indexOf(rank);
