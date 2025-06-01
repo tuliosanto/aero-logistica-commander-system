@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -68,6 +69,24 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
     }
   };
 
+  // Helper function to safely format trechos
+  const formatTrechos = (trechos: string | string[] | undefined): string => {
+    if (!trechos) return '';
+    
+    // If it's already a string, split and rejoin
+    if (typeof trechos === 'string') {
+      return trechos.split(',').map(t => t.trim()).join(' - ');
+    }
+    
+    // If it's an array, join directly
+    if (Array.isArray(trechos)) {
+      return trechos.map(t => t.trim()).join(' - ');
+    }
+    
+    // Fallback
+    return String(trechos);
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -87,7 +106,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
             <SelectValue placeholder="Filtrar por aeronave" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas as aeronaves</SelectItem>
+            <SelectItem value="all">Todas as aeronaves</SelectItem>
             {aircrafts.map(aircraft => (
               <SelectItem key={aircraft} value={aircraft}>{aircraft}</SelectItem>
             ))}
@@ -98,8 +117,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
       {filteredMissions.length > 0 ? (
         <div className="space-y-4">
           {filteredMissions.map((mission) => {
-            // Handle trechos as string, split by comma and join with dash
-            const trechosFormatted = mission.trechos.split(',').map(t => t.trim()).join(' - ');
+            const trechosFormatted = formatTrechos(mission.trechos);
             
             return (
               <Card key={mission.id} className={mission.isCompleted ? 'opacity-70 border-green-500' : ''}>
