@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +15,7 @@ interface LoginFormProps {
 const LoginForm = ({ onLogin }: LoginFormProps) => {
   const [username, setUsername] = useState('');
   const [senha, setSenha] = useState('');
-  const [baseAerea, setBaseAerea] = useState('BASM'); // Default para BASM
+  const [baseAerea, setBaseAerea] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,18 +64,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     
     const user = users.find((u: User) => {
       // Add validation to ensure properties exist before calling toLowerCase
-      if (!u.username || !u.senha) {
-        console.log('Usuário com dados incompletos encontrado:', u);
-        return false;
-      }
-      
-      // Para supervisores, permite login em qualquer base
-      if (u.perfil === 'Supervisor') {
-        return u.username.toLowerCase() === username.toLowerCase() && u.senha === senha;
-      }
-      
-      // Para outros perfis, mantém a validação da base
-      if (!u.baseAerea) {
+      if (!u.username || !u.senha || !u.baseAerea) {
         console.log('Usuário com dados incompletos encontrado:', u);
         return false;
       }
@@ -89,11 +77,6 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     console.log('Usuário encontrado:', user);
     
     if (user) {
-      // Se for supervisor, atualiza a base aérea atual para a selecionada no login
-      if (user.perfil === 'Supervisor') {
-        user.baseAerea = baseAerea;
-      }
-      
       onLogin(user);
       toast({
         title: "Login realizado com sucesso",

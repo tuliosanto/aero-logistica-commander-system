@@ -23,7 +23,9 @@ export const AIR_BASES = [
   { code: 'BAST', name: 'BASE AÉREA DE SANTOS', location: 'Guarujá - SP' },
   { code: 'BASP', name: 'BASE AÉREA DE SÃO PAULO', location: 'Guarulhos - SP' },
   { code: 'BAGL', name: 'BASE AÉREA DO GALEÃO', location: 'Rio de Janeiro - RJ' },
-  { code: 'BAAF', name: 'BASE AÉREA DOS AFONSOS', location: 'Rio de Janeiro - RJ' }
+  { code: 'BAAF', name: 'BASE AÉREA DOS AFONSOS', location: 'Rio de Janeiro - RJ' },
+  { code: 'BREVET', name: 'BASE DE RECEPÇÃO DE VETERANOS', location: 'Rio de Janeiro - RJ' },
+  { code: 'SBSM', name: 'BASE AÉREA DE SANTA MARIA', location: 'Santa Maria - RS' }
 ];
 
 export const PRIORITIES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
