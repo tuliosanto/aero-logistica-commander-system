@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { BaseConfig } from '../types/BaseConfig';
 import { User } from '../types/User';
+import { useBaseImage } from '../hooks/useBaseImage';
 
 interface BaseConfigProps {
   currentUser: User;
@@ -17,6 +18,7 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
   const [nomeChefe, setNomeChefe] = useState('');
   const [postoChefe, setPostoChefe] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const baseImage = useBaseImage(currentUser.baseAerea);
 
   useEffect(() => {
     loadConfig();
@@ -83,36 +85,46 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
             Configurações da Base Aérea - {currentUser.baseAerea}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid w-full max-w-sm items-center gap-1.5">
-            <Label htmlFor="postoChefe">Posto do Chefe do PCAN-{getCodigoBase()}</Label>
-            <Input
-              type="text"
-              id="postoChefe"
-              value={postoChefe}
-              onChange={(e) => setPostoChefe(e.target.value)}
-              placeholder="Ex: Cap R1"
+        <CardContent className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="grid w-full max-w-sm items-center gap-1.5">
+              <Label htmlFor="postoChefe">Posto do Chefe do PCAN-{getCodigoBase()}</Label>
+              <Input
+                type="text"
+                id="postoChefe"
+                value={postoChefe}
+                onChange={(e) => setPostoChefe(e.target.value)}
+                placeholder="Ex: Cap R1"
+              />
+            </div>
+
+            <div className="grid w-full max-w-sm items-center gap-1.5">
+              <Label htmlFor="nomeChefe">Nome do Chefe do PCAN-{getCodigoBase()}</Label>
+              <Input
+                type="text"
+                id="nomeChefe"
+                value={nomeChefe}
+                onChange={(e) => setNomeChefe(e.target.value)}
+                placeholder="Ex: João Marcos Aguirre"
+              />
+            </div>
+
+            <Button 
+              onClick={handleSave} 
+              disabled={isLoading || !nomeChefe.trim() || !postoChefe.trim()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isLoading ? 'Salvando...' : 'Salvar Configurações'}
+            </Button>
+          </div>
+          
+          <div className="flex justify-center items-center">
+            <img 
+              src={baseImage} 
+              alt={`Logo da ${currentUser.baseAerea}`}
+              className="max-w-full max-h-64 object-contain"
             />
           </div>
-
-          <div className="grid w-full max-w-sm items-center gap-1.5">
-            <Label htmlFor="nomeChefe">Nome do Chefe do PCAN-{getCodigoBase()}</Label>
-            <Input
-              type="text"
-              id="nomeChefe"
-              value={nomeChefe}
-              onChange={(e) => setNomeChefe(e.target.value)}
-              placeholder="Ex: João Marcos Aguirre"
-            />
-          </div>
-
-          <Button 
-            onClick={handleSave} 
-            disabled={isLoading || !nomeChefe.trim() || !postoChefe.trim()}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {isLoading ? 'Salvando...' : 'Salvar Configurações'}
-          </Button>
         </CardContent>
       </Card>
     </div>

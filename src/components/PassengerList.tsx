@@ -8,15 +8,16 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Check } from 'lucide-react';
 import { Passenger } from '../types/Mission';
-import { MILITARY_RANKS, PRIORITIES, getRankOrder } from '../utils/constants';
+import { MILITARY_RANKS, PRIORITIES, getRankOrder, AIR_BASES } from '../utils/constants';
 import { toast } from '@/hooks/use-toast';
 
 interface PassengerListProps {
   passengers: Passenger[];
   onPassengersChange: (passengers: Passenger[]) => void;
+  baseAerea?: string;
 }
 
-const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) => {
+const PassengerList = ({ passengers, onPassengersChange, baseAerea }: PassengerListProps) => {
   const [isAddingPassenger, setIsAddingPassenger] = useState(false);
   const [editingPassenger, setEditingPassenger] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -95,7 +96,6 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
       destino: passenger.destino,
       peso: passenger.peso.toString(),
       pesoBagagem: passenger.pesoBagagem.toString(),
-      pesoBagagemMao: passenger.pesoBagagemMao.toString(),
       prioridade: passenger.prioridade.toString(),
       responsavelInscricao: passenger.responsavelInscricao || 'O Próprio',
       parentesco: passenger.parentesco || ''
@@ -138,6 +138,9 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
   });
 
   const generateReport = () => {
+    const baseInfo = AIR_BASES.find(base => base.code === baseAerea);
+    const baseName = baseInfo ? baseInfo.name : baseAerea || 'BASE AÉREA';
+    
     const reportWindow = window.open('', '_blank');
     if (!reportWindow) return;
 
@@ -147,6 +150,7 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
         <head>
           <title>Relação de Passageiros - Missão</title>
           <style>
+            @page { size: landscape; margin: 20mm; }
             body { font-family: Arial, sans-serif; margin: 20px; }
             .header { text-align: center; margin-bottom: 30px; }
             .mission-info { margin-bottom: 20px; }
@@ -161,6 +165,7 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
         <body>
           <div class="header">
             <h2>FORÇA AÉREA BRASILEIRA</h2>
+            <h3>${baseName}</h3>
             <h3>RELAÇÃO DE PASSAGEIROS</h3>
           </div>
           
@@ -225,15 +230,6 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Lista de Passageiros</h3>
         <div className="space-x-2">
-          {passengers.length > 0 && (
-            <Button 
-              onClick={() => {}} // generateReport implementation
-              variant="outline"
-              className="bg-blue-50 hover:bg-blue-100"
-            >
-              Gerar Relatório
-            </Button>
-          )}
           <Dialog open={isAddingPassenger} onOpenChange={setIsAddingPassenger}>
             <DialogTrigger asChild>
               <Button 
