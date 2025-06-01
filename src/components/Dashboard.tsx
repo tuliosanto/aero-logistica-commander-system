@@ -100,10 +100,13 @@ const Dashboard = ({
     loadMissions();
   };
 
-  const handleCompleteMission = (mission: Mission) => {
+  const handleCompleteMission = (missionId: string) => {
     const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
+    const mission = allMissions.find((m: Mission) => m.id === missionId);
+    if (!mission) return;
+    
     const updatedMissions = allMissions.map((m: Mission) => 
-      m.id === mission.id ? { ...mission, isCompleted: true } : m
+      m.id === missionId ? { ...m, isCompleted: true } : m
     );
     localStorage.setItem('missions', JSON.stringify(updatedMissions));
     loadMissions();
