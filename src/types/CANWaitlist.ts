@@ -4,6 +4,7 @@ export interface CANWaitlistPassenger {
   posto: string;
   nome: string;
   cpf: string;
+  telefone: string; // Novo campo de telefone
   destino: string;
   peso: number;
   pesoBagagem: number;

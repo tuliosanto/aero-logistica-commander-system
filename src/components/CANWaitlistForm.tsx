@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
   const [posto, setPosto] = useState(passenger?.posto || '');
   const [nome, setNome] = useState(passenger?.nome || '');
   const [cpf, setCpf] = useState(passenger?.cpf || '');
+  const [telefone, setTelefone] = useState(passenger?.telefone || '');
   const [destino, setDestino] = useState(passenger?.destino || '');
   const [peso, setPeso] = useState(passenger?.peso || 70);
   const [pesoBagagem, setPesoBagagem] = useState(passenger?.pesoBagagem || 0);
@@ -33,6 +35,7 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
       posto,
       nome,
       cpf,
+      telefone,
       destino,
       peso,
       pesoBagagem,
@@ -53,11 +56,18 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
     setCpf(formatted);
   };
 
-  const postos = [
-    'MAR', 'ALM', 'GEN', 'VAlm', 'TGBr', 'CMG', 'CNL', 'CAlm', 'CCapCav', 'CFO',
-    'CC', 'CF', 'CT', 'MAJ', 'CAP', 'PRI', 'SGT', 'CB', 'SD', 'MN',
-    'CIV', 'DEP'
-  ];
+  const formatTelefone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 10) {
+      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  };
+
+  const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatTelefone(e.target.value);
+    setTelefone(formatted);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -69,8 +79,8 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
               <SelectValue placeholder="Selecione o posto" />
             </SelectTrigger>
             <SelectContent>
-              {postos.map(p => (
-                <SelectItem key={p} value={p}>{p}</SelectItem>
+              {MILITARY_RANKS.map(rank => (
+                <SelectItem key={rank} value={rank}>{rank}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -102,20 +112,32 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="destino">Destino</Label>
-          <Select value={destino} onValueChange={setDestino}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o destino" />
-            </SelectTrigger>
-            <SelectContent>
-              {AERODROMOS.map(aero => (
-                <SelectItem key={aero.code} value={aero.code}>
-                  {aero.code} - {aero.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label htmlFor="telefone">Telefone para Contato</Label>
+          <Input 
+            id="telefone" 
+            value={telefone} 
+            onChange={handleTelefoneChange}
+            placeholder="(11) 99999-9999"
+            maxLength={15}
+            required 
+          />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="destino">Destino</Label>
+        <Select value={destino} onValueChange={setDestino}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o destino" />
+          </SelectTrigger>
+          <SelectContent>
+            {AERODROMOS.map(aero => (
+              <SelectItem key={aero.code} value={aero.code}>
+                {aero.code} - {aero.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

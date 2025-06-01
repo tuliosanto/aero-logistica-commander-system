@@ -104,25 +104,6 @@ const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
     return 'bg-blue-100 text-blue-800';
   };
 
-  const getPriorityText = (priority: number) => {
-    const priorities = {
-      1: 'Comandante Supremo',
-      2: 'Ministro da Defesa',
-      3: 'Comandante da Aeronáutica',
-      4: 'Oficiais-Generais',
-      5: 'Oficiais Superiores',
-      6: 'Oficiais Intermediários',
-      7: 'Oficiais Subalternos',
-      8: 'Suboficiais e Sargentos',
-      9: 'Cabos e Soldados',
-      10: 'Dependentes de Militares',
-      11: 'Servidores Civis',
-      12: 'Pensionistas',
-      13: 'Pessoas Autorizadas'
-    };
-    return priorities[priority as keyof typeof priorities] || 'Indefinida';
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -173,6 +154,7 @@ const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
                 <TableRow>
                   <TableHead>Passageiro</TableHead>
                   <TableHead>CPF</TableHead>
+                  <TableHead>Telefone</TableHead>
                   <TableHead>Destino</TableHead>
                   <TableHead>Peso Total</TableHead>
                   <TableHead>Prioridade</TableHead>
@@ -196,13 +178,14 @@ const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-sm">{passenger.cpf}</TableCell>
+                    <TableCell className="font-mono text-sm">{passenger.telefone}</TableCell>
                     <TableCell>{passenger.destino}</TableCell>
                     <TableCell>
                       {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
                     </TableCell>
                     <TableCell>
                       <Badge className={getPriorityColor(passenger.prioridade)}>
-                        {passenger.prioridade} - {getPriorityText(passenger.prioridade)}
+                        {passenger.prioridade}
                       </Badge>
                     </TableCell>
                     <TableCell>

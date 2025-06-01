@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +38,7 @@ const MissionForm = ({
   const [passageiros, setPassageiros] = useState<Passenger[]>(mission?.passageiros || []);
   const [waitlistPassengers, setWaitlistPassengers] = useState<CANWaitlistPassenger[]>([]);
   
-  // Estados para os trechos
+  // Estados para os trechos como text inputs
   const [origem, setOrigem] = useState('');
   const [trecho1, setTrecho1] = useState('');
   const [trecho2, setTrecho2] = useState('');
@@ -74,19 +75,20 @@ const MissionForm = ({
     setWaitlistPassengers(basePassengers);
   };
 
-  const getFinalDestination = () => {
-    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
-    return trechos.length > 1 ? trechos[trechos.length - 1] : '';
-  };
-
   const getCompatibleWaitlistPassengers = () => {
-    const finalDestination = getFinalDestination();
-    if (!finalDestination) return [];
+    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
+    if (trechos.length === 0) return [];
     
+    // Buscar passageiros cujo destino coincida com qualquer um dos trechos
     return waitlistPassengers.filter(passenger => 
-      passenger.destino === finalDestination &&
+      trechos.includes(passenger.destino) &&
       !passageiros.some(p => p.cpf === passenger.cpf)
     ).sort((a, b) => a.prioridade - b.prioridade);
+  };
+
+  const getDestinationsText = () => {
+    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
+    return trechos.length > 1 ? trechos.slice(1).join(', ') : 'Nenhum destino definido';
   };
 
   const moveFromWaitlistToMission = (waitlistPassenger: CANWaitlistPassenger) => {
@@ -244,10 +246,6 @@ const MissionForm = ({
 
   const weights = calculateTotalWeights();
 
-  const clearTrecho = (trechoSetter: (value: string) => void) => {
-    trechoSetter('');
-  };
-
   const formatFlightRoute = () => {
     const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
     return trechos.join(' - ');
@@ -299,192 +297,73 @@ const MissionForm = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="origem">Origem</Label>
-              <Select value={origem} onValueChange={setOrigem}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a origem" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AERODROMOS.map(aero => (
-                    <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code} - {aero.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input 
+                id="origem" 
+                value={origem} 
+                onChange={e => setOrigem(e.target.value)} 
+                placeholder="Ex: SBGL, SBBR, etc."
+                required 
+              />
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="trecho1">Trecho 1 (Opcional)</Label>
-                {trecho1 && (
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => clearTrecho(setTrecho1)}
-                    className="text-xs"
-                  >
-                    Limpar
-                  </Button>
-                )}
-              </div>
-              <Select value={trecho1} onValueChange={setTrecho1}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o destino" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AERODROMOS.map(aero => (
-                    <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="trecho1">Trecho 1 (Opcional)</Label>
+              <Input 
+                id="trecho1" 
+                value={trecho1} 
+                onChange={e => setTrecho1(e.target.value)} 
+                placeholder="Ex: SBGL, SBBR, etc."
+              />
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="trecho2">Trecho 2 (Opcional)</Label>
-                {trecho2 && (
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => clearTrecho(setTrecho2)}
-                    className="text-xs"
-                  >
-                    Limpar
-                  </Button>
-                )}
-              </div>
-              <Select value={trecho2} onValueChange={setTrecho2}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o destino" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AERODROMOS.map(aero => (
-                    <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="trecho2">Trecho 2 (Opcional)</Label>
+              <Input 
+                id="trecho2" 
+                value={trecho2} 
+                onChange={e => setTrecho2(e.target.value)} 
+                placeholder="Ex: SBGL, SBBR, etc."
+              />
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="trecho3">Trecho 3 (Opcional)</Label>
-                {trecho3 && (
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => clearTrecho(setTrecho3)}
-                    className="text-xs"
-                  >
-                    Limpar
-                  </Button>
-                )}
-              </div>
-              <Select value={trecho3} onValueChange={setTrecho3}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o destino" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AERODROMOS.map(aero => (
-                    <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="trecho3">Trecho 3 (Opcional)</Label>
+              <Input 
+                id="trecho3" 
+                value={trecho3} 
+                onChange={e => setTrecho3(e.target.value)} 
+                placeholder="Ex: SBGL, SBBR, etc."
+              />
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="trecho4">Trecho 4 (Opcional)</Label>
-                {trecho4 && (
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => clearTrecho(setTrecho4)}
-                    className="text-xs"
-                  >
-                    Limpar
-                  </Button>
-                )}
-              </div>
-              <Select value={trecho4} onValueChange={setTrecho4}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o destino" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AERODROMOS.map(aero => (
-                    <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="trecho4">Trecho 4 (Opcional)</Label>
+              <Input 
+                id="trecho4" 
+                value={trecho4} 
+                onChange={e => setTrecho4(e.target.value)} 
+                placeholder="Ex: SBGL, SBBR, etc."
+              />
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="trecho5">Trecho 5 (Opcional)</Label>
-                {trecho5 && (
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => clearTrecho(setTrecho5)}
-                    className="text-xs"
-                  >
-                    Limpar
-                  </Button>
-                )}
-              </div>
-              <Select value={trecho5} onValueChange={setTrecho5}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o destino" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AERODROMOS.map(aero => (
-                    <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="trecho5">Trecho 5 (Opcional)</Label>
+              <Input 
+                id="trecho5" 
+                value={trecho5} 
+                onChange={e => setTrecho5(e.target.value)} 
+                placeholder="Ex: SBGL, SBBR, etc."
+              />
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="trecho6">Trecho 6 (Opcional)</Label>
-                {trecho6 && (
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => clearTrecho(setTrecho6)}
-                    className="text-xs"
-                  >
-                    Limpar
-                  </Button>
-                )}
-              </div>
-              <Select value={trecho6} onValueChange={setTrecho6}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o destino" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AERODROMOS.map(aero => (
-                    <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="trecho6">Trecho 6 (Opcional)</Label>
+              <Input 
+                id="trecho6" 
+                value={trecho6} 
+                onChange={e => setTrecho6(e.target.value)} 
+                placeholder="Ex: SBGL, SBBR, etc."
+              />
             </div>
           </div>
         </div>
@@ -526,34 +405,6 @@ const MissionForm = ({
           <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
             {mission ? 'Atualizar Missão' : 'Cadastrar Missão'}
           </Button>
-          {mission && !mission.isCompleted && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button type="button" className="bg-green-600 hover:bg-green-700">
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Concluir Missão
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Concluir Missão</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza que deseja concluir esta missão? Esta ação irá:
-                    <br />• Arquivar a missão e todos os seus dados
-                    <br />• Remover permanentemente os passageiros da lista de espera que foram incluídos
-                    <br /><br />
-                    Esta ação não pode ser desfeita.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleCompleteMission} className="bg-green-600 hover:bg-green-700">
-                    Sim, Concluir Missão
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
           {onCancel && (
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancelar
@@ -570,7 +421,7 @@ const MissionForm = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserPlus className="w-5 h-5" />
-              Passageiros na Lista de Espera - Destino: {getFinalDestination()}
+              Passageiros na Lista de Espera - Destinos: {getDestinationsText()}
               <Badge variant="secondary">{compatiblePassengers.length}</Badge>
             </CardTitle>
           </CardHeader>
@@ -582,7 +433,7 @@ const MissionForm = ({
                     <div>
                       <p className="font-medium">{passenger.posto} {passenger.nome}</p>
                       <p className="text-sm text-gray-500">
-                        Peso Total: {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
+                        Destino: {passenger.destino} • Peso Total: {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
                         {passenger.parentesco && ` • ${passenger.parentesco}`}
                         {passenger.isAllocated && (
                           <span className="text-orange-600 font-semibold"> • Já alocado em outra missão</span>
@@ -624,6 +475,7 @@ const MissionForm = ({
             onPassengersChange={setPassageiros}
             showMoveToWaitlist={true}
             onMoveToWaitlist={moveFromMissionToWaitlist}
+            onComplete={mission && !mission.isCompleted ? handleCompleteMission : undefined}
           />
           
           {passageiros.length > 0 && (
