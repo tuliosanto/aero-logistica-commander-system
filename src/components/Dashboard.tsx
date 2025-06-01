@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import MissionList from './MissionList';
@@ -101,7 +102,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
       case 'new-mission':
         return (
           <MissionForm
-            onSubmit={handleCreateMission}
+            onSave={handleCreateMission}
             currentUser={currentUser}
           />
         );
@@ -109,7 +110,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
         return selectedMission ? (
           <MissionForm
             mission={selectedMission}
-            onSubmit={handleUpdateMission}
+            onSave={handleUpdateMission}
             currentUser={currentUser}
           />
         ) : null;
