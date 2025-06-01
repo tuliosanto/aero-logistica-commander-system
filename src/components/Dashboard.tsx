@@ -145,12 +145,12 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
-                <h1 className="text-2xl font-bold text-blue-700">Sistema CAN</h1>
                 <img 
                   src={baseImage} 
                   alt={`Logo ${currentUser.baseAerea}`}
                   className="h-10 w-auto object-contain"
                 />
+                <h1 className="text-2xl font-bold text-blue-700">Sistema CAN</h1>
               </div>
               <div className="text-sm text-gray-600">
                 {currentUser.posto} {currentUser.nomeGuerra} - {currentUser.baseAerea}
