@@ -132,7 +132,7 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
           <SelectContent>
             {AERODROMOS.map(aero => (
               <SelectItem key={aero.code} value={aero.code}>
-                {aero.code} - {aero.name}
+                {aero.code} - {aero.location}
               </SelectItem>
             ))}
           </SelectContent>
