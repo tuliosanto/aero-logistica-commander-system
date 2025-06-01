@@ -1,13 +1,16 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Mission, Passenger } from '../types/Mission';
 import { User } from '../types/User';
 import PassengerList from './PassengerList';
 import { toast } from '@/hooks/use-toast';
+import { AERODROMOS, getAerodromoByBase } from '../utils/constants';
 
 interface MissionFormProps {
   onSave: (mission: Mission) => void;
@@ -24,18 +27,47 @@ const MissionForm = ({
 }: MissionFormProps) => {
   const [aeronave, setAeronave] = useState(mission?.aeronave || '');
   const [matricula, setMatricula] = useState(mission?.matricula || '');
-  const [trechos, setTrechos] = useState(mission?.trechos.join(' - ') || '');
   const [dataVoo, setDataVoo] = useState(mission?.dataVoo || '');
   const [ofrag, setOfrag] = useState(mission?.ofrag || '');
   const [passageiros, setPassageiros] = useState<Passenger[]>(mission?.passageiros || []);
+  
+  // Estados para os trechos
+  const [origem, setOrigem] = useState('');
+  const [trecho1, setTrecho1] = useState('');
+  const [trecho2, setTrecho2] = useState('');
+  const [trecho3, setTrecho3] = useState('');
+  const [trecho4, setTrecho4] = useState('');
+  const [trecho5, setTrecho5] = useState('');
+  const [trecho6, setTrecho6] = useState('');
+
+  useEffect(() => {
+    // Define origem padrão baseada na base aérea do usuário
+    const defaultOrigem = getAerodromoByBase(currentUser.baseAerea);
+    setOrigem(defaultOrigem);
+
+    // Se estiver editando uma missão, carrega os trechos existentes
+    if (mission && mission.trechos.length > 0) {
+      setOrigem(mission.trechos[0] || defaultOrigem);
+      setTrecho1(mission.trechos[1] || '');
+      setTrecho2(mission.trechos[2] || '');
+      setTrecho3(mission.trechos[3] || '');
+      setTrecho4(mission.trechos[4] || '');
+      setTrecho5(mission.trechos[5] || '');
+      setTrecho6(mission.trechos[6] || '');
+    }
+  }, [currentUser.baseAerea, mission]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Monta array de trechos, incluindo apenas os preenchidos
+    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
+    
     const missionData: Mission = {
       id: mission?.id || Date.now().toString(),
       aeronave,
       matricula: matricula || '',
-      trechos: trechos ? trechos.split(' - ').filter(t => t.trim()) : [],
+      trechos,
       dataVoo: dataVoo || new Date().toISOString().split('T')[0],
       ofrag: ofrag || '',
       operadorId: currentUser.id,
@@ -49,10 +81,17 @@ const MissionForm = ({
       // Reset form for new mission
       setAeronave('');
       setMatricula('');
-      setTrechos('');
       setDataVoo('');
       setOfrag('');
       setPassageiros([]);
+      const defaultOrigem = getAerodromoByBase(currentUser.baseAerea);
+      setOrigem(defaultOrigem);
+      setTrecho1('');
+      setTrecho2('');
+      setTrecho3('');
+      setTrecho4('');
+      setTrecho5('');
+      setTrecho6('');
     }
     toast({
       title: mission ? "Missão atualizada" : "Missão cadastrada",
@@ -97,14 +136,128 @@ const MissionForm = ({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="trechos">Trechos</Label>
-          <Input 
-            id="trechos" 
-            value={trechos} 
-            onChange={e => setTrechos(e.target.value)} 
-            placeholder="Ex: SBSM - SBGL - SBCC - SBBR" 
-          />
+        <div className="space-y-4">
+          <Label className="text-lg font-semibold">Trechos do Voo</Label>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="origem">Origem</Label>
+              <Select value={origem} onValueChange={setOrigem}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a origem" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AERODROMOS.map(aero => (
+                    <SelectItem key={aero.code} value={aero.code}>
+                      {aero.code} - {aero.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="trecho1">Trecho 1 (Opcional)</Label>
+              <Select value={trecho1} onValueChange={setTrecho1}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o destino" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum</SelectItem>
+                  {AERODROMOS.map(aero => (
+                    <SelectItem key={aero.code} value={aero.code}>
+                      {aero.code} - {aero.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="trecho2">Trecho 2 (Opcional)</Label>
+              <Select value={trecho2} onValueChange={setTrecho2}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o destino" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum</SelectItem>
+                  {AERODROMOS.map(aero => (
+                    <SelectItem key={aero.code} value={aero.code}>
+                      {aero.code} - {aero.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="trecho3">Trecho 3 (Opcional)</Label>
+              <Select value={trecho3} onValueChange={setTrecho3}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o destino" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum</SelectItem>
+                  {AERODROMOS.map(aero => (
+                    <SelectItem key={aero.code} value={aero.code}>
+                      {aero.code} - {aero.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="trecho4">Trecho 4 (Opcional)</Label>
+              <Select value={trecho4} onValueChange={setTrecho4}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o destino" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum</SelectItem>
+                  {AERODROMOS.map(aero => (
+                    <SelectItem key={aero.code} value={aero.code}>
+                      {aero.code} - {aero.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="trecho5">Trecho 5 (Opcional)</Label>
+              <Select value={trecho5} onValueChange={setTrecho5}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o destino" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum</SelectItem>
+                  {AERODROMOS.map(aero => (
+                    <SelectItem key={aero.code} value={aero.code}>
+                      {aero.code} - {aero.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="trecho6">Trecho 6 (Opcional)</Label>
+              <Select value={trecho6} onValueChange={setTrecho6}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o destino" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum</SelectItem>
+                  {AERODROMOS.map(aero => (
+                    <SelectItem key={aero.code} value={aero.code}>
+                      {aero.code} - {aero.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
