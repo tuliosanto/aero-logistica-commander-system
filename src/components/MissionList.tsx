@@ -24,14 +24,8 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
   };
 
   const getCodigoBase = () => {
-    const codigos: { [key: string]: string } = {
-      'Base Aérea de Santa Maria': 'SM',
-      'Base Aérea do Galeão': 'GL',
-      'Base Aérea de Brasília': 'BR',
-      'Base Aérea de Manaus': 'MN',
-      'Base Aérea de Campo Grande': 'CG',
-    };
-    return codigos[currentUser.baseAerea] || 'XX';
+    // Extrai os dois últimos caracteres da base aérea
+    return currentUser.baseAerea.slice(-2);
   };
 
   const getChefePCAN = () => {
@@ -67,104 +61,108 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
           <title>Relação de Passageiros - ${mission.ofrag}</title>
           <meta charset="UTF-8">
           <style>
-            @page { margin: 10mm; size: A4; }
+            @page { margin: 15mm; size: A4; }
             body { 
               font-family: Arial, sans-serif; 
               margin: 0; 
               padding: 0;
-              font-size: 10px;
-              line-height: 1.1;
+              font-size: 9px;
+              line-height: 1.2;
             }
             .header { 
               text-align: center; 
-              margin-bottom: 10px;
+              margin-bottom: 15px;
               font-weight: bold;
-              border: 3px solid black;
+              border: 2px solid black;
               padding: 8px;
             }
             .header-title {
-              font-size: 12px;
+              font-size: 11px;
               font-weight: bold;
-              margin: 2px 0;
+              margin: 1px 0;
             }
             .info-section {
               display: flex;
-              margin-bottom: 10px;
+              margin-bottom: 15px;
               gap: 0;
-              height: 60px;
+              height: 50px;
             }
             .aviao-box {
               border: 2px solid black;
-              padding: 10px 5px;
+              padding: 8px 3px;
               writing-mode: vertical-lr;
               text-orientation: mixed;
               text-align: center;
               font-weight: bold;
-              width: 50px;
-              background-color: #f5f5f5;
+              width: 40px;
+              background-color: #f8f8f8;
               display: flex;
               align-items: center;
               justify-content: center;
+              font-size: 8px;
             }
             .info-group {
               border: 2px solid black;
               border-left: 0;
-              padding: 5px;
+              padding: 4px 6px;
               flex: 1;
-              font-size: 9px;
+              font-size: 8px;
               display: flex;
               flex-direction: column;
               justify-content: space-around;
             }
             .info-group:last-child {
-              max-width: 200px;
+              max-width: 180px;
             }
             .info-row {
-              margin-bottom: 3px;
+              margin-bottom: 2px;
             }
             .info-label {
               font-weight: bold;
               display: inline-block;
-              min-width: 80px;
+              min-width: 70px;
             }
             table { 
               width: 100%; 
               border-collapse: collapse; 
-              margin-bottom: 10px;
-              font-size: 8px;
+              margin-bottom: 15px;
+              font-size: 7px;
             }
             th, td { 
               border: 1px solid black; 
-              padding: 2px 4px; 
+              padding: 1px 3px; 
               text-align: center;
               vertical-align: middle;
+              height: 12px;
             }
             th { 
               background-color: #f0f0f0; 
               font-weight: bold;
-              font-size: 7px;
+              font-size: 6px;
+              padding: 2px 3px;
             }
             .nome-col { 
               text-align: left; 
-              max-width: 150px; 
-              font-size: 7px;
+              max-width: 140px; 
+              font-size: 6px;
             }
             .cpf-col { 
               font-family: monospace; 
-              font-size: 6px; 
+              font-size: 5px; 
             }
             .footer-info {
               display: flex;
               justify-content: space-between;
-              margin-top: 5px;
-              font-size: 9px;
+              margin-top: 8px;
+              font-size: 8px;
               font-weight: bold;
-              border: 1px solid black;
-              padding: 3px 5px;
+              border: 2px solid black;
+              padding: 4px 8px;
+              background-color: #f8f8f8;
             }
             .footer-info:last-child {
               border-top: 0;
-              border-bottom: 3px solid black;
+              margin-top: 0;
             }
             @media print { 
               body { margin: 0; } 
@@ -175,7 +173,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
         <body>
           <div class="header">
             <div class="header-title">COMANDO DA AERONÁUTICA</div>
-            <div class="header-title">${currentUser.baseAerea.toUpperCase()}</div>
+            <div class="header-title">${currentUser.baseAerea}</div>
             <div class="header-title">SISTEMA DO CORREIO AÉREO NACIONAL</div>
             <div class="header-title">RELAÇÃO DE PASSAGEIROS</div>
           </div>
@@ -199,7 +197,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
               </div>
               <div class="info-row">
                 <span class="info-label">ROTA:</span>
-                <span>${mission.trechos.join('')}</span>
+                <span>${mission.trechos}</span>
               </div>
             </div>
             <div class="info-group">
@@ -318,7 +316,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                   OFRAG {mission.ofrag}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {mission.trechos.join(' → ')}
+                  {mission.trechos}
                 </p>
               </div>
               <div className="flex space-x-2">

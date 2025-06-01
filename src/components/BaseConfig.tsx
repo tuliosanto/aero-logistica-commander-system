@@ -61,14 +61,8 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
   };
 
   const getCodigoBase = () => {
-    const codigos: { [key: string]: string } = {
-      'Base Aérea de Santa Maria': 'SM',
-      'Base Aérea do Galeão': 'GL',
-      'Base Aérea de Brasília': 'BR',
-      'Base Aérea de Manaus': 'MN',
-      'Base Aérea de Campo Grande': 'CG',
-    };
-    return codigos[currentUser.baseAerea] || 'XX';
+    // Extrai os dois últimos caracteres da base aérea
+    return currentUser.baseAerea.slice(-2);
   };
 
   if (currentUser.perfil === 'Operador') {
@@ -88,9 +82,6 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
           <CardTitle className="text-2xl font-bold text-blue-700">
             Configurações da Base Aérea - {currentUser.baseAerea}
           </CardTitle>
-          <p className="text-gray-600">
-            Código da Base: {getCodigoBase()}
-          </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid w-full max-w-sm items-center gap-1.5">

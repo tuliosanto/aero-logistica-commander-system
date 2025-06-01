@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,10 +41,12 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     }
     
     // Get users from localStorage
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    let users = JSON.parse(localStorage.getItem('users') || '[]');
     console.log('Usuários encontrados:', users);
     
-    // DADOS DE USUARIO ADMIN PARA ACESSO INICIAL
+    // DADOS DE USUARIO ADMIN PARA ACESSO INICIAL - só adiciona se não existir
+    const adminExists = users.some((u: User) => u.username === 'admin');
+    if (!adminExists) {
       const defaultAdmin: User = {
         id: '1',
         posto: 'TB',
@@ -59,6 +60,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       users.push(defaultAdmin);
       localStorage.setItem('users', JSON.stringify(users));
       console.log('Usuário admin padrão criado');
+    }
     
     const user = users.find((u: User) => {
       // Add validation to ensure properties exist before calling toLowerCase
