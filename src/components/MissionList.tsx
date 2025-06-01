@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -120,7 +121,10 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
           <title>Relação de Passageiros - ${mission.ofrag}</title>
           <meta charset="UTF-8">
           <style>
-            @page { margin: 15mm; size: A4; }
+            @page { 
+              margin: 15mm; 
+              size: A4 landscape; 
+            }
             body { 
               font-family: Arial, sans-serif; 
               margin: 0; 
