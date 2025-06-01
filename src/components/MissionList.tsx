@@ -694,7 +694,6 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                 </p>
                 <p className="text-sm text-gray-600">
                   {mission.trechos}
-                  {formatFlightRoute() || 'Nenhum trecho definido'}
                 </p>
               </div>
               <div className="flex space-x-2">
