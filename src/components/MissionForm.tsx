@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { UserPlus, ArrowLeft, Calendar } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { UserPlus, ArrowLeft, Calendar, CheckCircle } from 'lucide-react';
 import { Mission, Passenger } from '../types/Mission';
 import { User } from '../types/User';
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
@@ -20,13 +20,15 @@ interface MissionFormProps {
   onCancel?: () => void;
   currentUser: User;
   mission?: Mission;
+  onComplete?: (mission: Mission) => void;
 }
 
 const MissionForm = ({
   onSave,
   onCancel,
   currentUser,
-  mission
+  mission,
+  onComplete
 }: MissionFormProps) => {
   const [aeronave, setAeronave] = useState(mission?.aeronave || '');
   const [matricula, setMatricula] = useState(mission?.matricula || '');
@@ -100,10 +102,22 @@ const MissionForm = ({
       prioridade: waitlistPassenger.prioridade,
       responsavelInscricao: waitlistPassenger.responsavelInscricao,
       parentesco: waitlistPassenger.parentesco,
-      checkedIn: false
+      checkedIn: false,
+      fromWaitlist: true,
+      waitlistId: waitlistPassenger.id
     };
 
     setPassageiros([...passageiros, newPassenger]);
+    
+    // Marcar como alocado na lista de espera
+    const allWaitlistPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
+    const updatedWaitlistPassengers = allWaitlistPassengers.map((p: CANWaitlistPassenger) =>
+      p.id === waitlistPassenger.id 
+        ? { ...p, isAllocated: true, missionId: mission?.id || 'new' }
+        : p
+    );
+    localStorage.setItem('canWaitlist', JSON.stringify(updatedWaitlistPassengers));
+    loadWaitlistPassengers();
     
     toast({
       title: "Passageiro adicionado",
@@ -112,11 +126,62 @@ const MissionForm = ({
   };
 
   const moveFromMissionToWaitlist = (passenger: Passenger) => {
+    // Só permite mover se o passageiro veio da lista de espera
+    if (!passenger.fromWaitlist) {
+      toast({
+        title: "Ação não permitida",
+        description: "Apenas passageiros que vieram da lista de espera podem ser retornados a ela.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setPassageiros(passageiros.filter(p => p.id !== passenger.id));
+    
+    // Desmarcar como alocado na lista de espera
+    if (passenger.waitlistId) {
+      const allWaitlistPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
+      const updatedWaitlistPassengers = allWaitlistPassengers.map((p: CANWaitlistPassenger) =>
+        p.id === passenger.waitlistId 
+          ? { ...p, isAllocated: false, missionId: undefined }
+          : p
+      );
+      localStorage.setItem('canWaitlist', JSON.stringify(updatedWaitlistPassengers));
+      loadWaitlistPassengers();
+    }
     
     toast({
       title: "Passageiro removido",
       description: `${passenger.posto} ${passenger.nome} foi removido da missão e retornado à lista de espera.`,
+    });
+  };
+
+  const handleCompleteMission = () => {
+    if (!mission) return;
+
+    const completedMission: Mission = {
+      ...mission,
+      isCompleted: true,
+      passageiros
+    };
+
+    // Remover passageiros da lista de espera que estão na missão
+    const allWaitlistPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
+    const passageirosFromWaitlist = passageiros.filter(p => p.fromWaitlist && p.waitlistId);
+    const waitlistIdsToRemove = passageirosFromWaitlist.map(p => p.waitlistId);
+    
+    const updatedWaitlistPassengers = allWaitlistPassengers.filter((p: CANWaitlistPassenger) => 
+      !waitlistIdsToRemove.includes(p.id)
+    );
+    localStorage.setItem('canWaitlist', JSON.stringify(updatedWaitlistPassengers));
+
+    if (onComplete) {
+      onComplete(completedMission);
+    }
+
+    toast({
+      title: "Missão concluída",
+      description: `OFRAG ${mission.ofrag} foi concluída com sucesso. Passageiros da lista de espera foram removidos.`,
     });
   };
 
@@ -461,6 +526,34 @@ const MissionForm = ({
           <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
             {mission ? 'Atualizar Missão' : 'Cadastrar Missão'}
           </Button>
+          {mission && !mission.isCompleted && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button type="button" className="bg-green-600 hover:bg-green-700">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Concluir Missão
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Concluir Missão</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tem certeza que deseja concluir esta missão? Esta ação irá:
+                    <br />• Arquivar a missão e todos os seus dados
+                    <br />• Remover permanentemente os passageiros da lista de espera que foram incluídos
+                    <br /><br />
+                    Esta ação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleCompleteMission} className="bg-green-600 hover:bg-green-700">
+                    Sim, Concluir Missão
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           {onCancel && (
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancelar
@@ -491,6 +584,9 @@ const MissionForm = ({
                       <p className="text-sm text-gray-500">
                         Peso Total: {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
                         {passenger.parentesco && ` • ${passenger.parentesco}`}
+                        {passenger.isAllocated && (
+                          <span className="text-orange-600 font-semibold"> • Já alocado em outra missão</span>
+                        )}
                       </p>
                     </div>
                     <Badge className={getPriorityColor(passenger.prioridade)}>
@@ -501,6 +597,7 @@ const MissionForm = ({
                     size="sm"
                     onClick={() => moveFromWaitlistToMission(passenger)}
                     className="bg-green-600 hover:bg-green-700"
+                    disabled={passenger.isAllocated}
                   >
                     <UserPlus className="w-4 h-4 mr-1" />
                     Adicionar

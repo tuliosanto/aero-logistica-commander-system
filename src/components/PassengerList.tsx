@@ -10,6 +10,7 @@ import { Check, ArrowLeft } from 'lucide-react';
 import { Passenger } from '../types/Mission';
 import { MILITARY_RANKS, PRIORITIES, getRankOrder, AIR_BASES } from '../utils/constants';
 import { toast } from '@/hooks/use-toast';
+import PriorityTooltip from './PriorityTooltip';
 
 interface PassengerListProps {
   passengers: Passenger[];
@@ -136,15 +137,6 @@ const PassengerList = ({
       });
     }
   };
-
-  const sortedPassengers = [...passengers].sort((a, b) => {
-    // First by priority (lower number = higher priority)
-    if (a.prioridade !== b.prioridade) {
-      return a.prioridade - b.prioridade;
-    }
-    // Then by military rank (higher rank = higher priority)
-    return getRankOrder(b.posto) - getRankOrder(a.posto);
-  });
 
   const generateReport = () => {
     const baseInfo = AIR_BASES.find(base => base.code === baseAerea);
@@ -393,78 +385,229 @@ const PassengerList = ({
         </div>
       </div>
 
-      {sortedPassengers.length > 0 && (
-        <div className="space-y-2">
-          {sortedPassengers.map((passenger, index) => (
-            <Card key={passenger.id} className="p-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-4">
-                  <Badge variant="outline" className="font-mono">
-                    #{index + 1}
-                  </Badge>
-                  <div>
-                    <p className="font-semibold">
-                      {passenger.posto} {passenger.nome}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      CPF: {passenger.cpf || 'Não informado'} | Destino: {passenger.destino || 'Não informado'}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Responsável: {passenger.responsavelInscricao} | Parentesco: {passenger.parentesco || 'N/A'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="text-right text-sm">
-                    <p>PAX: {passenger.peso}kg | Bag: {passenger.pesoBagagem}kg | BM: {passenger.pesoBagagemMao}kg</p>
-                    <p>Prioridade: {passenger.prioridade}</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      size="sm" 
-                      variant={passenger.checkedIn ? "default" : "outline"}
-                      onClick={() => toggleCheckIn(passenger.id)}
-                      className={passenger.checkedIn ? "bg-blue-600 hover:bg-blue-700" : ""}
-                    >
-                      {passenger.checkedIn ? <Check className="h-4 w-4" /> : "Check-in"}
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleEdit(passenger)}
-                    >
-                      Editar
-                    </Button>
-                    {showMoveToWaitlist && onMoveToWaitlist && (
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => onMoveToWaitlist(passenger)}
-                        className="text-orange-600 hover:bg-orange-50"
-                      >
-                        <ArrowLeft className="h-4 w-4 mr-1" />
-                        Lista de Espera
-                      </Button>
+      <div className="space-y-2">
+        {passengers
+          .sort((a, b) => {
+            if (a.prioridade !== b.prioridade) {
+              return a.prioridade - b.prioridade;
+            }
+            const rankA = getRankOrder(a.posto);
+            const rankB = getRankOrder(b.posto);
+            return rankA - rankB;
+          })
+          .map((passenger) => (
+            <div key={passenger.id} className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
+              <div className="flex items-center space-x-4">
+                <div>
+                  <p className="font-medium">{passenger.posto} {passenger.nome}</p>
+                  <p className="text-sm text-gray-500">
+                    CPF: {passenger.cpf} | Destino: {passenger.destino}
+                    {passenger.parentesco && ` | ${passenger.parentesco}`}
+                    {passenger.fromWaitlist && (
+                      <span className="text-blue-600 font-semibold"> | Da lista de espera</span>
                     )}
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={() => handleDelete(passenger.id)}
-                    >
-                      Remover
-                    </Button>
-                  </div>
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Peso: {passenger.peso}kg | Bagagem: {passenger.pesoBagagem}kg | Bagagem de mão: {passenger.pesoBagagemMao}kg
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Responsável: {passenger.responsavelInscricao}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge className={getPriorityColor(passenger.prioridade)}>
+                    Prioridade {passenger.prioridade}
+                  </Badge>
                   {passenger.checkedIn && (
-                    <div className="flex items-center text-blue-600">
-                      <Check className="h-5 w-5" />
-                    </div>
+                    <Badge className="bg-green-100 text-green-800">
+                      <Check className="w-3 h-3 mr-1" />
+                      Check-in
+                    </Badge>
                   )}
                 </div>
               </div>
-            </Card>
+              <div className="flex space-x-2">
+                {!passenger.checkedIn && (
+                  <Button 
+                    size="sm" 
+                    onClick={() => toggleCheckIn(passenger.id)}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Check-in
+                  </Button>
+                )}
+                {passenger.checkedIn && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => toggleCheckIn(passenger.id)}
+                  >
+                    Desfazer Check-in
+                  </Button>
+                )}
+                {editingPassenger === passenger.id ? (
+                  <Button size="sm" onClick={() => saveEdit(passenger.id)}>
+                    Salvar
+                  </Button>
+                ) : (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => startEdit(passenger)}
+                  >
+                    Editar
+                  </Button>
+                )}
+                {showMoveToWaitlist && onMoveToWaitlist && passenger.fromWaitlist && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => onMoveToWaitlist(passenger)}
+                    className="text-orange-600 hover:bg-orange-50"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Lista de Espera
+                  </Button>
+                )}
+                <Button 
+                  size="sm" 
+                  variant="destructive"
+                  onClick={() => removePassenger(passenger.id)}
+                >
+                  Remover
+                </Button>
+              </div>
+
+              {editingPassenger === passenger.id && (
+                <Dialog open={true} onOpenChange={() => setEditingPassenger(null)}>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Editar Passageiro</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-posto">Posto</Label>
+                        <Select value={formData.posto} onValueChange={(value) => setFormData({...formData, posto: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o posto" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MILITARY_RANKS.map(rank => (
+                              <SelectItem key={rank} value={rank}>
+                                {rank}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-nome">Nome Completo *</Label>
+                        <Input
+                          id="edit-nome"
+                          value={formData.nome}
+                          onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-cpf">CPF</Label>
+                        <Input
+                          id="edit-cpf"
+                          value={formData.cpf}
+                          onChange={(e) => setFormData({...formData, cpf: e.target.value})}
+                          placeholder="000.000.000-00"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-destino">Destino</Label>
+                        <Input
+                          id="edit-destino"
+                          value={formData.destino}
+                          onChange={(e) => setFormData({...formData, destino: e.target.value})}
+                          placeholder="Ex: SBRF, SBCO"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-peso">Peso PAX (kg)</Label>
+                        <Input
+                          id="edit-peso"
+                          type="number"
+                          value={formData.peso}
+                          onChange={(e) => setFormData({...formData, peso: e.target.value})}
+                          min="0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-pesoBagagem">Bagagem (kg)</Label>
+                        <Input
+                          id="edit-pesoBagagem"
+                          type="number"
+                          value={formData.pesoBagagem}
+                          onChange={(e) => setFormData({...formData, pesoBagagem: e.target.value})}
+                          min="0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-pesoBagagemMao">Bag. Mão (kg)</Label>
+                        <Input
+                          id="edit-pesoBagagemMao"
+                          type="number"
+                          value={formData.pesoBagagemMao}
+                          onChange={(e) => setFormData({...formData, pesoBagagemMao: e.target.value})}
+                          min="0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-prioridade">Prioridade</Label>
+                        <Select value={formData.prioridade.toString()} onValueChange={(value) => setFormData({...formData, prioridade: parseInt(value)})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a prioridade" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {PRIORITIES.map(priority => (
+                              <SelectItem key={priority.value} value={priority.value.toString()}>
+                                <PriorityTooltip priority={priority.value}>
+                                  <span>{priority.label}</span>
+                                </PriorityTooltip>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-responsavelInscricao">Responsável pela Inscrição</Label>
+                        <Input
+                          id="edit-responsavelInscricao"
+                          value={formData.responsavelInscricao}
+                          onChange={(e) => setFormData({...formData, responsavelInscricao: e.target.value})}
+                          placeholder="O Próprio"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-parentesco">Parentesco</Label>
+                        <Input
+                          id="edit-parentesco"
+                          value={formData.parentesco}
+                          onChange={(e) => setFormData({...formData, parentesco: e.target.value})}
+                          placeholder="Ex: Cônjuge, Filho(a), etc."
+                        />
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
           ))}
-        </div>
-      )}
+      </div>
 
       {sortedPassengers.length === 0 && (
         <div className="text-center py-8 text-gray-500">

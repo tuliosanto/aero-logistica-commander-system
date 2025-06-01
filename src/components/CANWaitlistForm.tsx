@@ -1,21 +1,21 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import { User } from '../types/User';
-import { AERODROMOS } from '../utils/constants';
+import { MILITARY_RANKS, PRIORITIES, AERODROMOS } from '../utils/constants';
+import PriorityTooltip from './PriorityTooltip';
 
 interface CANWaitlistFormProps {
+  passenger?: CANWaitlistPassenger | null;
   onSave: (passenger: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => void;
   onCancel: () => void;
   currentUser: User;
-  passenger?: CANWaitlistPassenger | null;
 }
 
-const CANWaitlistForm = ({ onSave, onCancel, currentUser, passenger }: CANWaitlistFormProps) => {
+const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitlistFormProps) => {
   const [posto, setPosto] = useState(passenger?.posto || '');
   const [nome, setNome] = useState(passenger?.nome || '');
   const [cpf, setCpf] = useState(passenger?.cpf || '');
@@ -172,14 +172,16 @@ const CANWaitlistForm = ({ onSave, onCancel, currentUser, passenger }: CANWaitli
 
       <div className="space-y-2">
         <Label htmlFor="prioridade">Prioridade</Label>
-        <Select value={prioridade.toString()} onValueChange={value => setPrioridade(Number(value))}>
+        <Select value={prioridade.toString()} onValueChange={(value) => setPrioridade(parseInt(value))}>
           <SelectTrigger>
             <SelectValue placeholder="Selecione a prioridade" />
           </SelectTrigger>
           <SelectContent>
-            {prioridades.map(p => (
-              <SelectItem key={p.value} value={p.value.toString()}>
-                {p.label}
+            {PRIORITIES.map(priority => (
+              <SelectItem key={priority.value} value={priority.value.toString()}>
+                <PriorityTooltip priority={priority.value}>
+                  <span>{priority.label}</span>
+                </PriorityTooltip>
               </SelectItem>
             ))}
           </SelectContent>

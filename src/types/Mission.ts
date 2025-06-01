@@ -10,6 +10,7 @@ export interface Mission {
   passageiros: Passenger[];
   createdAt: string;
   baseAerea: string; // Adicionando campo para identificar a base aérea
+  isCompleted?: boolean; // Nova propriedade para indicar se a missão foi concluída
 }
 
 export interface Passenger {
@@ -25,4 +26,6 @@ export interface Passenger {
   checkedIn?: boolean;
   responsavelInscricao: string;
   parentesco: string;
+  fromWaitlist?: boolean; // Nova propriedade para indicar se veio da lista de espera
+  waitlistId?: string; // ID do registro na lista de espera (se aplicável)
 }

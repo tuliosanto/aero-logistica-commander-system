@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, UserPlus, Trash2 } from 'lucide-react';
+import { PlusCircle, UserPlus, Trash2, Plane } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import { User } from '../types/User';
@@ -176,6 +176,7 @@ const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
                   <TableHead>Destino</TableHead>
                   <TableHead>Peso Total</TableHead>
                   <TableHead>Prioridade</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Responsável</TableHead>
                   <TableHead>Data Inscrição</TableHead>
                   <TableHead>Ações</TableHead>
@@ -204,6 +205,18 @@ const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
                         {passenger.prioridade} - {getPriorityText(passenger.prioridade)}
                       </Badge>
                     </TableCell>
+                    <TableCell>
+                      {passenger.isAllocated ? (
+                        <Badge className="bg-orange-100 text-orange-800">
+                          <Plane className="w-3 h-3 mr-1" />
+                          Alocado em Voo
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-green-100 text-green-800">
+                          Aguardando
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell>{passenger.responsavelInscricao}</TableCell>
                     <TableCell>
                       {new Date(passenger.dataInscricao).toLocaleDateString('pt-BR')}
@@ -214,6 +227,7 @@ const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
                           size="sm"
                           variant="outline"
                           onClick={() => handleEditPassenger(passenger)}
+                          disabled={passenger.isAllocated}
                         >
                           <UserPlus className="w-4 h-4" />
                         </Button>
@@ -221,6 +235,7 @@ const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
                           size="sm"
                           variant="destructive"
                           onClick={() => handleDeletePassenger(passenger.id)}
+                          disabled={passenger.isAllocated}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

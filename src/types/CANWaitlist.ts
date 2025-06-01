@@ -13,4 +13,6 @@ export interface CANWaitlistPassenger {
   parentesco: string;
   dataInscricao: string;
   baseAerea: string;
+  isAllocated?: boolean; // Nova propriedade para indicar se está alocado em uma missão
+  missionId?: string; // ID da missão onde está alocado
 }
