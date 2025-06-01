@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle, Users, Settings, LogOut, Plane, UserPlus } from 'lucide-react';
+import { PlusCircle, Users, Settings, LogOut, Plane, UserPlus, Archive } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Mission } from '../types/Mission';
 import { User } from '../types/User';
@@ -13,6 +14,7 @@ import MissionList from './MissionList';
 import UserManagement from './UserManagement';
 import BaseConfigComponent from './BaseConfig';
 import CANWaitlist from './CANWaitlist';
+import CANWaitlistForm from './CANWaitlistForm';
 import { useBaseImage } from '../hooks/useBaseImage';
 
 interface DashboardProps {
@@ -27,6 +29,7 @@ const Dashboard = ({
   const [missions, setMissions] = useState<Mission[]>([]);
   const [waitlist, setWaitlist] = useState<CANWaitlistPassenger[]>([]);
   const [showMissionForm, setShowMissionForm] = useState(false);
+  const [showWaitlistForm, setShowWaitlistForm] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [activeTab, setActiveTab] = useState(currentUser.perfil === 'Secretario' ? 'waitlist' : 'missions');
   const baseImage = useBaseImage(currentUser.baseAerea);
@@ -54,6 +57,10 @@ const Dashboard = ({
   const handleCreateMission = () => {
     setEditingMission(null);
     setShowMissionForm(true);
+  };
+
+  const handleCreateWaitlistEntry = () => {
+    setShowWaitlistForm(true);
   };
 
   const handleEditMission = (mission: Mission) => {
@@ -93,6 +100,25 @@ const Dashboard = ({
     setEditingMission(null);
   };
 
+  const handleSaveWaitlistEntry = (entry: CANWaitlistPassenger) => {
+    const allWaitlist = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
+    const newEntry: CANWaitlistPassenger = {
+      ...entry,
+      id: Date.now().toString(),
+      dataInscricao: new Date().toISOString(),
+      baseAerea: currentUser.baseAerea
+    };
+    allWaitlist.push(newEntry);
+    localStorage.setItem('canWaitlist', JSON.stringify(allWaitlist));
+    loadWaitlist();
+    setShowWaitlistForm(false);
+    
+    toast({
+      title: "Inscrição registrada",
+      description: `${entry.posto} ${entry.nome} foi inscrito na lista de espera CAN.`
+    });
+  };
+
   const handleDeleteMission = (missionId: string) => {
     const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
     const updatedMissions = allMissions.filter((m: Mission) => m.id !== missionId);
@@ -109,11 +135,45 @@ const Dashboard = ({
       m.id === missionId ? { ...m, isCompleted: true } : m
     );
     localStorage.setItem('missions', JSON.stringify(updatedMissions));
+    
+    // Remover passageiros da lista de espera se vieram dela
+    if (mission.passageiros && mission.passageiros.length > 0) {
+      const allWaitlist = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
+      const waitlistIdsToRemove = mission.passageiros
+        .filter(p => p.fromWaitlist && p.waitlistId)
+        .map(p => p.waitlistId);
+      
+      if (waitlistIdsToRemove.length > 0) {
+        const updatedWaitlist = allWaitlist.filter((entry: CANWaitlistPassenger) => 
+          !waitlistIdsToRemove.includes(entry.id)
+        );
+        localStorage.setItem('canWaitlist', JSON.stringify(updatedWaitlist));
+        loadWaitlist();
+      }
+    }
+    
     loadMissions();
     
     toast({
       title: "Missão concluída",
       description: `OFRAG ${mission.ofrag} foi concluída com sucesso.`
+    });
+  };
+
+  const handleArchiveMission = (missionId: string) => {
+    const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
+    const mission = allMissions.find((m: Mission) => m.id === missionId);
+    if (!mission) return;
+    
+    const updatedMissions = allMissions.map((m: Mission) => 
+      m.id === missionId ? { ...m, isArchived: true } : m
+    );
+    localStorage.setItem('missions', JSON.stringify(updatedMissions));
+    loadMissions();
+    
+    toast({
+      title: "Missão arquivada",
+      description: `OFRAG ${mission.ofrag} foi arquivada com sucesso.`
     });
   };
 
@@ -233,6 +293,7 @@ const Dashboard = ({
                   onEdit={handleEditMission} 
                   onDelete={handleDeleteMission} 
                   onComplete={handleCompleteMission}
+                  onArchive={handleArchiveMission}
                   currentUser={currentUser} 
                 />
               )}
@@ -240,15 +301,37 @@ const Dashboard = ({
           )}
 
           <TabsContent value="waitlist" className="space-y-6">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-800">Inscrições Ativas</h2>
-              <p className="text-gray-600">Gerencie passageiros na lista de espera do Correio Aéreo Nacional</p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-800">Inscrições Ativas</h2>
+                <p className="text-gray-600">Gerencie passageiros na lista de espera do Correio Aéreo Nacional</p>
+              </div>
+              <Button onClick={handleCreateWaitlistEntry} className="bg-green-600 hover:bg-green-700">
+                <PlusCircle className="w-4 h-4 mr-2" />
+                Nova Inscrição CAN
+              </Button>
             </div>
-            <CANWaitlist 
-              waitlist={waitlist}
-              onAddToMission={handleAddToMission}
-              onRemove={handleRemoveFromWaitlist}
-            />
+            
+            {showWaitlistForm ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Nova Inscrição CAN</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CANWaitlistForm 
+                    onSave={handleSaveWaitlistEntry}
+                    onCancel={() => setShowWaitlistForm(false)}
+                    currentUser={currentUser}
+                  />
+                </CardContent>
+              </Card>
+            ) : (
+              <CANWaitlist 
+                waitlist={waitlist}
+                onAddToMission={handleAddToMission}
+                onRemove={handleRemoveFromWaitlist}
+              />
+            )}
           </TabsContent>
 
           {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (

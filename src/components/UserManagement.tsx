@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -64,9 +63,19 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validação básica
+    if (!formData.username || !formData.username.trim()) {
+      toast({
+        title: "Erro",
+        description: "Username é obrigatório.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Check if username is already taken (excluding current editing user)
     const existingUser = users.find(u => 
-      u.username.toLowerCase() === formData.username.toLowerCase() && 
+      u.username && u.username.toLowerCase() === formData.username.toLowerCase() && 
       u.id !== editingUser
     );
     
