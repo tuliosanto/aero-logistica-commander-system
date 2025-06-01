@@ -12,6 +12,8 @@ export interface Mission {
   baseAerea: string; // Adicionando campo para identificar a base aérea
   isCompleted?: boolean; // Nova propriedade para indicar se a missão foi concluída
   isArchived?: boolean; // Nova propriedade para indicar se a missão foi arquivada
+  horarioChamada?: string; // Horário de chamada dos passageiros
+  horarioDecolagem?: string; // Horário de decolagem da aeronave
 }
 
 export interface Passenger {

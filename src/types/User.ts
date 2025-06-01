@@ -8,4 +8,5 @@ export interface User {
   perfil: 'Operador' | 'Administrador' | 'Supervisor' | 'Secretario';
   senha: string;
   username: string;
+  nome?: string; // Nome completo do usuário para relatórios
 }
