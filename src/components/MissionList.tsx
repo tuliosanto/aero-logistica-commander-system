@@ -448,7 +448,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
               <td class='x50'></td><td class='x50'></td><td class='x50'></td>
             </tr>
             <tr style='height:16.5pt'>
-              <td colspan='12' class='x41'>${currentUser.baseAerea.name}</td>
+              <td colspan='12' class='x41'>${currentUser.baseAerea}</td>
               <td class='x50'></td><td class='x50'></td><td class='x50'></td>
             </tr>
             <tr style='height:16.5pt'>
