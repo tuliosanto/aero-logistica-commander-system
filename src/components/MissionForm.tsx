@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -111,6 +110,10 @@ const MissionForm = ({
 
   const weights = calculateTotalWeights();
 
+  const clearTrecho = (trechoSetter: (value: string) => void) => {
+    trechoSetter('');
+  };
+
   return (
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -157,13 +160,25 @@ const MissionForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho1">Trecho 1 (Opcional)</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="trecho1">Trecho 1 (Opcional)</Label>
+                {trecho1 && (
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => clearTrecho(setTrecho1)}
+                    className="text-xs"
+                  >
+                    Limpar
+                  </Button>
+                )}
+              </div>
               <Select value={trecho1} onValueChange={setTrecho1}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o destino" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
                       {aero.code} - {aero.name}
@@ -174,13 +189,25 @@ const MissionForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho2">Trecho 2 (Opcional)</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="trecho2">Trecho 2 (Opcional)</Label>
+                {trecho2 && (
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => clearTrecho(setTrecho2)}
+                    className="text-xs"
+                  >
+                    Limpar
+                  </Button>
+                )}
+              </div>
               <Select value={trecho2} onValueChange={setTrecho2}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o destino" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
                       {aero.code} - {aero.name}
@@ -191,13 +218,25 @@ const MissionForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho3">Trecho 3 (Opcional)</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="trecho3">Trecho 3 (Opcional)</Label>
+                {trecho3 && (
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => clearTrecho(setTrecho3)}
+                    className="text-xs"
+                  >
+                    Limpar
+                  </Button>
+                )}
+              </div>
               <Select value={trecho3} onValueChange={setTrecho3}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o destino" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
                       {aero.code} - {aero.name}
@@ -208,13 +247,25 @@ const MissionForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho4">Trecho 4 (Opcional)</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="trecho4">Trecho 4 (Opcional)</Label>
+                {trecho4 && (
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => clearTrecho(setTrecho4)}
+                    className="text-xs"
+                  >
+                    Limpar
+                  </Button>
+                )}
+              </div>
               <Select value={trecho4} onValueChange={setTrecho4}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o destino" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
                       {aero.code} - {aero.name}
@@ -225,13 +276,25 @@ const MissionForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho5">Trecho 5 (Opcional)</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="trecho5">Trecho 5 (Opcional)</Label>
+                {trecho5 && (
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => clearTrecho(setTrecho5)}
+                    className="text-xs"
+                  >
+                    Limpar
+                  </Button>
+                )}
+              </div>
               <Select value={trecho5} onValueChange={setTrecho5}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o destino" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
                       {aero.code} - {aero.name}
@@ -242,13 +305,25 @@ const MissionForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho6">Trecho 6 (Opcional)</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="trecho6">Trecho 6 (Opcional)</Label>
+                {trecho6 && (
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => clearTrecho(setTrecho6)}
+                    className="text-xs"
+                  >
+                    Limpar
+                  </Button>
+                )}
+              </div>
               <Select value={trecho6} onValueChange={setTrecho6}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o destino" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
                       {aero.code} - {aero.name}
