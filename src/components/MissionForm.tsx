@@ -331,7 +331,7 @@ const MissionForm = ({
               <Input 
                 id="trecho3" 
                 value={trecho3} 
-                onChange={e => setTrecho3(e.target.value).toUpperCase()} 
+                onChange={e => setTrecho3(e.target.value.toUpperCase())} 
                 placeholder="Ex: SBGL, SBBR, etc."
               />
             </div>
