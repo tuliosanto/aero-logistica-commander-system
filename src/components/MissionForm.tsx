@@ -114,6 +114,11 @@ const MissionForm = ({
     trechoSetter('');
   };
 
+  const formatFlightRoute = () => {
+    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
+    return trechos.join(' - ');
+  };
+
   return (
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -140,7 +145,12 @@ const MissionForm = ({
         </div>
 
         <div className="space-y-4">
-          <Label className="text-lg font-semibold">Trechos do Voo</Label>
+          <div className="flex justify-between items-center">
+            <Label className="text-lg font-semibold">Trechos do Voo</Label>
+            <div className="text-sm text-gray-600">
+              <strong>Rota:</strong> {formatFlightRoute() || 'Nenhum trecho definido'}
+            </div>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">

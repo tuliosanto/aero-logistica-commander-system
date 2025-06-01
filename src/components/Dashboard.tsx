@@ -23,7 +23,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [showMissionForm, setShowMissionForm] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
-  const [activeTab, setActiveTab] = useState('missions');
+  const [activeTab, setActiveTab] = useState(currentUser.perfil === 'Secretario' ? 'waitlist' : 'missions');
   const baseImage = useBaseImage(currentUser.baseAerea);
 
   useEffect(() => {

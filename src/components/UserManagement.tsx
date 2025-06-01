@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +44,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       // Administrador can only see users from their base
       return users.filter(user => user.baseAerea === currentUser.baseAerea);
     }
-    // Operadores shouldn't access this component, but just in case
+    // Operadores e Secretarios shouldn't access this component, but just in case
     return [];
   };
 
@@ -192,7 +191,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     }
   };
 
-  const changeUserProfile = (userId: string, newProfile: 'Operador' | 'Administrador' | 'Supervisor') => {
+  const changeUserProfile = (userId: string, newProfile: 'Operador' | 'Administrador' | 'Supervisor' | 'Secretario') => {
     if (userId === currentUser.id) {
       toast({
         title: "Erro",
@@ -245,9 +244,9 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
   const getAvailableProfiles = () => {
     if (currentUser.perfil === 'Supervisor') {
-      return ['Operador', 'Administrador', 'Supervisor'];
+      return ['Operador', 'Secretario', 'Administrador', 'Supervisor'];
     } else {
-      return ['Operador'];
+      return ['Operador', 'Secretario'];
     }
   };
 
@@ -362,7 +361,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="perfil">Perfil de Acesso *</Label>
-                  <Select value={formData.perfil} onValueChange={(value: 'Operador' | 'Administrador' | 'Supervisor') => setFormData({...formData, perfil: value})}>
+                  <Select value={formData.perfil} onValueChange={(value: 'Operador' | 'Administrador' | 'Supervisor' | 'Secretario') => setFormData({...formData, perfil: value})}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -420,10 +419,15 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                         {user.posto} {user.nomeGuerra}
                       </p>
                       <Badge 
-                        variant={user.perfil === 'Supervisor' ? 'default' : user.perfil === 'Administrador' ? 'secondary' : 'outline'}
+                        variant={
+                          user.perfil === 'Supervisor' ? 'default' : 
+                          user.perfil === 'Administrador' ? 'secondary' : 
+                          user.perfil === 'Secretario' ? 'secondary' : 'outline'
+                        }
                         className={
                           user.perfil === 'Supervisor' ? 'bg-purple-100 text-purple-800' :
-                          user.perfil === 'Administrador' ? 'bg-red-100 text-red-800' : ''
+                          user.perfil === 'Administrador' ? 'bg-red-100 text-red-800' : 
+                          user.perfil === 'Secretario' ? 'bg-blue-100 text-blue-800' : ''
                         }
                       >
                         {user.perfil}
@@ -444,7 +448,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                     <>
                       <Select 
                         value={user.perfil} 
-                        onValueChange={(value: 'Operador' | 'Administrador' | 'Supervisor') => changeUserProfile(user.id, value)}
+                        onValueChange={(value: 'Operador' | 'Administrador' | 'Supervisor' | 'Secretario') => changeUserProfile(user.id, value)}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
