@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import MissionList from './MissionList';
@@ -8,6 +7,7 @@ import BaseConfigComponent from './BaseConfig';
 import { Mission } from '../types/Mission';
 import { User } from '../types/User';
 import { toast } from '@/hooks/use-toast';
+import { useBaseImage } from '../hooks/useBaseImage';
 
 interface DashboardProps {
   currentUser: User;
@@ -18,6 +18,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState('missions');
   const [missions, setMissions] = useState<Mission[]>([]);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
+  const baseImage = useBaseImage(currentUser.baseAerea);
 
   useEffect(() => {
     loadMissions();
@@ -143,7 +144,14 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-blue-700">Sistema CAN</h1>
+              <div className="flex items-center space-x-3">
+                <h1 className="text-2xl font-bold text-blue-700">Sistema CAN</h1>
+                <img 
+                  src={baseImage} 
+                  alt={`Logo ${currentUser.baseAerea}`}
+                  className="h-10 w-auto object-contain"
+                />
+              </div>
               <div className="text-sm text-gray-600">
                 {currentUser.posto} {currentUser.nomeGuerra} - {currentUser.baseAerea}
               </div>
