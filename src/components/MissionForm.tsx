@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +21,8 @@ interface MissionFormProps {
   currentUser: User;
   mission?: Mission;
   onComplete?: (mission: Mission) => void;
+  waitlist: CANWaitlistPassenger[];
+  onUpdateWaitlist: () => void;
 }
 
 const MissionForm = ({
@@ -29,14 +30,15 @@ const MissionForm = ({
   onCancel,
   currentUser,
   mission,
-  onComplete
+  onComplete,
+  waitlist,
+  onUpdateWaitlist
 }: MissionFormProps) => {
   const [aeronave, setAeronave] = useState(mission?.aeronave || '');
   const [matricula, setMatricula] = useState(mission?.matricula || '');
   const [dataVoo, setDataVoo] = useState(mission?.dataVoo || '');
   const [ofrag, setOfrag] = useState(mission?.ofrag || '');
   const [passageiros, setPassageiros] = useState<Passenger[]>(mission?.passageiros || []);
-  const [waitlistPassengers, setWaitlistPassengers] = useState<CANWaitlistPassenger[]>([]);
   
   // Estados para os trechos como text inputs
   const [origem, setOrigem] = useState('');
@@ -62,25 +64,15 @@ const MissionForm = ({
       setTrecho5(mission.trechos[5] || '');
       setTrecho6(mission.trechos[6] || '');
     }
-
-    // Carregar lista de espera
-    loadWaitlistPassengers();
   }, [currentUser.baseAerea, mission]);
-
-  const loadWaitlistPassengers = () => {
-    const allPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
-    const basePassengers = allPassengers.filter((passenger: CANWaitlistPassenger) => 
-      passenger.baseAerea === currentUser.baseAerea
-    );
-    setWaitlistPassengers(basePassengers);
-  };
 
   const getCompatibleWaitlistPassengers = () => {
     const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
     if (trechos.length === 0) return [];
     
-    // Buscar passageiros cujo destino coincida com qualquer um dos trechos
-    return waitlistPassengers.filter(passenger => 
+    // Filtrar passageiros não alocados em missões ativas/concluídas e cujo destino coincida com qualquer um dos trechos
+    return waitlist.filter(passenger => 
+      !passenger.isAllocated &&
       trechos.includes(passenger.destino) &&
       !passageiros.some(p => p.cpf === passenger.cpf)
     ).sort((a, b) => a.prioridade - b.prioridade);
@@ -119,7 +111,7 @@ const MissionForm = ({
         : p
     );
     localStorage.setItem('canWaitlist', JSON.stringify(updatedWaitlistPassengers));
-    loadWaitlistPassengers();
+    onUpdateWaitlist();
     
     toast({
       title: "Passageiro adicionado",
@@ -149,7 +141,7 @@ const MissionForm = ({
           : p
       );
       localStorage.setItem('canWaitlist', JSON.stringify(updatedWaitlistPassengers));
-      loadWaitlistPassengers();
+      onUpdateWaitlist();
     }
     
     toast({
@@ -176,6 +168,7 @@ const MissionForm = ({
       !waitlistIdsToRemove.includes(p.id)
     );
     localStorage.setItem('canWaitlist', JSON.stringify(updatedWaitlistPassengers));
+    onUpdateWaitlist();
 
     if (onComplete) {
       onComplete(completedMission);
@@ -435,9 +428,6 @@ const MissionForm = ({
                       <p className="text-sm text-gray-500">
                         Destino: {passenger.destino} • Peso Total: {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
                         {passenger.parentesco && ` • ${passenger.parentesco}`}
-                        {passenger.isAllocated && (
-                          <span className="text-orange-600 font-semibold"> • Já alocado em outra missão</span>
-                        )}
                       </p>
                     </div>
                     <Badge className={getPriorityColor(passenger.prioridade)}>
@@ -448,7 +438,6 @@ const MissionForm = ({
                     size="sm"
                     onClick={() => moveFromWaitlistToMission(passenger)}
                     className="bg-green-600 hover:bg-green-700"
-                    disabled={passenger.isAllocated}
                   >
                     <UserPlus className="w-4 h-4 mr-1" />
                     Adicionar
@@ -476,6 +465,7 @@ const MissionForm = ({
             showMoveToWaitlist={true}
             onMoveToWaitlist={moveFromMissionToWaitlist}
             onComplete={mission && !mission.isCompleted ? handleCompleteMission : undefined}
+            showAddPassengerButton={true}
           />
           
           {passageiros.length > 0 && (

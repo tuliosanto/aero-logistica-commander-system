@@ -15,6 +15,7 @@ import UserManagement from './UserManagement';
 import BaseConfigComponent from './BaseConfig';
 import CANWaitlist from './CANWaitlist';
 import CANWaitlistForm from './CANWaitlistForm';
+import ArchivedMissions from './ArchivedMissions';
 import { useBaseImage } from '../hooks/useBaseImage';
 
 interface DashboardProps {
@@ -27,10 +28,12 @@ const Dashboard = ({
   onLogout
 }: DashboardProps) => {
   const [missions, setMissions] = useState<Mission[]>([]);
+  const [archivedMissions, setArchivedMissions] = useState<Mission[]>([]);
   const [waitlist, setWaitlist] = useState<CANWaitlistPassenger[]>([]);
   const [showMissionForm, setShowMissionForm] = useState(false);
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
+  const [editingWaitlistPassenger, setEditingWaitlistPassenger] = useState<CANWaitlistPassenger | null>(null);
   const [activeTab, setActiveTab] = useState(currentUser.perfil === 'Secretario' ? 'waitlist' : 'missions');
   const baseImage = useBaseImage(currentUser.baseAerea);
 
@@ -43,7 +46,13 @@ const Dashboard = ({
     const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
     // Filtrar missões apenas da base aérea do usuário logado
     const baseMissions = allMissions.filter((mission: Mission) => mission.baseAerea === currentUser.baseAerea);
-    setMissions(baseMissions);
+    
+    // Separar missões ativas e arquivadas
+    const activeMissions = baseMissions.filter((mission: Mission) => !mission.isArchived);
+    const archived = baseMissions.filter((mission: Mission) => mission.isArchived);
+    
+    setMissions(activeMissions);
+    setArchivedMissions(archived);
   };
 
   const loadWaitlist = () => {
@@ -60,12 +69,18 @@ const Dashboard = ({
   };
 
   const handleCreateWaitlistEntry = () => {
+    setEditingWaitlistPassenger(null);
     setShowWaitlistForm(true);
   };
 
   const handleEditMission = (mission: Mission) => {
     setEditingMission(mission);
     setShowMissionForm(true);
+  };
+
+  const handleEditWaitlistPassenger = (passenger: CANWaitlistPassenger) => {
+    setEditingWaitlistPassenger(passenger);
+    setShowWaitlistForm(true);
   };
 
   const handleSaveMission = (missionData: Mission) => {
@@ -100,23 +115,40 @@ const Dashboard = ({
     setEditingMission(null);
   };
 
-  const handleSaveWaitlistEntry = (entry: CANWaitlistPassenger) => {
+  const handleSaveWaitlistEntry = (entry: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => {
     const allWaitlist = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
-    const newEntry: CANWaitlistPassenger = {
-      ...entry,
-      id: Date.now().toString(),
-      dataInscricao: new Date().toISOString(),
-      baseAerea: currentUser.baseAerea
-    };
-    allWaitlist.push(newEntry);
-    localStorage.setItem('canWaitlist', JSON.stringify(allWaitlist));
+    
+    if (editingWaitlistPassenger) {
+      // Atualizar passageiro existente
+      const updatedWaitlist = allWaitlist.map((p: CANWaitlistPassenger) =>
+        p.id === editingWaitlistPassenger.id 
+          ? { ...editingWaitlistPassenger, ...entry }
+          : p
+      );
+      localStorage.setItem('canWaitlist', JSON.stringify(updatedWaitlist));
+      toast({
+        title: "Passageiro atualizado",
+        description: `${entry.posto} ${entry.nome} foi atualizado na lista de espera CAN.`
+      });
+    } else {
+      // Criar novo passageiro
+      const newEntry: CANWaitlistPassenger = {
+        ...entry,
+        id: Date.now().toString(),
+        dataInscricao: new Date().toISOString(),
+        baseAerea: currentUser.baseAerea
+      };
+      allWaitlist.push(newEntry);
+      localStorage.setItem('canWaitlist', JSON.stringify(allWaitlist));
+      toast({
+        title: "Inscrição registrada",
+        description: `${entry.posto} ${entry.nome} foi inscrito na lista de espera CAN.`
+      });
+    }
+    
     loadWaitlist();
     setShowWaitlistForm(false);
-    
-    toast({
-      title: "Inscrição registrada",
-      description: `${entry.posto} ${entry.nome} foi inscrito na lista de espera CAN.`
-    });
+    setEditingWaitlistPassenger(null);
   };
 
   const handleDeleteMission = (missionId: string) => {
@@ -198,9 +230,9 @@ const Dashboard = ({
   };
 
   const getTabsCount = () => {
-    if (currentUser.perfil === 'Operador') return 'grid-cols-2';
+    if (currentUser.perfil === 'Operador') return 'grid-cols-3';
     if (currentUser.perfil === 'Secretario') return 'grid-cols-1';
-    return 'grid-cols-4';
+    return 'grid-cols-5';
   };
 
   return (
@@ -237,6 +269,12 @@ const Dashboard = ({
                 <span>Missões</span>
               </TabsTrigger>
             )}
+            {currentUser.perfil !== 'Secretario' && (
+              <TabsTrigger value="archived" className="flex items-center space-x-2">
+                <Archive className="w-4 h-4" />
+                <span>Arquivadas</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="waitlist" className="flex items-center space-x-2">
               <UserPlus className="w-4 h-4" />
               <span>Inscrições CAN</span>
@@ -259,7 +297,7 @@ const Dashboard = ({
             <TabsContent value="missions" className="space-y-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-800">Missões</h2>
+                  <h2 className="text-3xl font-bold text-gray-800">Missões Ativas</h2>
                   <p className="text-gray-600">Gerencie as missões do Correio Aéreo Nacional</p>
                 </div>
                 <Button onClick={handleCreateMission} className="bg-blue-600 hover:bg-blue-700">
@@ -284,6 +322,8 @@ const Dashboard = ({
                         setEditingMission(null);
                       }} 
                       currentUser={currentUser} 
+                      waitlist={waitlist}
+                      onUpdateWaitlist={loadWaitlist}
                     />
                   </CardContent>
                 </Card>
@@ -297,6 +337,19 @@ const Dashboard = ({
                   currentUser={currentUser} 
                 />
               )}
+            </TabsContent>
+          )}
+
+          {currentUser.perfil !== 'Secretario' && (
+            <TabsContent value="archived" className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-800">Missões Arquivadas</h2>
+                <p className="text-gray-600">Histórico de missões concluídas e arquivadas</p>
+              </div>
+              <ArchivedMissions 
+                missions={archivedMissions} 
+                currentUser={currentUser} 
+              />
             </TabsContent>
           )}
 
@@ -315,12 +368,18 @@ const Dashboard = ({
             {showWaitlistForm ? (
               <Card>
                 <CardHeader>
-                  <CardTitle>Nova Inscrição CAN</CardTitle>
+                  <CardTitle>
+                    {editingWaitlistPassenger ? 'Editar Inscrição CAN' : 'Nova Inscrição CAN'}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CANWaitlistForm 
+                    passenger={editingWaitlistPassenger}
                     onSave={handleSaveWaitlistEntry}
-                    onCancel={() => setShowWaitlistForm(false)}
+                    onCancel={() => {
+                      setShowWaitlistForm(false);
+                      setEditingWaitlistPassenger(null);
+                    }}
                     currentUser={currentUser}
                   />
                 </CardContent>
@@ -330,6 +389,7 @@ const Dashboard = ({
                 waitlist={waitlist}
                 onAddToMission={handleAddToMission}
                 onRemove={handleRemoveFromWaitlist}
+                onEdit={handleEditWaitlistPassenger}
               />
             )}
           </TabsContent>

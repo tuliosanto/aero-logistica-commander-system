@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronRight, Trash2, UserPlus } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, UserPlus, Edit } from 'lucide-react';
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import { getRankOrder } from '../utils/constants';
 import PriorityTooltip from './PriorityTooltip';
@@ -13,6 +13,7 @@ interface CANWaitlistProps {
   waitlist: CANWaitlistPassenger[];
   onAddToMission: (entry: CANWaitlistPassenger) => void;
   onRemove: (id: string) => void;
+  onEdit: (entry: CANWaitlistPassenger) => void;
 }
 
 const destinationColors = [
@@ -26,11 +27,14 @@ const destinationColors = [
   'bg-red-100 text-red-800 border-red-300',
 ];
 
-const CANWaitlist = ({ waitlist, onAddToMission, onRemove }: CANWaitlistProps) => {
+const CANWaitlist = ({ waitlist, onAddToMission, onRemove, onEdit }: CANWaitlistProps) => {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
   const groupedWaitlist = useMemo(() => {
-    const groups = waitlist.reduce((acc, entry) => {
+    // Filtrar apenas passageiros não alocados
+    const availablePassengers = waitlist.filter(entry => !entry.isAllocated);
+    
+    const groups = availablePassengers.reduce((acc, entry) => {
       if (!acc[entry.destino]) {
         acc[entry.destino] = [];
       }
@@ -77,7 +81,9 @@ const CANWaitlist = ({ waitlist, onAddToMission, onRemove }: CANWaitlistProps) =
     return destinationColors[index % destinationColors.length];
   };
 
-  if (waitlist.length === 0) {
+  const availablePassengers = waitlist.filter(entry => !entry.isAllocated);
+
+  if (availablePassengers.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -93,7 +99,7 @@ const CANWaitlist = ({ waitlist, onAddToMission, onRemove }: CANWaitlistProps) =
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Lista de Espera CAN ({waitlist.length} passageiros)</CardTitle>
+        <CardTitle>Lista de Espera CAN ({availablePassengers.length} passageiros disponíveis)</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {Object.entries(groupedWaitlist).map(([destino, entries], groupIndex) => {
@@ -145,9 +151,19 @@ const CANWaitlist = ({ waitlist, onAddToMission, onRemove }: CANWaitlistProps) =
                             <p>CPF: {entry.cpf}</p>
                             <p>Peso: {entry.peso}kg | Bagagem: {entry.pesoBagagem + entry.pesoBagagemMao}kg</p>
                             <p>Data de Inscrição: {new Date(entry.dataInscricao).toLocaleDateString('pt-BR')}</p>
+                            {entry.telefone && <p>Telefone: {entry.telefone}</p>}
                           </div>
                         </div>
                         <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onEdit(entry)}
+                            className="bg-blue-50 hover:bg-blue-100 text-blue-700"
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Editar
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
