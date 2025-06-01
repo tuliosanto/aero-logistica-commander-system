@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -96,6 +97,7 @@ const PassengerList = ({ passengers, onPassengersChange, baseAerea }: PassengerL
       destino: passenger.destino,
       peso: passenger.peso.toString(),
       pesoBagagem: passenger.pesoBagagem.toString(),
+      pesoBagagemMao: passenger.pesoBagagemMao.toString(),
       prioridade: passenger.prioridade.toString(),
       responsavelInscricao: passenger.responsavelInscricao || 'O Próprio',
       parentesco: passenger.parentesco || ''
