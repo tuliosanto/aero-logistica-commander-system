@@ -320,7 +320,6 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                     value={formData.nomeGuerra}
                     onChange={(e) => setFormData({...formData, nomeGuerra: e.target.value})}
                     placeholder="Nome de guerra"
-                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -329,7 +328,6 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                     id="nomeCompleto"
                     value={formData.nomeCompleto}
                     onChange={(e) => setFormData({...formData, nomeCompleto: e.target.value})}
-                    required
                   />
                 </div>
               </div>
