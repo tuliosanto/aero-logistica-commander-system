@@ -11,11 +11,14 @@ const Index = () => {
     // Check for existing session
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
+      const user = JSON.parse(savedUser);
+      console.log('Usuario carregado:', user);
+      setCurrentUser(user);
     }
   }, []);
 
   const handleLogin = (user: User) => {
+    console.log('Login realizado:', user);
     setCurrentUser(user);
     localStorage.setItem('currentUser', JSON.stringify(user));
   };

@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle, Users, Settings, LogOut, Plane } from 'lucide-react';
+import { PlusCircle, Users, Settings, LogOut, Plane, UserPlus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Mission } from '../types/Mission';
 import { User } from '../types/User';
@@ -12,6 +11,7 @@ import MissionForm from './MissionForm';
 import MissionList from './MissionList';
 import UserManagement from './UserManagement';
 import BaseConfigComponent from './BaseConfig';
+import CANWaitlist from './CANWaitlist';
 import { useBaseImage } from '../hooks/useBaseImage';
 
 interface DashboardProps {
@@ -23,7 +23,9 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [showMissionForm, setShowMissionForm] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
-  const [activeTab, setActiveTab] = useState(currentUser.perfil === 'Secretario' ? 'waitlist' : 'missions');
+  const [activeTab, setActiveTab] = useState(
+    currentUser.perfil === 'Secretario' ? 'waitlist' : 'missions'
+  );
   const baseImage = useBaseImage(currentUser.baseAerea);
 
   useEffect(() => {
@@ -89,6 +91,12 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
     loadMissions();
   };
 
+  const getTabsCount = () => {
+    if (currentUser.perfil === 'Operador') return 'grid-cols-2';
+    if (currentUser.perfil === 'Secretario') return 'grid-cols-1';
+    return 'grid-cols-4';
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <nav className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
@@ -125,18 +133,24 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
 
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`grid w-full ${currentUser.perfil !== 'Operador' ? 'grid-cols-3' : 'grid-cols-1'} mb-6`}>
-            <TabsTrigger value="missions" className="flex items-center space-x-2">
-              <Plane className="w-4 h-4" />
-              <span>Missões</span>
+          <TabsList className={`grid w-full ${getTabsCount()} mb-6`}>
+            {currentUser.perfil !== 'Secretario' && (
+              <TabsTrigger value="missions" className="flex items-center space-x-2">
+                <Plane className="w-4 h-4" />
+                <span>Missões</span>
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="waitlist" className="flex items-center space-x-2">
+              <UserPlus className="w-4 h-4" />
+              <span>Inscrições CAN</span>
             </TabsTrigger>
-            {currentUser.perfil !== 'Operador' && (
+            {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
               <TabsTrigger value="users" className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
                 <span>Usuários</span>
               </TabsTrigger>
             )}
-            {currentUser.perfil !== 'Operador' && (
+            {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
               <TabsTrigger value="config" className="flex items-center space-x-2">
                 <Settings className="w-4 h-4" />
                 <span>Configurações</span>
@@ -144,51 +158,61 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
             )}
           </TabsList>
 
-          <TabsContent value="missions" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-800">Missões</h2>
-                <p className="text-gray-600">Gerencie as missões do Correio Aéreo Nacional</p>
+          {currentUser.perfil !== 'Secretario' && (
+            <TabsContent value="missions" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-800">Missões</h2>
+                  <p className="text-gray-600">Gerencie as missões do Correio Aéreo Nacional</p>
+                </div>
+                <Button 
+                  onClick={handleCreateMission}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  Nova Missão
+                </Button>
               </div>
-              <Button 
-                onClick={handleCreateMission}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <PlusCircle className="w-4 h-4 mr-2" />
-                Nova Missão
-              </Button>
-            </div>
 
-            {showMissionForm ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    {editingMission ? 'Editar Missão' : 'Nova Missão'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <MissionForm
-                    mission={editingMission}
-                    onSave={handleSaveMission}
-                    onCancel={() => {
-                      setShowMissionForm(false);
-                      setEditingMission(null);
-                    }}
-                    currentUser={currentUser}
-                  />
-                </CardContent>
-              </Card>
-            ) : (
-              <MissionList
-                missions={missions}
-                onEdit={handleEditMission}
-                onDelete={handleDeleteMission}
-                currentUser={currentUser}
-              />
-            )}
+              {showMissionForm ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      {editingMission ? 'Editar Missão' : 'Nova Missão'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MissionForm
+                      mission={editingMission}
+                      onSave={handleSaveMission}
+                      onCancel={() => {
+                        setShowMissionForm(false);
+                        setEditingMission(null);
+                      }}
+                      currentUser={currentUser}
+                    />
+                  </CardContent>
+                </Card>
+              ) : (
+                <MissionList
+                  missions={missions}
+                  onEdit={handleEditMission}
+                  onDelete={handleDeleteMission}
+                  currentUser={currentUser}
+                />
+              )}
+            </TabsContent>
+          )}
+
+          <TabsContent value="waitlist" className="space-y-6">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800">Lista de Espera CAN</h2>
+              <p className="text-gray-600">Gerencie passageiros na lista de espera do Correio Aéreo Nacional</p>
+            </div>
+            <CANWaitlist currentUser={currentUser} />
           </TabsContent>
 
-          {currentUser.perfil !== 'Operador' && (
+          {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
             <TabsContent value="users" className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-gray-800">Usuários</h2>
@@ -198,7 +222,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
             </TabsContent>
           )}
 
-          {currentUser.perfil !== 'Operador' && (
+          {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
             <TabsContent value="config" className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-gray-800">Configurações da Base</h2>
