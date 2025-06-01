@@ -97,23 +97,28 @@ const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
   };
 
   const getPriorityColor = (priority: number) => {
-    switch (priority) {
-      case 1: return 'bg-red-100 text-red-800';
-      case 2: return 'bg-orange-100 text-orange-800';
-      case 3: return 'bg-yellow-100 text-yellow-800';
-      case 4: return 'bg-green-100 text-green-800';
-      case 5: return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+    if (priority <= 3) return 'bg-red-100 text-red-800';
+    if (priority <= 6) return 'bg-orange-100 text-orange-800';
+    if (priority <= 9) return 'bg-yellow-100 text-yellow-800';
+    if (priority <= 12) return 'bg-green-100 text-green-800';
+    return 'bg-blue-100 text-blue-800';
   };
 
   const getPriorityText = (priority: number) => {
     const priorities = {
-      1: 'Urgentíssima',
-      2: 'Urgente',
-      3: 'Prioritária',
-      4: 'Rotina',
-      5: 'A pedido'
+      1: 'Comandante Supremo',
+      2: 'Ministro da Defesa',
+      3: 'Comandante da Aeronáutica',
+      4: 'Oficiais-Generais',
+      5: 'Oficiais Superiores',
+      6: 'Oficiais Intermediários',
+      7: 'Oficiais Subalternos',
+      8: 'Suboficiais e Sargentos',
+      9: 'Cabos e Soldados',
+      10: 'Dependentes de Militares',
+      11: 'Servidores Civis',
+      12: 'Pensionistas',
+      13: 'Pessoas Autorizadas'
     };
     return priorities[priority as keyof typeof priorities] || 'Indefinida';
   };
@@ -177,7 +182,9 @@ const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {waitlistPassengers.map((passenger) => (
+                {waitlistPassengers
+                  .sort((a, b) => a.prioridade - b.prioridade)
+                  .map((passenger) => (
                   <TableRow key={passenger.id}>
                     <TableCell>
                       <div>
@@ -194,7 +201,7 @@ const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
                     </TableCell>
                     <TableCell>
                       <Badge className={getPriorityColor(passenger.prioridade)}>
-                        {getPriorityText(passenger.prioridade)}
+                        {passenger.prioridade} - {getPriorityText(passenger.prioridade)}
                       </Badge>
                     </TableCell>
                     <TableCell>{passenger.responsavelInscricao}</TableCell>

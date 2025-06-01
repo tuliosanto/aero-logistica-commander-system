@@ -8,7 +8,7 @@ export interface CANWaitlistPassenger {
   peso: number;
   pesoBagagem: number;
   pesoBagagemMao: number;
-  prioridade: number;
+  prioridade: number; // 1-13 como nas missões
   responsavelInscricao: string;
   parentesco: string;
   dataInscricao: string;

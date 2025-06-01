@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,8 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { UserPlus, ArrowLeft, Calendar } from 'lucide-react';
 import { Mission, Passenger } from '../types/Mission';
 import { User } from '../types/User';
+import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import PassengerList from './PassengerList';
 import { toast } from '@/hooks/use-toast';
 import { AERODROMOS, getAerodromoByBase } from '../utils/constants';
@@ -29,6 +33,7 @@ const MissionForm = ({
   const [dataVoo, setDataVoo] = useState(mission?.dataVoo || '');
   const [ofrag, setOfrag] = useState(mission?.ofrag || '');
   const [passageiros, setPassageiros] = useState<Passenger[]>(mission?.passageiros || []);
+  const [waitlistPassengers, setWaitlistPassengers] = useState<CANWaitlistPassenger[]>([]);
   
   // Estados para os trechos
   const [origem, setOrigem] = useState('');
@@ -54,7 +59,71 @@ const MissionForm = ({
       setTrecho5(mission.trechos[5] || '');
       setTrecho6(mission.trechos[6] || '');
     }
+
+    // Carregar lista de espera
+    loadWaitlistPassengers();
   }, [currentUser.baseAerea, mission]);
+
+  const loadWaitlistPassengers = () => {
+    const allPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
+    const basePassengers = allPassengers.filter((passenger: CANWaitlistPassenger) => 
+      passenger.baseAerea === currentUser.baseAerea
+    );
+    setWaitlistPassengers(basePassengers);
+  };
+
+  const getFinalDestination = () => {
+    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
+    return trechos.length > 1 ? trechos[trechos.length - 1] : '';
+  };
+
+  const getCompatibleWaitlistPassengers = () => {
+    const finalDestination = getFinalDestination();
+    if (!finalDestination) return [];
+    
+    return waitlistPassengers.filter(passenger => 
+      passenger.destino === finalDestination &&
+      !passageiros.some(p => p.cpf === passenger.cpf)
+    ).sort((a, b) => a.prioridade - b.prioridade);
+  };
+
+  const moveFromWaitlistToMission = (waitlistPassenger: CANWaitlistPassenger) => {
+    const newPassenger: Passenger = {
+      id: Date.now().toString(),
+      posto: waitlistPassenger.posto,
+      nome: waitlistPassenger.nome,
+      cpf: waitlistPassenger.cpf,
+      destino: waitlistPassenger.destino,
+      peso: waitlistPassenger.peso,
+      pesoBagagem: waitlistPassenger.pesoBagagem,
+      pesoBagagemMao: waitlistPassenger.pesoBagagemMao,
+      prioridade: waitlistPassenger.prioridade,
+      responsavelInscricao: waitlistPassenger.responsavelInscricao,
+      parentesco: waitlistPassenger.parentesco,
+      checkedIn: false
+    };
+
+    setPassageiros([...passageiros, newPassenger]);
+    
+    toast({
+      title: "Passageiro adicionado",
+      description: `${waitlistPassenger.posto} ${waitlistPassenger.nome} foi movido da lista de espera para a missão.`,
+    });
+  };
+
+  const moveFromMissionToWaitlist = (passenger: Passenger) => {
+    setPassageiros(passageiros.filter(p => p.id !== passenger.id));
+    
+    toast({
+      title: "Passageiro removido",
+      description: `${passenger.posto} ${passenger.nome} foi removido da missão e retornado à lista de espera.`,
+    });
+  };
+
+  const setTodayDate = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setDataVoo(today);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +187,16 @@ const MissionForm = ({
     const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
     return trechos.join(' - ');
   };
+
+  const getPriorityColor = (priority: number) => {
+    if (priority <= 3) return 'bg-red-100 text-red-800';
+    if (priority <= 6) return 'bg-orange-100 text-orange-800';
+    if (priority <= 9) return 'bg-yellow-100 text-yellow-800';
+    if (priority <= 12) return 'bg-green-100 text-green-800';
+    return 'bg-blue-100 text-blue-800';
+  };
+
+  const compatiblePassengers = getCompatibleWaitlistPassengers();
 
   return (
     <div className="space-y-6">
@@ -191,7 +270,7 @@ const MissionForm = ({
                 <SelectContent>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code} - {aero.name}
+                      {aero.code}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -220,7 +299,7 @@ const MissionForm = ({
                 <SelectContent>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code} - {aero.name}
+                      {aero.code}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -249,7 +328,7 @@ const MissionForm = ({
                 <SelectContent>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code} - {aero.name}
+                      {aero.code}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -278,7 +357,7 @@ const MissionForm = ({
                 <SelectContent>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code} - {aero.name}
+                      {aero.code}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -307,7 +386,7 @@ const MissionForm = ({
                 <SelectContent>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code} - {aero.name}
+                      {aero.code}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -336,7 +415,7 @@ const MissionForm = ({
                 <SelectContent>
                   {AERODROMOS.map(aero => (
                     <SelectItem key={aero.code} value={aero.code}>
-                      {aero.code} - {aero.name}
+                      {aero.code}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -348,12 +427,24 @@ const MissionForm = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="dataVoo">Data do Voo</Label>
-            <Input 
-              id="dataVoo" 
-              type="date" 
-              value={dataVoo} 
-              onChange={e => setDataVoo(e.target.value)} 
-            />
+            <div className="flex gap-2">
+              <Input 
+                id="dataVoo" 
+                type="date" 
+                value={dataVoo} 
+                onChange={e => setDataVoo(e.target.value)} 
+                className="flex-1"
+              />
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={setTodayDate}
+                className="flex items-center gap-1"
+              >
+                <Calendar className="w-4 h-4" />
+                Hoje
+              </Button>
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="ofrag">OFRAG</Label>
@@ -380,6 +471,47 @@ const MissionForm = ({
 
       <Separator />
 
+      {/* Lista de Espera Compatível */}
+      {compatiblePassengers.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5" />
+              Passageiros na Lista de Espera - Destino: {getFinalDestination()}
+              <Badge variant="secondary">{compatiblePassengers.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {compatiblePassengers.map((passenger) => (
+                <div key={passenger.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <p className="font-medium">{passenger.posto} {passenger.nome}</p>
+                      <p className="text-sm text-gray-500">
+                        Peso Total: {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
+                        {passenger.parentesco && ` • ${passenger.parentesco}`}
+                      </p>
+                    </div>
+                    <Badge className={getPriorityColor(passenger.prioridade)}>
+                      Prioridade {passenger.prioridade}
+                    </Badge>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => moveFromWaitlistToMission(passenger)}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <UserPlus className="w-4 h-4 mr-1" />
+                    Adicionar
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
@@ -390,7 +522,12 @@ const MissionForm = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <PassengerList passengers={passageiros} onPassengersChange={setPassageiros} />
+          <PassengerList 
+            passengers={passageiros} 
+            onPassengersChange={setPassageiros}
+            showMoveToWaitlist={true}
+            onMoveToWaitlist={moveFromMissionToWaitlist}
+          />
           
           {passageiros.length > 0 && (
             <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
