@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown, ChevronUp, UserPlus } from 'lucide-react';
 import { User } from '../types/User';
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import { Mission } from '../types/Mission';
@@ -23,6 +25,8 @@ const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWa
   const [waitlistPassengers, setWaitlistPassengers] = useState<CANWaitlistPassenger[]>([]);
   const [compatiblePassengers, setCompatiblePassengers] = useState<CANWaitlistPassenger[]>([]);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [collapsedDestinations, setCollapsedDestinations] = useState<Record<string, boolean>>({});
 
   // Helper function to safely parse trechos
   const parseTrechos = (trechos: string | string[] | undefined): string[] => {
@@ -104,6 +108,8 @@ const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWa
     const allPassengers = [...waitlistPassengers, newPassenger];
     saveWaitlistPassengers(allPassengers);
     
+    setShowAddForm(false);
+    
     toast({
       title: "Passageiro adicionado à lista de espera",
       description: `${passenger.posto} ${passenger.nome} foi adicionado com sucesso.`,
@@ -161,6 +167,13 @@ const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWa
     return 'bg-blue-100 text-blue-800';
   };
 
+  const toggleDestinationCollapse = (destination: string) => {
+    setCollapsedDestinations(prev => ({
+      ...prev,
+      [destination]: !prev[destination]
+    }));
+  };
+
   // Group passengers by destination with colors
   const groupedPassengers = waitlistPassengers.reduce((groups, passenger) => {
     if (!groups[passenger.destino]) {
@@ -184,14 +197,36 @@ const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWa
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Lista de Espera CAN</h2>
-        <p className="text-sm text-gray-600">Base: {currentUser.baseAerea}</p>
+        <div>
+          <h2 className="text-2xl font-bold">Lista de Espera CAN</h2>
+          <p className="text-sm text-gray-600">Base: {currentUser.baseAerea}</p>
+        </div>
+        <Button 
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          <UserPlus className="w-4 h-4 mr-2" />
+          {showAddForm ? 'Cancelar' : 'Adicionar Passageiro'}
+        </Button>
       </div>
+
+      {showAddForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Adicionar Passageiro à Lista de Espera</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CANWaitlistForm 
+              currentUser={currentUser}
+              onSubmit={addToWaitlist}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue="waitlist" className="space-y-4">
         <TabsList>
           <TabsTrigger value="waitlist">Lista de Espera</TabsTrigger>
-          <TabsTrigger value="add">Adicionar Passageiro</TabsTrigger>
           {missions.length > 0 && (
             <TabsTrigger value="allocate">Alocar para Missões</TabsTrigger>
           )}
@@ -202,88 +237,106 @@ const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWa
             Object.entries(groupedPassengers).map(([destination, passengers], index) => {
               const colorClass = destinationColors[index % destinationColors.length];
               const aeroporto = AERODROMOS.find(a => a.code === destination);
+              const isCollapsed = collapsedDestinations[destination];
               
               return (
                 <Card key={destination} className={`border-2 ${colorClass}`}>
-                  <CardHeader>
-                    <CardTitle className="text-lg">
-                      Destino: {destination} - {aeroporto?.name || 'Aeroporto não identificado'}
-                      <Badge className="ml-2" variant="secondary">
-                        {passengers.length} passageiro{passengers.length !== 1 ? 's' : ''}
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Passageiro</TableHead>
-                          <TableHead>CPF</TableHead>
-                          <TableHead>Telefone</TableHead>
-                          <TableHead>Peso Total</TableHead>
-                          <TableHead>Prioridade</TableHead>
-                          <TableHead>Data Inscrição</TableHead>
-                          <TableHead>Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {passengers
-                          .sort((a, b) => {
-                            if (a.prioridade !== b.prioridade) {
-                              return a.prioridade - b.prioridade;
-                            }
-                            return a.posto.localeCompare(b.posto);
-                          })
-                          .map((passenger) => (
-                            <TableRow key={passenger.id}>
-                              <TableCell>
-                                <div>
-                                  <p className="font-medium">{passenger.posto} {passenger.nome}</p>
-                                  {passenger.parentesco && (
-                                    <p className="text-sm text-gray-500">({passenger.parentesco})</p>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <span className="font-mono text-sm">{passenger.cpf}</span>
-                              </TableCell>
-                              <TableCell>
-                                <span className="font-mono text-sm">{passenger.telefone}</span>
-                              </TableCell>
-                              <TableCell>
-                                <div>
-                                  <p className="font-medium">
-                                    {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    PAX: {passenger.peso}kg | Desp: {passenger.pesoBagagem}kg | Mão: {passenger.pesoBagagemMao}kg
-                                  </p>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <PriorityTooltip priority={passenger.prioridade}>
-                                  <Badge className={getPriorityColor(passenger.prioridade)}>
-                                    {passenger.prioridade}
-                                  </Badge>
-                                </PriorityTooltip>
-                              </TableCell>
-                              <TableCell>
-                                {new Date(passenger.dataInscricao).toLocaleDateString('pt-BR')}
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => removeFromWaitlist(passenger.id)}
-                                >
-                                  Remover
-                                </Button>
-                              </TableCell>
+                  <Collapsible>
+                    <CollapsibleTrigger 
+                      className="w-full"
+                      onClick={() => toggleDestinationCollapse(destination)}
+                    >
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center justify-between">
+                          <div className="flex items-center">
+                            Destino: {destination} - {aeroporto?.name || 'Aeroporto não identificado'}
+                            <Badge className="ml-2" variant="secondary">
+                              {passengers.length} passageiro{passengers.length !== 1 ? 's' : ''}
+                            </Badge>
+                          </div>
+                          {isCollapsed ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronUp className="w-4 h-4" />
+                          )}
+                        </CardTitle>
+                      </CardHeader>
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent>
+                      <CardContent>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Passageiro</TableHead>
+                              <TableHead>CPF</TableHead>
+                              <TableHead>Telefone</TableHead>
+                              <TableHead>Peso Total</TableHead>
+                              <TableHead>Prioridade</TableHead>
+                              <TableHead>Data Inscrição</TableHead>
+                              <TableHead>Ações</TableHead>
                             </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
+                          </TableHeader>
+                          <TableBody>
+                            {passengers
+                              .sort((a, b) => {
+                                if (a.prioridade !== b.prioridade) {
+                                  return a.prioridade - b.prioridade;
+                                }
+                                return a.posto.localeCompare(b.posto);
+                              })
+                              .map((passenger) => (
+                                <TableRow key={passenger.id}>
+                                  <TableCell>
+                                    <div>
+                                      <p className="font-medium">{passenger.posto} {passenger.nome}</p>
+                                      {passenger.parentesco && (
+                                        <p className="text-sm text-gray-500">({passenger.parentesco})</p>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="font-mono text-sm">{passenger.cpf}</span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="font-mono text-sm">{passenger.telefone}</span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div>
+                                      <p className="font-medium">
+                                        {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        PAX: {passenger.peso}kg | Desp: {passenger.pesoBagagem}kg | Mão: {passenger.pesoBagagemMao}kg
+                                      </p>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <PriorityTooltip priority={passenger.prioridade}>
+                                      <Badge className={getPriorityColor(passenger.prioridade)}>
+                                        {passenger.prioridade}
+                                      </Badge>
+                                    </PriorityTooltip>
+                                  </TableCell>
+                                  <TableCell>
+                                    {new Date(passenger.dataInscricao).toLocaleDateString('pt-BR')}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => removeFromWaitlist(passenger.id)}
+                                    >
+                                      Remover
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                          </TableBody>
+                        </Table>
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </Card>
               );
             })
@@ -294,13 +347,6 @@ const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWa
               </CardContent>
             </Card>
           )}
-        </TabsContent>
-
-        <TabsContent value="add">
-          <CANWaitlistForm 
-            currentUser={currentUser}
-            onSubmit={addToWaitlist}
-          />
         </TabsContent>
 
         {missions.length > 0 && (

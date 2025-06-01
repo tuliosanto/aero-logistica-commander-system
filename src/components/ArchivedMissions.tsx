@@ -1,41 +1,44 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Edit, Trash2, CheckCircle, ArrowLeft, Printer, Archive, ChevronDown, ChevronUp } from 'lucide-react';
-import { Mission, Passenger } from '../types/Mission';
+import { Trash2, Printer, ChevronDown, ChevronUp, Archive, Undo } from 'lucide-react';
+import { Mission } from '../types/Mission';
 import { User } from '../types/User';
-import { MILITARY_RANKS, PRIORITIES, AERODROMOS } from '../utils/constants';
 import { toast } from '@/hooks/use-toast';
-import PriorityTooltip from './PriorityTooltip';
 
-interface MissionListProps {
-  missions: Mission[];
-  onEdit: (mission: Mission) => void;
-  onDelete: (missionId: string) => void;
+interface ArchivedMissionsProps {
   currentUser: User;
 }
 
-const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListProps) => {
+const ArchivedMissions = ({ currentUser }: ArchivedMissionsProps) => {
+  const [archivedMissions, setArchivedMissions] = useState<Mission[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedAircraft, setSelectedAircraft] = useState('');
-  const [showPassengerList, setShowPassengerList] = useState(false);
-  const [passengers, setPassengers] = useState<Passenger[]>([]);
-  const [editingMissionId, setEditingMissionId] = useState<string | null>(null);
   const [collapsedMissions, setCollapsedMissions] = useState<Record<string, boolean>>({});
 
-  const aircrafts = [...new Set(missions.map(mission => mission.aeronave))];
+  useEffect(() => {
+    loadArchivedMissions();
+  }, [currentUser.baseAerea]);
 
-  const filteredMissions = missions.filter(mission => {
+  const loadArchivedMissions = () => {
+    const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
+    const archived = allMissions.filter((mission: Mission) => 
+      mission.baseAerea === currentUser.baseAerea && mission.isArchived
+    );
+    setArchivedMissions(archived);
+  };
+
+  const aircrafts = [...new Set(archivedMissions.map(mission => mission.aeronave))];
+
+  const filteredMissions = archivedMissions.filter(mission => {
     const searchMatch =
       mission.ofrag.toLowerCase().includes(searchQuery.toLowerCase()) ||
       mission.aeronave.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -54,64 +57,38 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
     }));
   };
 
-  const handleCompleteMission = (missionId: string) => {
-    const updatedMissions = missions.map(mission =>
-      mission.id === missionId ? { ...mission, isCompleted: true } : mission
-    );
-    localStorage.setItem('missions', JSON.stringify(updatedMissions));
-    toast({
-      title: "Missão concluída",
-      description: `OFRAG ${missions.find(m => m.id === missionId)?.ofrag} foi marcada como concluída.`,
-    });
-  };
-
-  const handleArchiveMission = (missionId: string) => {
-    const mission = missions.find(m => m.id === missionId);
+  const handleUnarchiveMission = (missionId: string) => {
+    const mission = archivedMissions.find(m => m.id === missionId);
     if (!mission) return;
 
-    if (confirm(`Tem certeza que deseja arquivar a missão OFRAG ${mission.ofrag}?`)) {
-      // Update mission as archived
-      const updatedMissions = missions.map(m =>
-        m.id === missionId ? { ...m, isArchived: true, archivedAt: new Date().toISOString() } : m
+    if (confirm(`Tem certeza que deseja desarquivar a missão OFRAG ${mission.ofrag}?`)) {
+      const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
+      const updatedMissions = allMissions.map((m: Mission) =>
+        m.id === missionId ? { ...m, isArchived: false, archivedAt: undefined } : m
       );
       localStorage.setItem('missions', JSON.stringify(updatedMissions));
-
-      // Remove allocation from waitlist passengers
-      const waitlistKey = `waitlist_${currentUser.baseAerea}`;
-      const waitlistPassengers = JSON.parse(localStorage.getItem(waitlistKey) || '[]');
-      const updatedWaitlist = waitlistPassengers.map((passenger: any) => 
-        passenger.missionId === missionId 
-          ? { ...passenger, isAllocated: false, missionId: undefined }
-          : passenger
-      );
-      localStorage.setItem(waitlistKey, JSON.stringify(updatedWaitlist));
+      loadArchivedMissions();
       
       toast({
-        title: "Missão arquivada",
-        description: `OFRAG ${mission.ofrag} foi arquivada com sucesso.`,
+        title: "Missão desarquivada",
+        description: `OFRAG ${mission.ofrag} foi desarquivada com sucesso.`,
       });
     }
   };
 
   const handleDeleteMission = (missionId: string) => {
-    const mission = missions.find(m => m.id === missionId);
+    const mission = archivedMissions.find(m => m.id === missionId);
     if (!mission) return;
 
-    if (confirm(`Tem certeza que deseja excluir a missão OFRAG ${mission.ofrag}?`)) {
-      // Remove allocation from waitlist passengers before deleting
-      const waitlistKey = `waitlist_${currentUser.baseAerea}`;
-      const waitlistPassengers = JSON.parse(localStorage.getItem(waitlistKey) || '[]');
-      const updatedWaitlist = waitlistPassengers.map((passenger: any) => 
-        passenger.missionId === missionId 
-          ? { ...passenger, isAllocated: false, missionId: undefined }
-          : passenger
-      );
-      localStorage.setItem(waitlistKey, JSON.stringify(updatedWaitlist));
-
-      onDelete(missionId);
+    if (confirm(`Tem certeza que deseja excluir permanentemente a missão OFRAG ${mission.ofrag}?`)) {
+      const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
+      const updatedMissions = allMissions.filter((m: Mission) => m.id !== missionId);
+      localStorage.setItem('missions', JSON.stringify(updatedMissions));
+      loadArchivedMissions();
+      
       toast({
         title: "Missão excluída",
-        description: `OFRAG ${mission.ofrag} foi excluída com sucesso.`,
+        description: `OFRAG ${mission.ofrag} foi excluída permanentemente.`,
       });
     }
   };
@@ -130,12 +107,23 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
       </tr>
     `).join('');
 
+    const formatTrechos = (trechos: string | string[] | undefined): string => {
+      if (!trechos) return '';
+      if (typeof trechos === 'string') {
+        return trechos.split(',').map(t => t.trim()).join(' - ');
+      }
+      if (Array.isArray(trechos)) {
+        return trechos.map(t => t.trim()).join(' - ');
+      }
+      return String(trechos);
+    };
+
     const trechosFormatted = formatTrechos(mission.trechos);
 
     printWindow.document.write(`
       <html>
         <head>
-          <title>OFRAG ${mission.ofrag}</title>
+          <title>OFRAG ${mission.ofrag} (ARQUIVADA)</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 20px; }
             table { border-collapse: collapse; width: 100%; margin-top: 20px; }
@@ -143,18 +131,21 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
             th { background-color: #f2f2f2; }
             .header { text-align: center; margin-bottom: 20px; }
             .mission-info { margin-bottom: 20px; }
+            .archived-stamp { color: red; font-weight: bold; }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>ORDEM DE VÔO</h1>
+            <h1>ORDEM DE VÔOO</h1>
             <h2>OFRAG ${mission.ofrag}</h2>
+            <p class="archived-stamp">MISSÃO ARQUIVADA</p>
           </div>
           <div class="mission-info">
             <p><strong>Aeronave:</strong> ${mission.aeronave} (${mission.matricula})</p>
             <p><strong>Trechos:</strong> ${trechosFormatted}</p>
             <p><strong>Data do Voo:</strong> ${format(new Date(mission.dataVoo), 'dd/MM/yyyy')}</p>
             <p><strong>Base Aérea:</strong> ${mission.baseAerea}</p>
+            <p><strong>Arquivada em:</strong> ${mission.archivedAt ? format(new Date(mission.archivedAt), 'dd/MM/yyyy \'às\' HH:mm') : ''}</p>
           </div>
           <h3>Lista de Passageiros</h3>
           <table>
@@ -176,24 +167,6 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
     `);
     printWindow.document.close();
     printWindow.print();
-  };
-
-  // Helper function to safely format trechos
-  const formatTrechos = (trechos: string | string[] | undefined): string => {
-    if (!trechos) return '';
-    
-    // If it's already a string, split and rejoin
-    if (typeof trechos === 'string') {
-      return trechos.split(',').map(t => t.trim()).join(' - ');
-    }
-    
-    // If it's an array, join directly
-    if (Array.isArray(trechos)) {
-      return trechos.map(t => t.trim()).join(' - ');
-    }
-    
-    // Fallback
-    return String(trechos);
   };
 
   return (
@@ -226,11 +199,10 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
       {filteredMissions.length > 0 ? (
         <div className="space-y-4">
           {filteredMissions.map((mission) => {
-            const trechosFormatted = formatTrechos(mission.trechos);
             const isCollapsed = collapsedMissions[mission.id];
             
             return (
-              <Card key={mission.id} className={mission.isCompleted ? 'opacity-70 border-green-500' : ''}>
+              <Card key={mission.id} className="opacity-70 border-orange-500">
                 <Collapsible>
                   <CollapsibleTrigger 
                     className="w-full"
@@ -241,12 +213,10 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                         <div className="flex-1 text-left">
                           <CardTitle className="text-xl text-blue-700 flex items-center">
                             OFRAG {mission.ofrag}
-                            {mission.isCompleted && (
-                              <Badge className="ml-2 bg-green-100 text-green-800">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Concluída
-                              </Badge>
-                            )}
+                            <Badge className="ml-2 bg-orange-100 text-orange-800">
+                              <Archive className="w-3 h-3 mr-1" />
+                              Arquivada
+                            </Badge>
                             {isCollapsed ? (
                               <ChevronDown className="w-4 h-4 ml-2" />
                             ) : (
@@ -255,8 +225,10 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                           </CardTitle>
                           <div className="mt-2 space-y-1">
                             <p><strong>Aeronave:</strong> {mission.aeronave} ({mission.matricula})</p>
-                            <p><strong>Trechos:</strong> {trechosFormatted}</p>
                             <p><strong>Data do Voo:</strong> {format(new Date(mission.dataVoo), 'dd/MM/yyyy')}</p>
+                            {mission.archivedAt && (
+                              <p><strong>Arquivada em:</strong> {format(new Date(mission.archivedAt), 'dd/MM/yyyy \'às\' HH:mm')}</p>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -278,40 +250,15 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                             Imprimir
                           </Button>
                           
-                          {!mission.isCompleted && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => onEdit(mission)}
-                                className="text-blue-600 hover:text-blue-700"
-                              >
-                                <Edit className="w-4 h-4 mr-2" />
-                                Editar
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleCompleteMission(mission.id)}
-                                className="text-green-600 hover:text-green-700"
-                              >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Concluir
-                              </Button>
-                            </>
-                          )}
-                          
-                          {mission.isCompleted && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleArchiveMission(mission.id)}
-                              className="text-orange-600 hover:text-orange-700"
-                            >
-                              <Archive className="w-4 h-4 mr-2" />
-                              Arquivar
-                            </Button>
-                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUnarchiveMission(mission.id)}
+                            className="text-green-600 hover:text-green-700"
+                          >
+                            <Undo className="w-4 h-4 mr-2" />
+                            Desarquivar
+                          </Button>
                           
                           <Button
                             size="sm"
@@ -374,7 +321,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
       ) : (
         <Card>
           <CardContent className="text-center py-8">
-            <p className="text-gray-500">Nenhuma missão encontrada.</p>
+            <p className="text-gray-500">Nenhuma missão arquivada encontrada.</p>
           </CardContent>
         </Card>
       )}
@@ -382,4 +329,4 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
   );
 };
 
-export default MissionList;
+export default ArchivedMissions;
