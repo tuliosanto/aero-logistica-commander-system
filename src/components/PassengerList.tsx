@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trash2, UserCheck, UserX, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Trash2, UserCheck, UserX, CheckCircle, ArrowLeft, UserPlus } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Passenger } from '../types/Mission';
 import { getRankOrder } from '../utils/constants';
@@ -15,6 +14,8 @@ interface PassengerListProps {
   showMoveToWaitlist?: boolean;
   onMoveToWaitlist?: (passenger: Passenger) => void;
   onComplete?: () => void;
+  showAddPassengerButton?: boolean;
+  onAddPassenger?: () => void;
 }
 
 const PassengerList = ({ 
@@ -22,7 +23,9 @@ const PassengerList = ({
   onPassengersChange, 
   showMoveToWaitlist = false,
   onMoveToWaitlist,
-  onComplete
+  onComplete,
+  showAddPassengerButton = false,
+  onAddPassenger
 }: PassengerListProps) => {
   // Sort passengers by priority first, then by military rank
   const sortedPassengers = [...passengers].sort((a, b) => {
@@ -63,7 +66,15 @@ const PassengerList = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Passageiros</CardTitle>
+          <CardTitle className="flex justify-between items-center">
+            <span>Lista de Passageiros</span>
+            {showAddPassengerButton && onAddPassenger && (
+              <Button onClick={onAddPassenger} className="bg-blue-600 hover:bg-blue-700">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Novo Passageiro
+              </Button>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-gray-500 text-center py-4">Nenhum passageiro adicionado ainda.</p>
@@ -77,31 +88,39 @@ const PassengerList = ({
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>Lista de Passageiros ({passengers.length})</span>
-          {onComplete && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button className="bg-green-600 hover:bg-green-700">
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Concluir Missão
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Concluir Missão</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza que deseja concluir esta missão? Esta ação não pode ser desfeita.
-                    Os passageiros da lista de espera serão removidos permanentemente.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={onComplete} className="bg-green-600 hover:bg-green-700">
-                    Concluir
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+          <div className="flex gap-2">
+            {showAddPassengerButton && onAddPassenger && (
+              <Button onClick={onAddPassenger} className="bg-blue-600 hover:bg-blue-700">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Novo Passageiro
+              </Button>
+            )}
+            {onComplete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="bg-green-600 hover:bg-green-700">
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Concluir Missão
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Concluir Missão</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza que deseja concluir esta missão? Esta ação não pode ser desfeita.
+                      Os passageiros da lista de espera serão removidos permanentemente.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={onComplete} className="bg-green-600 hover:bg-green-700">
+                      Concluir
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
