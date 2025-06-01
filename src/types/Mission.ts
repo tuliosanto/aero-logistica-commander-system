@@ -22,4 +22,6 @@ export interface Passenger {
   pesoBagagemMao: number;
   prioridade: number;
   checkedIn?: boolean;
+  responsavelInscricao: string;
+  parentesco: string;
 }

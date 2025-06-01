@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +37,6 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
 
     const totalPaxWeight = mission.passageiros.reduce((sum, p) => sum + p.peso, 0);
     const totalBaggageWeight = mission.passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0);
-    const totalWeight = totalPaxWeight + totalBaggageWeight;
 
     const reportContent = `
       <!DOCTYPE html>
@@ -44,81 +44,79 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
         <head>
           <title>Relação de Passageiros - ${mission.ofrag}</title>
           <style>
-            @page { margin: 15mm; size: A4; }
+            @page { margin: 10mm; size: A4; }
             body { 
               font-family: Arial, sans-serif; 
               margin: 0; 
               padding: 0;
-              font-size: 11px;
-              line-height: 1.2;
+              font-size: 10px;
+              line-height: 1.1;
             }
             .header { 
               text-align: center; 
-              margin-bottom: 15px;
+              margin-bottom: 10px;
               font-weight: bold;
-              font-size: 12px;
+              border: 2px solid black;
+              padding: 5px;
             }
             .info-section {
               display: flex;
-              justify-content: space-between;
-              margin-bottom: 15px;
-              gap: 10px;
+              margin-bottom: 10px;
+              gap: 0;
             }
-            .info-box {
+            .aviao-box {
               border: 2px solid black;
+              padding: 10px 5px;
+              writing-mode: vertical-lr;
+              text-orientation: mixed;
+              text-align: center;
+              font-weight: bold;
+              width: 50px;
+              background-color: #f5f5f5;
+            }
+            .info-group {
+              border: 2px solid black;
+              border-left: 0;
               padding: 5px;
               flex: 1;
+              font-size: 9px;
             }
-            .info-box-small {
-              border: 2px solid black;
-              padding: 5px;
-              min-width: 150px;
+            .info-group:last-child {
+              max-width: 200px;
             }
             .info-row {
-              display: flex;
               margin-bottom: 3px;
             }
             .info-label {
               font-weight: bold;
-              margin-right: 5px;
+              display: inline-block;
+              min-width: 80px;
             }
             table { 
               width: 100%; 
               border-collapse: collapse; 
               margin-bottom: 10px;
-              font-size: 10px;
+              font-size: 8px;
             }
             th, td { 
               border: 1px solid black; 
-              padding: 3px 5px; 
+              padding: 2px 4px; 
               text-align: center;
               vertical-align: middle;
             }
             th { 
               background-color: #f0f0f0; 
               font-weight: bold;
-              font-size: 9px;
+              font-size: 7px;
             }
-            .nome-col { text-align: left; }
-            .cpf-col { font-family: monospace; }
+            .nome-col { text-align: left; max-width: 150px; }
+            .cpf-col { font-family: monospace; font-size: 7px; }
             .footer-info {
               display: flex;
               justify-content: space-between;
-              margin-top: 10px;
-              font-size: 10px;
-            }
-            .signature-section {
-              margin-top: 20px;
-              font-size: 10px;
-            }
-            .aviao-vertical {
-              writing-mode: vertical-lr;
-              text-orientation: mixed;
-              border: 2px solid black;
-              padding: 20px 5px;
-              text-align: center;
+              margin-top: 5px;
+              font-size: 9px;
               font-weight: bold;
-              width: 30px;
             }
             @media print { 
               body { margin: 0; } 
@@ -135,8 +133,8 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
           </div>
           
           <div class="info-section">
-            <div class="aviao-vertical">AVIÃO</div>
-            <div class="info-box">
+            <div class="aviao-box">AVIÃO</div>
+            <div class="info-group">
               <div class="info-row">
                 <span class="info-label">MODELO:</span>
                 <span>${mission.aeronave}</span>
@@ -146,7 +144,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                 <span>${mission.matricula}</span>
               </div>
             </div>
-            <div class="info-box">
+            <div class="info-group">
               <div class="info-row">
                 <span class="info-label">TERMINAL:</span>
                 <span>POSTO CAN SANTA MARIA</span>
@@ -156,7 +154,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                 <span>${mission.trechos.join(' – ')}</span>
               </div>
             </div>
-            <div class="info-box-small">
+            <div class="info-group">
               <div class="info-row">
                 <span class="info-label">DATA DO VOO:</span>
                 <span>${new Date(mission.dataVoo).toLocaleDateString('pt-BR')}</span>
@@ -193,21 +191,21 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
             <tbody>
               ${sortedPassengers.map((passenger, index) => `
                 <tr>
-                  <td>${index + 26}</td>
+                  <td>${index + 1}</td>
                   <td class="nome-col">${passenger.posto} ${passenger.nome}</td>
-                  <td class="cpf-col">${passenger.cpf.replace(/\D/g, '')}</td>
+                  <td class="cpf-col">${passenger.cpf}</td>
                   <td>${passenger.destino}</td>
                   <td>${passenger.prioridade}</td>
                   <td>${passenger.peso}</td>
                   <td>${passenger.pesoBagagem + passenger.pesoBagagemMao}</td>
                   <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>${passenger.responsavelInscricao || ''}</td>
+                  <td>${passenger.parentesco || ''}</td>
                 </tr>
               `).join('')}
               ${Array.from({ length: Math.max(0, 25 - sortedPassengers.length) }, (_, i) => `
                 <tr>
-                  <td>${26 + sortedPassengers.length + i}</td>
+                  <td>${sortedPassengers.length + i + 1}</td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -223,30 +221,18 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
           </table>
 
           <div class="footer-info">
-            <div>
-              <strong>CHEFE DO PCAN-SM:</strong> João Marcos Aguirre - Cap R1
-            </div>
-            <div>
-              <strong>SOMA</strong>&nbsp;&nbsp;&nbsp;&nbsp;${totalPaxWeight}&nbsp;&nbsp;&nbsp;&nbsp;${totalBaggageWeight}
-            </div>
-            <div>
-              <strong>CMT ANV:</strong>
-            </div>
+            <div>CHEFE DO PCAN-SM: João Marcos Aguirre - Cap R1</div>
+            <div>SOMA&nbsp;&nbsp;&nbsp;&nbsp;${totalPaxWeight}&nbsp;&nbsp;&nbsp;&nbsp;${totalBaggageWeight}</div>
+            <div>CMT ANV:</div>
           </div>
 
           <div class="footer-info">
-            <div>
-              <strong>DESPACHANTE:</strong>
-            </div>
-            <div>
-              <strong>TOTAL:</strong>&nbsp;&nbsp;&nbsp;&nbsp;${totalWeight}
-            </div>
-            <div>
-              <strong>MEC ANV:</strong>
-            </div>
+            <div>DESPACHANTE: 1S ADELINO</div>
+            <div>TOTAL:&nbsp;&nbsp;&nbsp;&nbsp;${totalPaxWeight + totalBaggageWeight}</div>
+            <div>MEC ANV:</div>
           </div>
 
-          <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Imprimir</button>
+          <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer;">Imprimir</button>
         </body>
       </html>
     `;
@@ -272,11 +258,11 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle className="flex items-center space-x-3">
-                  <span className="text-2xl font-bold text-green-700">{mission.aeronave}</span>
+                  <span className="text-2xl font-bold text-blue-700">{mission.aeronave}</span>
                   <Badge variant="outline" className="bg-blue-50">
                     {mission.matricula}
                   </Badge>
-                  <Badge variant="outline" className="bg-orange-50 text-orange-700 font-semibold">
+                  <Badge variant="outline" className="bg-yellow-50 text-yellow-700 font-semibold">
                     {new Date(mission.dataVoo).toLocaleDateString('pt-BR')}
                   </Badge>
                 </CardTitle>

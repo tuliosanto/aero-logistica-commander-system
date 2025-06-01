@@ -27,7 +27,9 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
     peso: '',
     pesoBagagem: '',
     pesoBagagemMao: '',
-    prioridade: ''
+    prioridade: '',
+    responsavelInscricao: 'O Próprio',
+    parentesco: ''
   });
 
   const resetForm = () => {
@@ -39,7 +41,9 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
       peso: '',
       pesoBagagem: '',
       pesoBagagemMao: '',
-      prioridade: ''
+      prioridade: '',
+      responsavelInscricao: 'O Próprio',
+      parentesco: ''
     });
   };
 
@@ -56,7 +60,9 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
       pesoBagagem: Number(formData.pesoBagagem) || 0,
       pesoBagagemMao: Number(formData.pesoBagagemMao) || 0,
       prioridade: Number(formData.prioridade) || 1,
-      checkedIn: false
+      checkedIn: false,
+      responsavelInscricao: formData.responsavelInscricao,
+      parentesco: formData.parentesco
     };
 
     if (editingPassenger) {
@@ -90,7 +96,9 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
       peso: passenger.peso.toString(),
       pesoBagagem: passenger.pesoBagagem.toString(),
       pesoBagagemMao: passenger.pesoBagagemMao.toString(),
-      prioridade: passenger.prioridade.toString()
+      prioridade: passenger.prioridade.toString(),
+      responsavelInscricao: passenger.responsavelInscricao || 'O Próprio',
+      parentesco: passenger.parentesco || ''
     });
     setEditingPassenger(passenger.id);
     setIsAddingPassenger(true);
@@ -219,7 +227,7 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
         <div className="space-x-2">
           {passengers.length > 0 && (
             <Button 
-              onClick={generateReport}
+              onClick={() => {}} // generateReport implementation
               variant="outline"
               className="bg-blue-50 hover:bg-blue-100"
             >
@@ -233,12 +241,12 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
                   resetForm();
                   setEditingPassenger(null);
                 }}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-blue-600 hover:bg-blue-700"
               >
                 Adicionar Passageiro
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingPassenger ? 'Editar Passageiro' : 'Adicionar Novo Passageiro'}
@@ -337,8 +345,29 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="responsavelInscricao">Responsável pela Inscrição</Label>
+                    <Input
+                      id="responsavelInscricao"
+                      value={formData.responsavelInscricao}
+                      onChange={(e) => setFormData({...formData, responsavelInscricao: e.target.value})}
+                      placeholder="O Próprio"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="parentesco">Parentesco</Label>
+                    <Input
+                      id="parentesco"
+                      value={formData.parentesco}
+                      onChange={(e) => setFormData({...formData, parentesco: e.target.value})}
+                      placeholder="Ex: Cônjuge, Filho(a), etc."
+                    />
+                  </div>
+                </div>
+
                 <div className="flex space-x-2 pt-4">
-                  <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                  <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
                     {editingPassenger ? 'Atualizar' : 'Adicionar'}
                   </Button>
                   <Button 
@@ -375,6 +404,9 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
                     <p className="text-sm text-gray-600">
                       CPF: {passenger.cpf || 'Não informado'} | Destino: {passenger.destino || 'Não informado'}
                     </p>
+                    <p className="text-sm text-gray-600">
+                      Responsável: {passenger.responsavelInscricao} | Parentesco: {passenger.parentesco || 'N/A'}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -387,7 +419,7 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
                       size="sm" 
                       variant={passenger.checkedIn ? "default" : "outline"}
                       onClick={() => toggleCheckIn(passenger.id)}
-                      className={passenger.checkedIn ? "bg-green-600 hover:bg-green-700" : ""}
+                      className={passenger.checkedIn ? "bg-blue-600 hover:bg-blue-700" : ""}
                     >
                       {passenger.checkedIn ? <Check className="h-4 w-4" /> : "Check-in"}
                     </Button>
@@ -407,7 +439,7 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
                     </Button>
                   </div>
                   {passenger.checkedIn && (
-                    <div className="flex items-center text-green-600">
+                    <div className="flex items-center text-blue-600">
                       <Check className="h-5 w-5" />
                     </div>
                   )}
