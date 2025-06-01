@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { CheckCircle } from 'lucide-react';
 import { Mission } from '../types/Mission';
 import { User } from '../types/User';
 import { toast } from '@/hooks/use-toast';
@@ -10,16 +12,27 @@ interface MissionListProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
   onDelete: (missionId: string) => void;
+  onComplete?: (missionId: string) => void;
   currentUser: User;
 }
 
-const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListProps) => {
+const MissionList = ({ missions, onEdit, onDelete, onComplete, currentUser }: MissionListProps) => {
   const handleDelete = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja excluir a missão OFRAG ${mission.ofrag}?`)) {
       onDelete(mission.id);
       toast({
         title: "Missão excluída",
         description: `OFRAG ${mission.ofrag} foi excluída com sucesso.`,
+      });
+    }
+  };
+
+  const handleComplete = (mission: Mission) => {
+    if (onComplete) {
+      onComplete(mission.id);
+      toast({
+        title: "Missão concluída",
+        description: `OFRAG ${mission.ofrag} foi concluída com sucesso.`,
       });
     }
   };
@@ -46,11 +59,13 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
     const reportWindow = window.open('', '_blank');
     if (!reportWindow) return;
 
+    // Sort passengers by priority first, then by military rank
     const sortedPassengers = [...mission.passageiros].sort((a, b) => {
       if (a.prioridade !== b.prioridade) {
         return a.prioridade - b.prioridade;
       }
-      return 0;
+      // If same priority, sort by military rank (you can customize this order)
+      return a.posto.localeCompare(b.posto);
     });
 
     const totalPaxWeight = mission.passageiros.reduce((sum, p) => sum + p.peso, 0);
@@ -693,32 +708,68 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                   OFRAG {mission.ofrag}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {mission.trechos}
+                  {mission.trechos.split(',').map(trecho => trecho.trim()).join(' - ')}
                 </p>
               </div>
-              <div className="flex space-x-2">
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => generateMissionReport(mission)}
-                  className="bg-blue-50 hover:bg-blue-100"
-                >
-                  Visualizar Impressão
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => onEdit(mission)}
-                >
-                  Editar
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="destructive"
-                  onClick={() => handleDelete(mission)}
-                >
-                  Excluir
-                </Button>
+              <div className="flex flex-col space-y-2">
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => generateMissionReport(mission)}
+                    className="bg-blue-50 hover:bg-blue-100"
+                  >
+                    Visualizar Impressão
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => onEdit(mission)}
+                  >
+                    Editar
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => handleDelete(mission)}
+                  >
+                    Excluir
+                  </Button>
+                </div>
+                {onComplete && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        className="bg-green-600 hover:bg-green-700 w-full"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Concluir Missão
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Concluir Missão</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja concluir esta missão? Esta ação irá:
+                          <br />• Arquivar a missão e todos os seus dados
+                          <br />• Remover permanentemente os passageiros da lista de espera que foram incluídos
+                          <br /><br />
+                          Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={() => handleComplete(mission)} 
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Sim, Concluir Missão
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </div>
           </CardHeader>

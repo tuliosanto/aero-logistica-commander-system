@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PlusCircle, Edit2, Trash2, Check, X, ArrowLeft, CheckCircle } from 'lucide-react';
+import { PlusCircle, Edit2, Trash2, Check, X, ArrowLeft } from 'lucide-react';
 import { Passenger } from '../types/Mission';
 import { MILITARY_RANKS, PRIORITIES, AERODROMOS } from '../utils/constants';
 import { toast } from '@/hooks/use-toast';
@@ -19,15 +17,13 @@ interface PassengerListProps {
   onPassengersChange: (passengers: Passenger[]) => void;
   showMoveToWaitlist?: boolean;
   onMoveToWaitlist?: (passenger: Passenger) => void;
-  onComplete?: () => void;
 }
 
 const PassengerList = ({ 
   passengers, 
   onPassengersChange, 
   showMoveToWaitlist = false, 
-  onMoveToWaitlist,
-  onComplete 
+  onMoveToWaitlist
 }: PassengerListProps) => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -36,6 +32,7 @@ const PassengerList = ({
   const [posto, setPosto] = useState('');
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
+  const [telefone, setTelefone] = useState('');
   const [destino, setDestino] = useState('');
   const [peso, setPeso] = useState(70);
   const [pesoBagagem, setPesoBagagem] = useState(0);
@@ -44,13 +41,20 @@ const PassengerList = ({
   const [responsavelInscricao, setResponsavelInscricao] = useState('');
   const [parentesco, setParentesco] = useState('');
 
-  // Sort passengers by priority
-  const sortedPassengers = passengers.sort((a, b) => a.prioridade - b.prioridade);
+  // Sort passengers by priority first, then by military rank
+  const sortedPassengers = passengers.sort((a, b) => {
+    if (a.prioridade !== b.prioridade) {
+      return a.prioridade - b.prioridade;
+    }
+    // If same priority, sort by military rank
+    return a.posto.localeCompare(b.posto);
+  });
 
   const resetForm = () => {
     setPosto('');
     setNome('');
     setCpf('');
+    setTelefone('');
     setDestino('');
     setPeso(70);
     setPesoBagagem(0);
@@ -65,6 +69,7 @@ const PassengerList = ({
     setPosto(passenger.posto);
     setNome(passenger.nome);
     setCpf(passenger.cpf);
+    setTelefone(passenger.telefone || '');
     setDestino(passenger.destino);
     setPeso(passenger.peso);
     setPesoBagagem(passenger.pesoBagagem);
@@ -85,6 +90,7 @@ const PassengerList = ({
             posto,
             nome,
             cpf,
+            telefone,
             destino,
             peso,
             pesoBagagem,
@@ -113,6 +119,7 @@ const PassengerList = ({
       posto,
       nome,
       cpf,
+      telefone,
       destino,
       peso,
       pesoBagagem,
@@ -164,6 +171,19 @@ const PassengerList = ({
     setCpf(formatted);
   };
 
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 10) {
+      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value);
+    setTelefone(formatted);
+  };
+
   const getPriorityColor = (priority: number) => {
     if (priority <= 3) return 'bg-red-100 text-red-800';
     if (priority <= 6) return 'bg-orange-100 text-orange-800';
@@ -208,7 +228,7 @@ const PassengerList = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="cpf">CPF</Label>
                   <Input 
@@ -217,6 +237,18 @@ const PassengerList = ({
                     onChange={handleCPFChange}
                     placeholder="000.000.000-00"
                     maxLength={14}
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="telefone">Telefone para Contato</Label>
+                  <Input 
+                    id="telefone" 
+                    value={telefone} 
+                    onChange={handlePhoneChange}
+                    placeholder="(11) 99999-9999"
+                    maxLength={15}
                     required 
                   />
                 </div>
@@ -329,44 +361,14 @@ const PassengerList = ({
       )}
 
       <div className="flex justify-between items-center">
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => setShowForm(true)} 
-            className="bg-green-600 hover:bg-green-700"
-            disabled={showForm}
-          >
-            <PlusCircle className="w-4 h-4 mr-2" />
-            Adicionar Passageiro
-          </Button>
-          {onComplete && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button className="bg-green-600 hover:bg-green-700">
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Concluir Missão
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Concluir Missão</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza que deseja concluir esta missão? Esta ação irá:
-                    <br />• Arquivar a missão e todos os seus dados
-                    <br />• Remover permanentemente os passageiros da lista de espera que foram incluídos
-                    <br /><br />
-                    Esta ação não pode ser desfeita.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={onComplete} className="bg-green-600 hover:bg-green-700">
-                    Sim, Concluir Missão
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
-        </div>
+        <Button 
+          onClick={() => setShowForm(true)} 
+          className="bg-green-600 hover:bg-green-700"
+          disabled={showForm}
+        >
+          <PlusCircle className="w-4 h-4 mr-2" />
+          Adicionar Passageiro
+        </Button>
       </div>
 
       {sortedPassengers.length > 0 ? (
@@ -378,6 +380,7 @@ const PassengerList = ({
                   <TableHead>Check-in</TableHead>
                   <TableHead>Passageiro</TableHead>
                   <TableHead>CPF</TableHead>
+                  <TableHead>Telefone</TableHead>
                   <TableHead>Destino</TableHead>
                   <TableHead>Peso Total</TableHead>
                   <TableHead>Prioridade</TableHead>
@@ -439,6 +442,18 @@ const PassengerList = ({
                         />
                       ) : (
                         <span className="font-mono text-sm">{passenger.cpf}</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {editingId === passenger.id ? (
+                        <Input 
+                          value={telefone} 
+                          onChange={handlePhoneChange}
+                          className="w-32"
+                          maxLength={15}
+                        />
+                      ) : (
+                        <span className="font-mono text-sm">{passenger.telefone}</span>
                       )}
                     </TableCell>
                     <TableCell>
