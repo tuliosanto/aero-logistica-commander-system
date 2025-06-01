@@ -336,7 +336,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="baseAerea">Base Aérea *</Label>
+                  <Label htmlFor="baseAerea">Base Aérea</Label>
                   <Select 
                     value={formData.baseAerea} 
                     onValueChange={(value) => setFormData({...formData, baseAerea: value})}
