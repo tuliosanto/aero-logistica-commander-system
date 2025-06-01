@@ -307,62 +307,62 @@ const MissionForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho1">Trecho 1 (Opcional)</Label>
+              <Label htmlFor="trecho1">Trecho 1</Label>
               <Input 
                 id="trecho1" 
                 value={trecho1} 
                 onChange={e => setTrecho1(e.target.value.toUpperCase())} 
-                placeholder="Ex: SBGL, SBBR, etc."
+                placeholder="SB(XX)"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho2">Trecho 2 (Opcional)</Label>
+              <Label htmlFor="trecho2">Trecho 2</Label>
               <Input 
                 id="trecho2" 
                 value={trecho2} 
                 onChange={e => setTrecho2(e.target.value.toUpperCase())} 
-                placeholder="Ex: SBGL, SBBR, etc."
+                placeholder="SB(XX)"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho3">Trecho 3 (Opcional)</Label>
+              <Label htmlFor="trecho3">Trecho 3</Label>
               <Input 
                 id="trecho3" 
                 value={trecho3} 
                 onChange={e => setTrecho3(e.target.value.toUpperCase())} 
-                placeholder="Ex: SBGL, SBBR, etc."
+                placeholder="SB(XX)"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho4">Trecho 4 (Opcional)</Label>
+              <Label htmlFor="trecho4">Trecho 4</Label>
               <Input 
                 id="trecho4" 
                 value={trecho4} 
                 onChange={e => setTrecho4(e.target.value.toUpperCase())} 
-                placeholder="Ex: SBGL, SBBR, etc."
+                placeholder="SB(XX)"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho5">Trecho 5 (Opcional)</Label>
+              <Label htmlFor="trecho5">Trecho 5</Label>
               <Input 
                 id="trecho5" 
                 value={trecho5} 
                 onChange={e => setTrecho5(e.target.value.toUpperCase())} 
-                placeholder="Ex: SBGL, SBBR, etc."
+                placeholder="SB(XX)"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trecho6">Trecho 6 (Opcional)</Label>
+              <Label htmlFor="trecho6">Trecho 6</Label>
               <Input 
                 id="trecho6" 
                 value={trecho6} 
                 onChange={e => setTrecho6(e.target.value.toUpperCase())} 
-                placeholder="Ex: SBGL, SBBR, etc."
+                placeholder="SB(XX)"
               />
             </div>
           </div>
