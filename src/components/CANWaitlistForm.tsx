@@ -22,11 +22,11 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
   const [cpf, setCpf] = useState(passenger?.cpf || '');
   const [telefone, setTelefone] = useState(passenger?.telefone || '');
   const [destino, setDestino] = useState(passenger?.destino || '');
-  const [peso, setPeso] = useState(passenger?.peso || 70);
-  const [pesoBagagem, setPesoBagagem] = useState(passenger?.pesoBagagem || 0);
+  const [peso, setPeso] = useState(passenger?.peso || '');
+  const [pesoBagagem, setPesoBagagem] = useState(passenger?.pesoBagagem || '');
   const [pesoBagagemMao, setPesoBagagemMao] = useState(passenger?.pesoBagagemMao || 0);
   const [prioridade, setPrioridade] = useState(passenger?.prioridade || 13);
-  const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || '');
+  const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || 'O PRÓPRIO');
   const [parentesco, setParentesco] = useState(passenger?.parentesco || '');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -119,7 +119,6 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
             onChange={handleTelefoneChange}
             placeholder="(11) 99999-9999"
             maxLength={15}
-            required 
           />
         </div>
       </div>
@@ -149,7 +148,6 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
             value={peso} 
             onChange={e => setPeso(Number(e.target.value))} 
             min="1"
-            required 
           />
         </div>
 
@@ -202,7 +200,6 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
             value={responsavelInscricao} 
             onChange={e => setResponsavelInscricao(e.target.value)} 
             placeholder="Nome do responsável"
-            required 
           />
         </div>
 
