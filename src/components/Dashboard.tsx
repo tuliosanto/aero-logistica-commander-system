@@ -13,100 +13,83 @@ import UserManagement from './UserManagement';
 import BaseConfigComponent from './BaseConfig';
 import CANWaitlist from './CANWaitlist';
 import { useBaseImage } from '../hooks/useBaseImage';
-
 interface DashboardProps {
   currentUser: User;
   onLogout: () => void;
 }
-
-const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
+const Dashboard = ({
+  currentUser,
+  onLogout
+}: DashboardProps) => {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [showMissionForm, setShowMissionForm] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
-  const [activeTab, setActiveTab] = useState(
-    currentUser.perfil === 'Secretario' ? 'waitlist' : 'missions'
-  );
+  const [activeTab, setActiveTab] = useState(currentUser.perfil === 'Secretario' ? 'waitlist' : 'missions');
   const baseImage = useBaseImage(currentUser.baseAerea);
-
   useEffect(() => {
     loadMissions();
   }, [currentUser.baseAerea]);
-
   const loadMissions = () => {
     const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
     // Filtrar missões apenas da base aérea do usuário logado
     const baseMissions = allMissions.filter((mission: Mission) => mission.baseAerea === currentUser.baseAerea);
     setMissions(baseMissions);
   };
-
   const handleCreateMission = () => {
     setEditingMission(null);
     setShowMissionForm(true);
   };
-
   const handleEditMission = (mission: Mission) => {
     setEditingMission(mission);
     setShowMissionForm(true);
   };
-
   const handleSaveMission = (missionData: Mission) => {
     const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
-    
     if (editingMission) {
-      const updatedMissions = allMissions.map((m: Mission) =>
-        m.id === editingMission.id ? { ...missionData, id: editingMission.id, createdAt: editingMission.createdAt } : m
-      );
+      const updatedMissions = allMissions.map((m: Mission) => m.id === editingMission.id ? {
+        ...missionData,
+        id: editingMission.id,
+        createdAt: editingMission.createdAt
+      } : m);
       localStorage.setItem('missions', JSON.stringify(updatedMissions));
-      
       toast({
         title: "Missão atualizada",
-        description: `OFRAG ${missionData.ofrag} foi atualizada com sucesso.`,
+        description: `OFRAG ${missionData.ofrag} foi atualizada com sucesso.`
       });
     } else {
       const newMission: Mission = {
         ...missionData,
         id: Date.now().toString(),
         createdAt: new Date().toISOString(),
-        baseAerea: currentUser.baseAerea,
+        baseAerea: currentUser.baseAerea
       };
-      
       allMissions.push(newMission);
       localStorage.setItem('missions', JSON.stringify(allMissions));
-      
       toast({
         title: "Missão criada",
-        description: `OFRAG ${missionData.ofrag} foi criada com sucesso.`,
+        description: `OFRAG ${missionData.ofrag} foi criada com sucesso.`
       });
     }
-    
     loadMissions();
     setShowMissionForm(false);
     setEditingMission(null);
   };
-
   const handleDeleteMission = (missionId: string) => {
     const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
     const updatedMissions = allMissions.filter((m: Mission) => m.id !== missionId);
     localStorage.setItem('missions', JSON.stringify(updatedMissions));
     loadMissions();
   };
-
   const getTabsCount = () => {
     if (currentUser.perfil === 'Operador') return 'grid-cols-2';
     if (currentUser.perfil === 'Secretario') return 'grid-cols-1';
     return 'grid-cols-4';
   };
-
-  return (
-    <div className="min-h-screen bg-slate-50">
+  return <div className="min-h-screen bg-slate-50">
       <nav className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <img 
-              src={baseImage} 
-              alt={`Logo da ${currentUser.baseAerea}`}
-              className="h-8 w-8 object-contain"
-            />
+            <img src={baseImage} alt={`Logo da ${currentUser.baseAerea}`} className="h-8 w-8 object-contain" />
             <h1 className="text-xl font-bold text-blue-700">Sistema de Gerenciamento de Passageiros</h1>
           </div>
           <div className="flex items-center space-x-4">
@@ -118,12 +101,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
                 {currentUser.baseAerea} - {currentUser.perfil}
               </p>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onLogout}
-              className="text-gray-600 hover:text-gray-800"
-            >
+            <Button variant="outline" size="sm" onClick={onLogout} className="text-gray-600 hover:text-gray-800">
               <LogOut className="w-4 h-4 mr-2" />
               Sair
             </Button>
@@ -134,107 +112,76 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className={`grid w-full ${getTabsCount()} mb-6`}>
-            {currentUser.perfil !== 'Secretario' && (
-              <TabsTrigger value="missions" className="flex items-center space-x-2">
+            {currentUser.perfil !== 'Secretario' && <TabsTrigger value="missions" className="flex items-center space-x-2">
                 <Plane className="w-4 h-4" />
                 <span>Missões</span>
-              </TabsTrigger>
-            )}
+              </TabsTrigger>}
             <TabsTrigger value="waitlist" className="flex items-center space-x-2">
               <UserPlus className="w-4 h-4" />
               <span>Inscrições CAN</span>
             </TabsTrigger>
-            {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
-              <TabsTrigger value="users" className="flex items-center space-x-2">
+            {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && <TabsTrigger value="users" className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
                 <span>Usuários</span>
-              </TabsTrigger>
-            )}
-            {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
-              <TabsTrigger value="config" className="flex items-center space-x-2">
+              </TabsTrigger>}
+            {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && <TabsTrigger value="config" className="flex items-center space-x-2">
                 <Settings className="w-4 h-4" />
                 <span>Configurações</span>
-              </TabsTrigger>
-            )}
+              </TabsTrigger>}
           </TabsList>
 
-          {currentUser.perfil !== 'Secretario' && (
-            <TabsContent value="missions" className="space-y-6">
+          {currentUser.perfil !== 'Secretario' && <TabsContent value="missions" className="space-y-6">
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-3xl font-bold text-gray-800">Missões</h2>
                   <p className="text-gray-600">Gerencie as missões do Correio Aéreo Nacional</p>
                 </div>
-                <Button 
-                  onClick={handleCreateMission}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
+                <Button onClick={handleCreateMission} className="bg-blue-600 hover:bg-blue-700">
                   <PlusCircle className="w-4 h-4 mr-2" />
                   Nova Missão
                 </Button>
               </div>
 
-              {showMissionForm ? (
-                <Card>
+              {showMissionForm ? <Card>
                   <CardHeader>
                     <CardTitle>
                       {editingMission ? 'Editar Missão' : 'Nova Missão'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <MissionForm
-                      mission={editingMission}
-                      onSave={handleSaveMission}
-                      onCancel={() => {
-                        setShowMissionForm(false);
-                        setEditingMission(null);
-                      }}
-                      currentUser={currentUser}
-                    />
+                    <MissionForm mission={editingMission} onSave={handleSaveMission} onCancel={() => {
+                setShowMissionForm(false);
+                setEditingMission(null);
+              }} currentUser={currentUser} />
                   </CardContent>
-                </Card>
-              ) : (
-                <MissionList
-                  missions={missions}
-                  onEdit={handleEditMission}
-                  onDelete={handleDeleteMission}
-                  currentUser={currentUser}
-                />
-              )}
-            </TabsContent>
-          )}
+                </Card> : <MissionList missions={missions} onEdit={handleEditMission} onDelete={handleDeleteMission} currentUser={currentUser} />}
+            </TabsContent>}
 
           <TabsContent value="waitlist" className="space-y-6">
             <div>
-              <h2 className="text-3xl font-bold text-gray-800">Lista de Espera CAN</h2>
+              <h2 className="text-3xl font-bold text-gray-800">Inscrições Ativas</h2>
               <p className="text-gray-600">Gerencie passageiros na lista de espera do Correio Aéreo Nacional</p>
             </div>
             <CANWaitlist currentUser={currentUser} />
           </TabsContent>
 
-          {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
-            <TabsContent value="users" className="space-y-6">
+          {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && <TabsContent value="users" className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-gray-800">Usuários</h2>
                 <p className="text-gray-600">Gerencie os usuários do sistema</p>
               </div>
               <UserManagement currentUser={currentUser} />
-            </TabsContent>
-          )}
+            </TabsContent>}
 
-          {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
-            <TabsContent value="config" className="space-y-6">
+          {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && <TabsContent value="config" className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-gray-800">Configurações da Base</h2>
                 <p className="text-gray-600">Configure os dados da sua base aérea</p>
               </div>
               <BaseConfigComponent currentUser={currentUser} />
-            </TabsContent>
-          )}
+            </TabsContent>}
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
