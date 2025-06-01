@@ -693,7 +693,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                   OFRAG {mission.ofrag}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {mission.trechos} -
+                  {mission.trechos}
                 </p>
               </div>
               <div className="flex space-x-2">

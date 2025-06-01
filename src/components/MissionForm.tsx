@@ -88,7 +88,7 @@ const MissionForm = ({
 
   const getDestinationsText = () => {
     const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
-    return trechos.length > 1 ? trechos.slice(1).join(', ') : 'Nenhum destino definido';
+    return trechos.length > 1 ? trechos.slice(1).join(' - ') : 'Nenhum destino definido';
   };
 
   const moveFromWaitlistToMission = (waitlistPassenger: CANWaitlistPassenger) => {
