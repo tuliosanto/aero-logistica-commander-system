@@ -6,7 +6,6 @@ import { User } from '../types/User';
 import { toast } from '@/hooks/use-toast';
 import { AIR_BASES } from '../utils/constants';
 import { Check, Archive } from 'lucide-react';
-
 interface MissionListProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
@@ -15,47 +14,48 @@ interface MissionListProps {
   onArchive: (missionId: string) => void;
   currentUser: User;
 }
-
-const MissionList = ({ missions, onEdit, onDelete, onComplete, onArchive, currentUser }: MissionListProps) => {
+const MissionList = ({
+  missions,
+  onEdit,
+  onDelete,
+  onComplete,
+  onArchive,
+  currentUser
+}: MissionListProps) => {
   const handleDelete = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja excluir a missão OFRAG ${mission.ofrag}?`)) {
       onDelete(mission.id);
       toast({
         title: "Missão excluída",
-        description: `OFRAG ${mission.ofrag} foi excluída com sucesso.`,
+        description: `OFRAG ${mission.ofrag} foi excluída com sucesso.`
       });
     }
   };
-
   const handleComplete = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja concluir a missão OFRAG ${mission.ofrag}?`)) {
       onComplete(mission.id);
       toast({
         title: "Missão concluída",
-        description: `OFRAG ${mission.ofrag} foi marcada como concluída.`,
+        description: `OFRAG ${mission.ofrag} foi marcada como concluída.`
       });
     }
   };
-
   const handleArchive = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja arquivar a missão OFRAG ${mission.ofrag}?`)) {
       onArchive(mission.id);
       toast({
         title: "Missão arquivada",
-        description: `OFRAG ${mission.ofrag} foi arquivada com sucesso.`,
+        description: `OFRAG ${mission.ofrag} foi arquivada com sucesso.`
       });
     }
   };
-
   const getCodigoBase = () => {
     return currentUser.baseAerea.slice(-2);
   };
-
   const getBaseFullName = () => {
     const base = AIR_BASES.find(b => b.code === currentUser.baseAerea);
     return base ? base.name : currentUser.baseAerea;
   };
-
   const getChefePCAN = () => {
     const savedConfig = localStorage.getItem(`baseConfig_${currentUser.baseAerea}`);
     if (savedConfig) {
@@ -64,33 +64,29 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, onArchive, curren
     }
     return 'NÃO CONFIGURADO';
   };
-
   const generateMissionReport = (mission: Mission) => {
     const reportWindow = window.open('', '_blank');
     if (!reportWindow) return;
-
     const sortedPassengers = [...mission.passageiros].sort((a, b) => {
       if (a.prioridade !== b.prioridade) {
         return a.prioridade - b.prioridade;
       }
       return 0;
     });
-
     const totalPaxWeight = mission.passageiros.reduce((sum, p) => sum + p.peso, 0);
     const totalBaggageWeight = mission.passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0);
     const codigoBase = getCodigoBase();
     const baseFullName = getBaseFullName();
     const chefePCAN = getChefePCAN();
     const despachante = `${currentUser.posto} ${currentUser.nomeGuerra}`;
-    
+
     // Divide passengers into pages
     const firstPagePassengers = sortedPassengers.slice(0, 25);
     const secondPagePassengers = sortedPassengers.slice(25);
     const needsSecondPage = sortedPassengers.length > 25;
-
     const generatePassengerRows = (passengers: any[], startIndex: number, totalRows: number) => {
       const rows = [];
-      
+
       // Add passenger rows
       for (let i = 0; i < passengers.length; i++) {
         const passenger = passengers[i];
@@ -112,12 +108,12 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, onArchive, curren
           </tr>
         `);
       }
-      
+
       // Add empty rows to fill the page
       for (let i = passengers.length; i < totalRows; i++) {
         const rowNumber = startIndex + i + 1;
         const isLastRows = i >= 15; // Last 10 rows have different styling
-        
+
         rows.push(`
           <tr style='height:14.25pt'>
             <td class='x47' style='height:12.75pt;'>${rowNumber}</td>
@@ -136,13 +132,10 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, onArchive, curren
           </tr>
         `);
       }
-      
       return rows.join('');
     };
-
     const firstPageRows = generatePassengerRows(firstPagePassengers, 0, 25);
     const secondPageRows = needsSecondPage ? generatePassengerRows(secondPagePassengers, 25, 25) : '';
-
     const reportContent = `
       <!DOCTYPE html>
       <html lang="pt-BR">
@@ -563,7 +556,7 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, onArchive, curren
             <tr style='height:16.5pt'>
               <td colspan='6' class='x49'>DESPACHANTE: ${despachante}</td>
               <td class='x66'>TOTAL:</td>
-              <td colspan='2' class='x68' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>${needsSecondPage ? (firstPagePassengers.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)) : (totalPaxWeight + totalBaggageWeight)}</td>
+              <td colspan='2' class='x68' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>${needsSecondPage ? firstPagePassengers.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0) : totalPaxWeight + totalBaggageWeight}</td>
               <td colspan='3' class='x69'>MEC ANV:</td>
               <td class='x50'></td><td class='x50'></td><td class='x53'></td>
             </tr>
@@ -682,24 +675,17 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, onArchive, curren
         </body>
       </html>
     `;
-
     reportWindow.document.write(reportContent);
     reportWindow.document.close();
   };
-
   if (missions.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        <p className="text-lg">Nenhuma missão cadastrada ainda.</p>
+    return <div className="text-center py-8 text-gray-500">
+        <p className="text-lg">Nenhuma missão ativa.</p>
         <p className="text-sm">Clique em "Nova Missão" para começar.</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-4">
-      {missions.map((mission) => (
-        <Card key={mission.id} className="hover:shadow-md transition-shadow">
+  return <div className="space-y-4">
+      {missions.map(mission => <Card key={mission.id} className="hover:shadow-md transition-shadow">
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
@@ -711,16 +697,12 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, onArchive, curren
                   <Badge variant="outline" className="bg-yellow-50 text-yellow-700 font-semibold">
                     {new Date(mission.dataVoo).toLocaleDateString('pt-BR')}
                   </Badge>
-                  {mission.isCompleted && (
-                    <Badge variant="outline" className="bg-green-50 text-green-700 font-semibold">
+                  {mission.isCompleted && <Badge variant="outline" className="bg-green-50 text-green-700 font-semibold">
                       Concluída
-                    </Badge>
-                  )}
-                  {mission.isArchived && (
-                    <Badge variant="outline" className="bg-gray-50 text-gray-700 font-semibold">
+                    </Badge>}
+                  {mission.isArchived && <Badge variant="outline" className="bg-gray-50 text-gray-700 font-semibold">
                       Arquivada
-                    </Badge>
-                  )}
+                    </Badge>}
                 </CardTitle>
                 <p className="text-sm text-gray-600 mt-1">
                   OFRAG {mission.ofrag}
@@ -730,50 +712,21 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, onArchive, curren
                 </p>
               </div>
               <div className="flex space-x-2">
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => generateMissionReport(mission)}
-                  className="bg-blue-50 hover:bg-blue-100"
-                >
+                <Button size="sm" variant="outline" onClick={() => generateMissionReport(mission)} className="bg-blue-50 hover:bg-blue-100">
                   Visualizar Impressão
                 </Button>
-                {!mission.isCompleted && !mission.isArchived && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleComplete(mission)}
-                    className="bg-green-50 hover:bg-green-100 text-green-700"
-                  >
+                {!mission.isCompleted && !mission.isArchived && <Button size="sm" variant="outline" onClick={() => handleComplete(mission)} className="bg-green-50 hover:bg-green-100 text-green-700">
                     <Check className="w-4 h-4 mr-1" />
                     Concluir
-                  </Button>
-                )}
-                {mission.isCompleted && !mission.isArchived && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleArchive(mission)}
-                    className="bg-gray-50 hover:bg-gray-100 text-gray-700"
-                  >
+                  </Button>}
+                {mission.isCompleted && !mission.isArchived && <Button size="sm" variant="outline" onClick={() => handleArchive(mission)} className="bg-gray-50 hover:bg-gray-100 text-gray-700">
                     <Archive className="w-4 h-4 mr-1" />
                     Arquivar
-                  </Button>
-                )}
-                {!mission.isArchived && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => onEdit(mission)}
-                  >
+                  </Button>}
+                {!mission.isArchived && <Button size="sm" variant="outline" onClick={() => onEdit(mission)}>
                     Editar
-                  </Button>
-                )}
-                <Button 
-                  size="sm" 
-                  variant="destructive"
-                  onClick={() => handleDelete(mission)}
-                >
+                  </Button>}
+                <Button size="sm" variant="destructive" onClick={() => handleDelete(mission)}>
                   Excluir
                 </Button>
               </div>
@@ -787,10 +740,7 @@ const MissionList = ({ missions, onEdit, onDelete, onComplete, onArchive, curren
               </div>
             </div>
           </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
+        </Card>)}
+    </div>;
 };
-
 export default MissionList;
