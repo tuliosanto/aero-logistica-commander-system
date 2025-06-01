@@ -697,7 +697,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                   onClick={() => generateMissionReport(mission)}
                   className="bg-blue-50 hover:bg-blue-100"
                 >
-                  Relatório
+                  Visualizar Impressão
                 </Button>
                 <Button 
                   size="sm" 
