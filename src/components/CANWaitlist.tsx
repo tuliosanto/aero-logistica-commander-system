@@ -24,6 +24,24 @@ const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWa
   const [compatiblePassengers, setCompatiblePassengers] = useState<CANWaitlistPassenger[]>([]);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
 
+  // Helper function to safely parse trechos
+  const parseTrechos = (trechos: string | string[] | undefined): string[] => {
+    if (!trechos) return [];
+    
+    // If it's already an array, return it
+    if (Array.isArray(trechos)) {
+      return trechos;
+    }
+    
+    // If it's a string, split by comma
+    if (typeof trechos === 'string') {
+      return trechos.split(',').map(t => t.trim()).filter(t => t);
+    }
+    
+    // Fallback
+    return [];
+  };
+
   useEffect(() => {
     loadWaitlistPassengers();
   }, [currentUser.baseAerea]);
@@ -48,10 +66,9 @@ const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWa
       return;
     }
 
-    // Handle trechos as string and split by comma, then extract destinations
-    const missionDestinations = selectedMission.trechos
-      .split(',')
-      .map(trecho => trecho.trim())
+    // Use the safe parseTrechos function instead of direct .split()
+    const trechosArray = parseTrechos(selectedMission.trechos);
+    const missionDestinations = trechosArray
       .flatMap(trecho => trecho.split('-').map(dest => dest.trim()))
       .filter(dest => dest.length > 0);
 
