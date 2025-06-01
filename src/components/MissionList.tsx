@@ -1,19 +1,20 @@
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Mission } from '../types/Mission';
 import { User } from '../types/User';
 import { toast } from '@/hooks/use-toast';
+import { AIR_BASES } from '../utils/constants';
 
 interface MissionListProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
   onDelete: (missionId: string) => void;
+  onSelectMission?: (mission: Mission) => void;
   currentUser: User;
 }
 
-const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListProps) => {
+const MissionList = ({ missions, onEdit, onDelete, onSelectMission, currentUser }: MissionListProps) => {
   const handleDelete = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja excluir a missão OFRAG ${mission.ofrag}?`)) {
       onDelete(mission.id);
@@ -26,6 +27,11 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
 
   const getCodigoBase = () => {
     return currentUser.baseAerea.slice(-2);
+  };
+
+  const getBaseFullName = () => {
+    const base = AIR_BASES.find(b => b.code === currentUser.baseAerea);
+    return base ? base.name : currentUser.baseAerea;
   };
 
   const getChefePCAN = () => {
@@ -51,6 +57,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
     const totalPaxWeight = mission.passageiros.reduce((sum, p) => sum + p.peso, 0);
     const totalBaggageWeight = mission.passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0);
     const codigoBase = getCodigoBase();
+    const baseFullName = getBaseFullName();
     const chefePCAN = getChefePCAN();
     const despachante = `${currentUser.posto} ${currentUser.nomeGuerra}`;
     
@@ -448,7 +455,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
               <td class='x50'></td><td class='x50'></td><td class='x50'></td>
             </tr>
             <tr style='height:16.5pt'>
-              <td colspan='12' class='x41'>${currentUser.baseAerea}</td>
+              <td colspan='12' class='x41'>${baseFullName}</td>
               <td class='x50'></td><td class='x50'></td><td class='x50'></td>
             </tr>
             <tr style='height:16.5pt'>
@@ -556,7 +563,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
               <td class='x50'></td><td class='x50'></td><td class='x50'></td>
             </tr>
             <tr style='height:16.5pt'>
-              <td colspan='12' class='x41'>${currentUser.baseAerea}</td>
+              <td colspan='12' class='x41'>${baseFullName}</td>
               <td class='x50'></td><td class='x50'></td><td class='x50'></td>
             </tr>
             <tr style='height:16.5pt'>
@@ -699,6 +706,16 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                 >
                   Visualizar Impressão
                 </Button>
+                {onSelectMission && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => onSelectMission(mission)}
+                    className="bg-green-50 hover:bg-green-100"
+                  >
+                    Gerenciar Passageiros
+                  </Button>
+                )}
                 <Button 
                   size="sm" 
                   variant="outline"

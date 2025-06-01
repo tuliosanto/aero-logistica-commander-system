@@ -9,6 +9,7 @@ export interface Mission {
   operadorId: string;
   passageiros: Passenger[];
   createdAt: string;
+  baseAerea: string; // Adicionando campo para identificar a base aérea
 }
 
 export interface Passenger {

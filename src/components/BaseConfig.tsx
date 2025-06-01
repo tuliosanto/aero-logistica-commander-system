@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -121,7 +120,7 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
             <img 
               src={baseImage} 
               alt={`Logo da ${currentUser.baseAerea}`}
-              className="max-w-full max-h-64 object-contain"
+              className="max-w-full max-h-64 object-contain mx-auto"
             />
           </div>
         </CardContent>
