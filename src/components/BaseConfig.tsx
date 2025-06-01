@@ -93,7 +93,7 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
                 id="postoChefe"
                 value={postoChefe}
                 onChange={(e) => setPostoChefe(e.target.value)}
-                placeholder="Ex: Cap R1"
+                placeholder="Ex: CP"
               />
             </div>
 
@@ -104,7 +104,7 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
                 id="nomeChefe"
                 value={nomeChefe}
                 onChange={(e) => setNomeChefe(e.target.value)}
-                placeholder="Ex: João Marcos Aguirre"
+                placeholder="Ex: Joaquim José da Silva Xavier"
               />
             </div>
 
