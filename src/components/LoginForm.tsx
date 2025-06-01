@@ -114,11 +114,11 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       <div className="absolute inset-0 bg-black/20"></div>
       <Card className="w-full max-w-md relative z-10 shadow-2xl bg-white/95 backdrop-blur-sm">
         <CardHeader className="text-center pb-2">
-          <div className="mx-auto mb-4 w-20 h-20 bg-blue-700 rounded-full flex items-center justify-center overflow-hidden">
+          <div className="mx-auto mb-4 w-20 h-20 rounded-full flex items-center justify-center overflow-hidden">
             <img 
               src={gladioImage} 
               alt="Gládio FAB" 
-              //className="w-16 h-16 object-contain"
+              className="w-16 h-16 object-contain"
             />
           </div>
           <CardTitle className="text-2xl font-bold text-blue-800">
