@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +23,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     nomeGuerra: '',
     nomeCompleto: '',
     baseAerea: '',
-    perfil: 'Operador' as 'Operador' | 'Administrador' | 'Supervisor',
+    perfil: 'Operador' as 'Operador' | 'Administrador' | 'Supervisor' | 'Secretario',
     senha: '',
     username: ''
   });
