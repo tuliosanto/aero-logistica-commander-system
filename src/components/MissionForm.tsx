@@ -40,7 +40,7 @@ const MissionForm = ({
   
   // Estados para os trechos como text inputs
   const [origem, setOrigem] = useState('');
-  const [trecho1, setTrecho1] = useState('').toUpperCase();
+  const [trecho1, setTrecho1] = useState('');
   const [trecho2, setTrecho2] = useState('');
   const [trecho3, setTrecho3] = useState('');
   const [trecho4, setTrecho4] = useState('');
@@ -331,7 +331,7 @@ const MissionForm = ({
               <Input 
                 id="trecho3" 
                 value={trecho3} 
-                onChange={e => setTrecho3(e.target.value)} 
+                onChange={e => setTrecho3(e.target.value).toUpperCase()} 
                 placeholder="Ex: SBGL, SBBR, etc."
               />
             </div>
