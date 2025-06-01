@@ -122,7 +122,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             />
           </div>
           <CardTitle className="text-2xl font-bold text-blue-800">
-            Sistema de Voos Logísticos
+            Sistema de Gerenciamento de Passageiros
           </CardTitle>
           <p className="text-sm text-gray-600 mt-2">
             Força Aérea Brasileira
@@ -131,7 +131,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Nome de Usuário</Label>
               <Input
                 id="username"
                 type="text"
