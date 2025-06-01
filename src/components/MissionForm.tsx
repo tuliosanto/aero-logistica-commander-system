@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,14 +52,15 @@ const MissionForm = ({
     setOrigem(defaultOrigem);
 
     // Se estiver editando uma missão, carrega os trechos existentes
-    if (mission && mission.trechos.length > 0) {
-      setOrigem(mission.trechos[0] || defaultOrigem);
-      setTrecho1(mission.trechos[1] || '');
-      setTrecho2(mission.trechos[2] || '');
-      setTrecho3(mission.trechos[3] || '');
-      setTrecho4(mission.trechos[4] || '');
-      setTrecho5(mission.trechos[5] || '');
-      setTrecho6(mission.trechos[6] || '');
+    if (mission && mission.trechos) {
+      const trechosArray = mission.trechos.split(',');
+      setOrigem(trechosArray[0] || defaultOrigem);
+      setTrecho1(trechosArray[1] || '');
+      setTrecho2(trechosArray[2] || '');
+      setTrecho3(trechosArray[3] || '');
+      setTrecho4(trechosArray[4] || '');
+      setTrecho5(trechosArray[5] || '');
+      setTrecho6(trechosArray[6] || '');
     }
 
     // Carregar lista de espera
@@ -97,6 +97,7 @@ const MissionForm = ({
       posto: waitlistPassenger.posto,
       nome: waitlistPassenger.nome,
       cpf: waitlistPassenger.cpf,
+      telefone: waitlistPassenger.telefone,
       destino: waitlistPassenger.destino,
       peso: waitlistPassenger.peso,
       pesoBagagem: waitlistPassenger.pesoBagagem,
@@ -196,13 +197,13 @@ const MissionForm = ({
     e.preventDefault();
     
     // Monta array de trechos, incluindo apenas os preenchidos
-    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
+    const trechosArray = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
     
     const missionData: Mission = {
       id: mission?.id || Date.now().toString(),
       aeronave,
       matricula: matricula || '',
-      trechos,
+      trechos: trechosArray.join(','), // Convert array to string
       dataVoo: dataVoo || new Date().toISOString().split('T')[0],
       ofrag: ofrag || '',
       operadorId: currentUser.id,
@@ -415,7 +416,6 @@ const MissionForm = ({
 
       <Separator />
 
-      {/* Lista de Espera Compatível */}
       {compatiblePassengers.length > 0 && (
         <Card>
           <CardHeader>
