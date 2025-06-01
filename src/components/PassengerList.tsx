@@ -29,7 +29,7 @@ const PassengerList = ({ passengers, onPassengersChange, baseAerea }: PassengerL
     peso: '',
     pesoBagagem: '',
     pesoBagagemMao: '',
-    prioridade: '',
+    prioridade: '2',
     responsavelInscricao: 'O PRÓPRIO',
     parentesco: ''
   });
@@ -43,7 +43,7 @@ const PassengerList = ({ passengers, onPassengersChange, baseAerea }: PassengerL
       peso: '',
       pesoBagagem: '',
       pesoBagagemMao: '',
-      prioridade: '',
+      prioridade: '2',
       responsavelInscricao: 'O PRÓPRIO',
       parentesco: ''
     });
