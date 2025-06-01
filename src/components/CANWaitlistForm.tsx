@@ -77,34 +77,11 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
     setTelefone(formatted);
   };
 
-  // Create safe filtered arrays with additional validation
-  const safeRanks = MILITARY_RANKS.filter(rank => {
-    const isValid = rank && typeof rank === 'string' && rank.trim() !== '';
-    if (!isValid) {
-      console.log('Filtered out invalid rank:', rank);
-    }
-    return isValid;
+  console.log('Original arrays lengths:', {
+    ranks: MILITARY_RANKS.length,
+    aerodromos: AERODROMOS.length,
+    priorities: PRIORITIES.length
   });
-
-  const safeAerodromos = AERODROMOS.filter(aero => {
-    const isValid = aero?.code && typeof aero.code === 'string' && aero.code.trim() !== '';
-    if (!isValid) {
-      console.log('Filtered out invalid aerodrome:', aero);
-    }
-    return isValid;
-  });
-
-  const safePriorities = PRIORITIES.filter(priority => {
-    const isValid = priority?.value && priority.value.toString().trim() !== '';
-    if (!isValid) {
-      console.log('Filtered out invalid priority:', priority);
-    }
-    return isValid;
-  });
-
-  console.log('Safe ranks:', safeRanks);
-  console.log('Safe aerodromos:', safeAerodromos);
-  console.log('Safe priorities:', safePriorities);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -116,9 +93,18 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
               <SelectValue placeholder="Selecione o posto" />
             </SelectTrigger>
             <SelectContent>
-              {safeRanks.map(rank => (
-                <SelectItem key={rank} value={rank}>{rank}</SelectItem>
-              ))}
+              {MILITARY_RANKS.map((rank, index) => {
+                console.log(`Rendering rank ${index}:`, rank);
+                if (!rank || rank.trim() === '') {
+                  console.error('Empty rank found at index:', index);
+                  return null;
+                }
+                return (
+                  <SelectItem key={`rank-${index}-${rank}`} value={rank}>
+                    {rank}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -167,11 +153,18 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             <SelectValue placeholder="Selecione o destino" />
           </SelectTrigger>
           <SelectContent>
-            {safeAerodromos.map(aero => (
-              <SelectItem key={aero.code} value={aero.code}>
-                {aero.code} - {aero.location}
-              </SelectItem>
-            ))}
+            {AERODROMOS.map((aero, index) => {
+              console.log(`Rendering aerodrome ${index}:`, aero);
+              if (!aero?.code || aero.code.trim() === '') {
+                console.error('Empty aerodrome code found at index:', index, aero);
+                return null;
+              }
+              return (
+                <SelectItem key={`aero-${index}-${aero.code}`} value={aero.code}>
+                  {aero.code} - {aero.location}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
@@ -218,13 +211,20 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             <SelectValue placeholder="Selecione a prioridade" />
           </SelectTrigger>
           <SelectContent>
-            {safePriorities.map(priority => (
-              <SelectItem key={priority.value} value={priority.value.toString()}>
-                <PriorityTooltip priority={priority.value}>
-                  <span>{priority.label}</span>
-                </PriorityTooltip>
-              </SelectItem>
-            ))}
+            {PRIORITIES.map((priority, index) => {
+              console.log(`Rendering priority ${index}:`, priority);
+              if (!priority?.value || priority.value < 1) {
+                console.error('Invalid priority found at index:', index, priority);
+                return null;
+              }
+              return (
+                <SelectItem key={`priority-${index}-${priority.value}`} value={priority.value.toString()}>
+                  <PriorityTooltip priority={priority.value}>
+                    <span>{priority.label}</span>
+                  </PriorityTooltip>
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
