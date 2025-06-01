@@ -385,6 +385,14 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
                   <div className="flex items-center space-x-2">
                     <Button 
                       size="sm" 
+                      variant={passenger.checkedIn ? "default" : "outline"}
+                      onClick={() => toggleCheckIn(passenger.id)}
+                      className={passenger.checkedIn ? "bg-green-600 hover:bg-green-700" : ""}
+                    >
+                      {passenger.checkedIn ? <Check className="h-4 w-4" /> : "Check-in"}
+                    </Button>
+                    <Button 
+                      size="sm" 
                       variant="outline"
                       onClick={() => handleEdit(passenger)}
                     >
@@ -396,14 +404,6 @@ const PassengerList = ({ passengers, onPassengersChange }: PassengerListProps) =
                       onClick={() => handleDelete(passenger.id)}
                     >
                       Remover
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant={passenger.checkedIn ? "default" : "outline"}
-                      onClick={() => toggleCheckIn(passenger.id)}
-                      className={passenger.checkedIn ? "bg-green-600 hover:bg-green-700" : ""}
-                    >
-                      {passenger.checkedIn ? <Check className="h-4 w-4" /> : "Check-in"}
                     </Button>
                   </div>
                   {passenger.checkedIn && (
