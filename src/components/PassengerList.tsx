@@ -2,8 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trash2, UserCheck, UserX, CheckCircle, ArrowLeft, UserPlus } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Trash2, UserCheck, UserX, ArrowLeft, UserPlus } from 'lucide-react';
 import { Passenger } from '../types/Mission';
 import { getRankOrder } from '../utils/constants';
 import PriorityTooltip from './PriorityTooltip';
@@ -13,7 +12,6 @@ interface PassengerListProps {
   onPassengersChange: (passengers: Passenger[]) => void;
   showMoveToWaitlist?: boolean;
   onMoveToWaitlist?: (passenger: Passenger) => void;
-  onComplete?: () => void;
   showAddPassengerButton?: boolean;
   onAddPassenger?: () => void;
 }
@@ -23,7 +21,6 @@ const PassengerList = ({
   onPassengersChange, 
   showMoveToWaitlist = false,
   onMoveToWaitlist,
-  onComplete,
   showAddPassengerButton = false,
   onAddPassenger
 }: PassengerListProps) => {
@@ -88,39 +85,12 @@ const PassengerList = ({
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>Lista de Passageiros ({passengers.length})</span>
-          <div className="flex gap-2">
-            {showAddPassengerButton && onAddPassenger && (
-              <Button onClick={onAddPassenger} className="bg-blue-600 hover:bg-blue-700">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Novo Passageiro
-              </Button>
-            )}
-            {onComplete && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button className="bg-green-600 hover:bg-green-700">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Concluir Missão
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Concluir Missão</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Tem certeza que deseja concluir esta missão? Esta ação não pode ser desfeita.
-                      Os passageiros da lista de espera serão removidos permanentemente.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={onComplete} className="bg-green-600 hover:bg-green-700">
-                      Concluir
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-          </div>
+          {showAddPassengerButton && onAddPassenger && (
+            <Button onClick={onAddPassenger} className="bg-blue-600 hover:bg-blue-700">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Novo Passageiro
+            </Button>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -209,13 +179,16 @@ const PassengerList = ({
                       Retornar
                     </Button>
                   )}
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleRemove(passenger.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  {/* Só mostra o botão de excluir se NÃO for da lista de espera */}
+                  {!passenger.fromWaitlist && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleRemove(passenger.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

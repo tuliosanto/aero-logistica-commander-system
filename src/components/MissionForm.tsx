@@ -12,6 +12,7 @@ import { Mission, Passenger } from '../types/Mission';
 import { User } from '../types/User';
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import PassengerList from './PassengerList';
+import PassengerForm from './PassengerForm';
 import { toast } from '@/hooks/use-toast';
 import { AERODROMOS, getAerodromoByBase } from '../utils/constants';
 
@@ -81,6 +82,11 @@ const MissionForm = ({
   const getDestinationsText = () => {
     const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
     return trechos.length > 1 ? trechos.slice(1).join("-").toUpperCase() : 'Nenhum destino definido';
+  };
+
+  const getAvailableDestinations = () => {
+    const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
+    return trechos.length > 1 ? trechos.slice(1) : [];
   };
 
   const moveFromWaitlistToMission = (waitlistPassenger: CANWaitlistPassenger) => {
@@ -178,6 +184,10 @@ const MissionForm = ({
       title: "Missão concluída",
       description: `OFRAG ${mission.ofrag} foi concluída com sucesso. Passageiros da lista de espera foram removidos.`,
     });
+  };
+
+  const handleAddDirectPassenger = (passenger: Passenger) => {
+    setPassageiros([...passageiros, passenger]);
   };
 
   const setTodayDate = () => {
@@ -453,9 +463,16 @@ const MissionForm = ({
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
             <span>Lista de Passageiros</span>
-            <span className="text-sm font-normal text-gray-600">
-              Total: {passageiros.length} passageiros
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-normal text-gray-600">
+                Total: {passageiros.length} passageiros
+              </span>
+              {/* Componente para adicionar passageiro diretamente */}
+              <PassengerForm
+                onAddPassenger={handleAddDirectPassenger}
+                destinations={getAvailableDestinations()}
+              />
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -464,9 +481,36 @@ const MissionForm = ({
             onPassengersChange={setPassageiros}
             showMoveToWaitlist={true}
             onMoveToWaitlist={moveFromMissionToWaitlist}
-            onComplete={mission && !mission.isCompleted ? handleCompleteMission : undefined}
-            showAddPassengerButton={true}
           />
+          
+          {/* Botão de concluir missão fora da lista de passageiros */}
+          {mission && !mission.isCompleted && passageiros.length > 0 && (
+            <div className="mt-6 flex justify-end">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="bg-green-600 hover:bg-green-700">
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Concluir Missão
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Concluir Missão</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza que deseja concluir esta missão? Esta ação não pode ser desfeita.
+                      Os passageiros da lista de espera serão removidos permanentemente.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleCompleteMission} className="bg-green-600 hover:bg-green-700">
+                      Concluir
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
           
           {passageiros.length > 0 && (
             <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
