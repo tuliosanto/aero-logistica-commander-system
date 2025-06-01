@@ -77,6 +77,35 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
     setTelefone(formatted);
   };
 
+  // Create safe filtered arrays with additional validation
+  const safeRanks = MILITARY_RANKS.filter(rank => {
+    const isValid = rank && typeof rank === 'string' && rank.trim() !== '';
+    if (!isValid) {
+      console.log('Filtered out invalid rank:', rank);
+    }
+    return isValid;
+  });
+
+  const safeAerodromos = AERODROMOS.filter(aero => {
+    const isValid = aero?.code && typeof aero.code === 'string' && aero.code.trim() !== '';
+    if (!isValid) {
+      console.log('Filtered out invalid aerodrome:', aero);
+    }
+    return isValid;
+  });
+
+  const safePriorities = PRIORITIES.filter(priority => {
+    const isValid = priority?.value && priority.value.toString().trim() !== '';
+    if (!isValid) {
+      console.log('Filtered out invalid priority:', priority);
+    }
+    return isValid;
+  });
+
+  console.log('Safe ranks:', safeRanks);
+  console.log('Safe aerodromos:', safeAerodromos);
+  console.log('Safe priorities:', safePriorities);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -87,7 +116,7 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
               <SelectValue placeholder="Selecione o posto" />
             </SelectTrigger>
             <SelectContent>
-              {MILITARY_RANKS.filter(rank => rank && rank.trim() !== '').map(rank => (
+              {safeRanks.map(rank => (
                 <SelectItem key={rank} value={rank}>{rank}</SelectItem>
               ))}
             </SelectContent>
@@ -138,7 +167,7 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             <SelectValue placeholder="Selecione o destino" />
           </SelectTrigger>
           <SelectContent>
-            {AERODROMOS.filter(aero => aero?.code && aero.code.trim() !== '').map(aero => (
+            {safeAerodromos.map(aero => (
               <SelectItem key={aero.code} value={aero.code}>
                 {aero.code} - {aero.location}
               </SelectItem>
@@ -189,7 +218,7 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             <SelectValue placeholder="Selecione a prioridade" />
           </SelectTrigger>
           <SelectContent>
-            {PRIORITIES.filter(priority => priority?.value && priority.value.toString().trim() !== '').map(priority => (
+            {safePriorities.map(priority => (
               <SelectItem key={priority.value} value={priority.value.toString()}>
                 <PriorityTooltip priority={priority.value}>
                   <span>{priority.label}</span>

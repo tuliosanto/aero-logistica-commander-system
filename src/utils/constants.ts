@@ -2,7 +2,7 @@
 export const MILITARY_RANKS = [
   'CV', 'S2', 'S1', 'CB', 'AL', 'CAD', '3S', '2S', '1S', 'SO', 
   'ASP', '2T', '1T', 'CP', 'MJ', 'TC', 'CL', 'BR', 'MB', 'TB'
-];
+].filter(rank => rank && rank.trim() !== ''); // Add filtering here to be safe
 
 export const AIR_BASES = [
   { code: 'BAAN', name: 'BASE AÉREA DE ANÁPOLIS', location: 'Anápolis - GO' },
@@ -73,7 +73,7 @@ export const AERODROMOS = [
   { code: 'SBRB', name: 'Plácido de Castro', location: 'Rio Branco/AC' },
   { code: 'SBUG', name: 'Rubem Berta', location: 'Uruguaiana/RS' },
   { code: 'SBCC', name: 'Cabo Frio', location: 'Cabo Frio/RJ' }
-];
+].filter(aero => aero?.code && aero.code.trim() !== ''); // Add filtering here to be safe
 
 export const PRIORITIES = [
   { value: 1, label: 'Prioridade 1 - Emergência Médica' },
@@ -89,7 +89,7 @@ export const PRIORITIES = [
   { value: 11, label: 'Prioridade 11 - Forças Auxiliares' },
   { value: 12, label: 'Prioridade 12 - Dependentes Servidores' },
   { value: 13, label: 'Prioridade 13 - Cidadãos Brasileiros' }
-];
+].filter(priority => priority?.value && priority.value.toString().trim() !== ''); // Add filtering here to be safe
 
 export const getRankOrder = (rank: string): number => {
   return MILITARY_RANKS.indexOf(rank);
