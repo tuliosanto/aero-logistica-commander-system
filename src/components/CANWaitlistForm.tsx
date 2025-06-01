@@ -30,6 +30,31 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
   const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || 'O PRÓPRIO');
   const [parentesco, setParentesco] = useState(passenger?.parentesco || '');
 
+  // Additional validation and filtering at component level
+  const validRanks = MILITARY_RANKS.filter(rank => {
+    const isValid = rank && typeof rank === 'string' && rank.trim().length > 0;
+    if (!isValid) {
+      console.warn('Filtering invalid rank in component:', rank);
+    }
+    return isValid;
+  });
+
+  const validAerodromos = AERODROMOS.filter(aero => {
+    const isValid = aero && aero.code && typeof aero.code === 'string' && aero.code.trim().length > 0;
+    if (!isValid) {
+      console.warn('Filtering invalid aerodrome in component:', aero);
+    }
+    return isValid;
+  });
+
+  const validPriorities = PRIORITIES.filter(priority => {
+    const isValid = priority && priority.value && typeof priority.value === 'number' && priority.value > 0;
+    if (!isValid) {
+      console.warn('Filtering invalid priority in component:', priority);
+    }
+    return isValid;
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const passengerData = {
@@ -77,10 +102,13 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
     setTelefone(formatted);
   };
 
-  console.log('Original arrays lengths:', {
-    ranks: MILITARY_RANKS.length,
-    aerodromos: AERODROMOS.length,
-    priorities: PRIORITIES.length
+  console.log('Component validation results:', {
+    validRanks: validRanks.length,
+    validAerodromos: validAerodromos.length,
+    validPriorities: validPriorities.length,
+    originalRanks: MILITARY_RANKS.length,
+    originalAerodromos: AERODROMOS.length,
+    originalPriorities: PRIORITIES.length
   });
 
   return (
@@ -93,12 +121,13 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
               <SelectValue placeholder="Selecione o posto" />
             </SelectTrigger>
             <SelectContent>
-              {MILITARY_RANKS.map((rank, index) => {
-                console.log(`Rendering rank ${index}:`, rank);
-                if (!rank || rank.trim() === '') {
-                  console.error('Empty rank found at index:', index);
+              {validRanks.map((rank, index) => {
+                // Extra validation before rendering
+                if (!rank || typeof rank !== 'string' || rank.trim() === '') {
+                  console.error('Attempting to render invalid rank:', rank, 'at index:', index);
                   return null;
                 }
+                console.log(`Rendering valid rank ${index}:`, rank);
                 return (
                   <SelectItem key={`rank-${index}-${rank}`} value={rank}>
                     {rank}
@@ -153,12 +182,13 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             <SelectValue placeholder="Selecione o destino" />
           </SelectTrigger>
           <SelectContent>
-            {AERODROMOS.map((aero, index) => {
-              console.log(`Rendering aerodrome ${index}:`, aero);
-              if (!aero?.code || aero.code.trim() === '') {
-                console.error('Empty aerodrome code found at index:', index, aero);
+            {validAerodromos.map((aero, index) => {
+              // Extra validation before rendering
+              if (!aero || !aero.code || typeof aero.code !== 'string' || aero.code.trim() === '') {
+                console.error('Attempting to render invalid aerodrome:', aero, 'at index:', index);
                 return null;
               }
+              console.log(`Rendering valid aerodrome ${index}:`, aero.code);
               return (
                 <SelectItem key={`aero-${index}-${aero.code}`} value={aero.code}>
                   {aero.code} - {aero.location}
@@ -211,12 +241,13 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             <SelectValue placeholder="Selecione a prioridade" />
           </SelectTrigger>
           <SelectContent>
-            {PRIORITIES.map((priority, index) => {
-              console.log(`Rendering priority ${index}:`, priority);
-              if (!priority?.value || priority.value < 1) {
-                console.error('Invalid priority found at index:', index, priority);
+            {validPriorities.map((priority, index) => {
+              // Extra validation before rendering
+              if (!priority || !priority.value || typeof priority.value !== 'number' || priority.value < 1) {
+                console.error('Attempting to render invalid priority:', priority, 'at index:', index);
                 return null;
               }
+              console.log(`Rendering valid priority ${index}:`, priority.value);
               return (
                 <SelectItem key={`priority-${index}-${priority.value}`} value={priority.value.toString()}>
                   <PriorityTooltip priority={priority.value}>
