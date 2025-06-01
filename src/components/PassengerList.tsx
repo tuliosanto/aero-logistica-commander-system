@@ -42,6 +42,25 @@ const PassengerList = ({
     parentesco: ''
   });
 
+  // Sort passengers for consistent ordering
+  const sortedPassengers = passengers
+    .sort((a, b) => {
+      if (a.prioridade !== b.prioridade) {
+        return a.prioridade - b.prioridade;
+      }
+      const rankA = getRankOrder(a.posto);
+      const rankB = getRankOrder(b.posto);
+      return rankA - rankB;
+    });
+
+  const getPriorityColor = (priority: number) => {
+    if (priority <= 3) return 'bg-red-100 text-red-800';
+    if (priority <= 6) return 'bg-orange-100 text-orange-800';
+    if (priority <= 9) return 'bg-yellow-100 text-yellow-800';
+    if (priority <= 12) return 'bg-green-100 text-green-800';
+    return 'bg-blue-100 text-blue-800';
+  };
+
   const resetForm = () => {
     setFormData({
       posto: '',
@@ -226,6 +245,19 @@ const PassengerList = ({
     reportWindow.print();
   };
 
+  // Missing function definitions
+  const saveEdit = (passengerId: string) => {
+    handleSubmit(new Event('submit') as any);
+  };
+
+  const startEdit = (passenger: Passenger) => {
+    handleEdit(passenger);
+  };
+
+  const removePassenger = (passengerId: string) => {
+    handleDelete(passengerId);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -335,7 +367,11 @@ const PassengerList = ({
                       </SelectTrigger>
                       <SelectContent>
                         {PRIORITIES.map(priority => (
-                          <SelectItem key={priority} value={priority.toString()}>{priority}</SelectItem>
+                          <SelectItem key={priority.value} value={priority.value.toString()}>
+                            <PriorityTooltip priority={priority.value}>
+                              <span>{priority.label}</span>
+                            </PriorityTooltip>
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -386,227 +422,218 @@ const PassengerList = ({
       </div>
 
       <div className="space-y-2">
-        {passengers
-          .sort((a, b) => {
-            if (a.prioridade !== b.prioridade) {
-              return a.prioridade - b.prioridade;
-            }
-            const rankA = getRankOrder(a.posto);
-            const rankB = getRankOrder(b.posto);
-            return rankA - rankB;
-          })
-          .map((passenger) => (
-            <div key={passenger.id} className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
-              <div className="flex items-center space-x-4">
-                <div>
-                  <p className="font-medium">{passenger.posto} {passenger.nome}</p>
-                  <p className="text-sm text-gray-500">
-                    CPF: {passenger.cpf} | Destino: {passenger.destino}
-                    {passenger.parentesco && ` | ${passenger.parentesco}`}
-                    {passenger.fromWaitlist && (
-                      <span className="text-blue-600 font-semibold"> | Da lista de espera</span>
-                    )}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Peso: {passenger.peso}kg | Bagagem: {passenger.pesoBagagem}kg | Bagagem de mão: {passenger.pesoBagagemMao}kg
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Responsável: {passenger.responsavelInscricao}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge className={getPriorityColor(passenger.prioridade)}>
-                    Prioridade {passenger.prioridade}
-                  </Badge>
-                  {passenger.checkedIn && (
-                    <Badge className="bg-green-100 text-green-800">
-                      <Check className="w-3 h-3 mr-1" />
-                      Check-in
-                    </Badge>
+        {sortedPassengers.map((passenger) => (
+          <div key={passenger.id} className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
+            <div className="flex items-center space-x-4">
+              <div>
+                <p className="font-medium">{passenger.posto} {passenger.nome}</p>
+                <p className="text-sm text-gray-500">
+                  CPF: {passenger.cpf} | Destino: {passenger.destino}
+                  {passenger.parentesco && ` | ${passenger.parentesco}`}
+                  {passenger.fromWaitlist && (
+                    <span className="text-blue-600 font-semibold"> | Da lista de espera</span>
                   )}
-                </div>
+                </p>
+                <p className="text-sm text-gray-500">
+                  Peso: {passenger.peso}kg | Bagagem: {passenger.pesoBagagem}kg | Bagagem de mão: {passenger.pesoBagagemMao}kg
+                </p>
+                <p className="text-sm text-gray-600">
+                  Responsável: {passenger.responsavelInscricao}
+                </p>
               </div>
-              <div className="flex space-x-2">
-                {!passenger.checkedIn && (
-                  <Button 
-                    size="sm" 
-                    onClick={() => toggleCheckIn(passenger.id)}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    Check-in
-                  </Button>
-                )}
+              <div className="flex items-center space-x-2">
+                <Badge className={getPriorityColor(passenger.prioridade)}>
+                  Prioridade {passenger.prioridade}
+                </Badge>
                 {passenger.checkedIn && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => toggleCheckIn(passenger.id)}
-                  >
-                    Desfazer Check-in
-                  </Button>
+                  <Badge className="bg-green-100 text-green-800">
+                    <Check className="w-3 h-3 mr-1" />
+                    Check-in
+                  </Badge>
                 )}
-                {editingPassenger === passenger.id ? (
-                  <Button size="sm" onClick={() => saveEdit(passenger.id)}>
-                    Salvar
-                  </Button>
-                ) : (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => startEdit(passenger)}
-                  >
-                    Editar
-                  </Button>
-                )}
-                {showMoveToWaitlist && onMoveToWaitlist && passenger.fromWaitlist && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => onMoveToWaitlist(passenger)}
-                    className="text-orange-600 hover:bg-orange-50"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-1" />
-                    Lista de Espera
-                  </Button>
-                )}
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              {!passenger.checkedIn && (
                 <Button 
                   size="sm" 
-                  variant="destructive"
-                  onClick={() => removePassenger(passenger.id)}
+                  onClick={() => toggleCheckIn(passenger.id)}
+                  className="bg-green-600 hover:bg-green-700"
                 >
-                  Remover
+                  Check-in
                 </Button>
-              </div>
-
-              {editingPassenger === passenger.id && (
-                <Dialog open={true} onOpenChange={() => setEditingPassenger(null)}>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Editar Passageiro</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-posto">Posto</Label>
-                        <Select value={formData.posto} onValueChange={(value) => setFormData({...formData, posto: value})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o posto" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {MILITARY_RANKS.map(rank => (
-                              <SelectItem key={rank} value={rank}>
-                                {rank}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-nome">Nome Completo *</Label>
-                        <Input
-                          id="edit-nome"
-                          value={formData.nome}
-                          onChange={(e) => setFormData({...formData, nome: e.target.value})}
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-cpf">CPF</Label>
-                        <Input
-                          id="edit-cpf"
-                          value={formData.cpf}
-                          onChange={(e) => setFormData({...formData, cpf: e.target.value})}
-                          placeholder="000.000.000-00"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-destino">Destino</Label>
-                        <Input
-                          id="edit-destino"
-                          value={formData.destino}
-                          onChange={(e) => setFormData({...formData, destino: e.target.value})}
-                          placeholder="Ex: SBRF, SBCO"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-peso">Peso PAX (kg)</Label>
-                        <Input
-                          id="edit-peso"
-                          type="number"
-                          value={formData.peso}
-                          onChange={(e) => setFormData({...formData, peso: e.target.value})}
-                          min="0"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-pesoBagagem">Bagagem (kg)</Label>
-                        <Input
-                          id="edit-pesoBagagem"
-                          type="number"
-                          value={formData.pesoBagagem}
-                          onChange={(e) => setFormData({...formData, pesoBagagem: e.target.value})}
-                          min="0"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-pesoBagagemMao">Bag. Mão (kg)</Label>
-                        <Input
-                          id="edit-pesoBagagemMao"
-                          type="number"
-                          value={formData.pesoBagagemMao}
-                          onChange={(e) => setFormData({...formData, pesoBagagemMao: e.target.value})}
-                          min="0"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-prioridade">Prioridade</Label>
-                        <Select value={formData.prioridade.toString()} onValueChange={(value) => setFormData({...formData, prioridade: parseInt(value)})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione a prioridade" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {PRIORITIES.map(priority => (
-                              <SelectItem key={priority.value} value={priority.value.toString()}>
-                                <PriorityTooltip priority={priority.value}>
-                                  <span>{priority.label}</span>
-                                </PriorityTooltip>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-responsavelInscricao">Responsável pela Inscrição</Label>
-                        <Input
-                          id="edit-responsavelInscricao"
-                          value={formData.responsavelInscricao}
-                          onChange={(e) => setFormData({...formData, responsavelInscricao: e.target.value})}
-                          placeholder="O Próprio"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-parentesco">Parentesco</Label>
-                        <Input
-                          id="edit-parentesco"
-                          value={formData.parentesco}
-                          onChange={(e) => setFormData({...formData, parentesco: e.target.value})}
-                          placeholder="Ex: Cônjuge, Filho(a), etc."
-                        />
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
               )}
+              {passenger.checkedIn && (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => toggleCheckIn(passenger.id)}
+                >
+                  Desfazer Check-in
+                </Button>
+              )}
+              {editingPassenger === passenger.id ? (
+                <Button size="sm" onClick={() => saveEdit(passenger.id)}>
+                  Salvar
+                </Button>
+              ) : (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => startEdit(passenger)}
+                >
+                  Editar
+                </Button>
+              )}
+              {showMoveToWaitlist && onMoveToWaitlist && passenger.fromWaitlist && (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => onMoveToWaitlist(passenger)}
+                  className="text-orange-600 hover:bg-orange-50"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-1" />
+                  Lista de Espera
+                </Button>
+              )}
+              <Button 
+                size="sm" 
+                variant="destructive"
+                onClick={() => removePassenger(passenger.id)}
+              >
+                Remover
+              </Button>
             </div>
-          ))}
+
+            {editingPassenger === passenger.id && (
+              <Dialog open={true} onOpenChange={() => setEditingPassenger(null)}>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Editar Passageiro</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-posto">Posto</Label>
+                      <Select value={formData.posto} onValueChange={(value) => setFormData({...formData, posto: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o posto" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MILITARY_RANKS.map(rank => (
+                            <SelectItem key={rank} value={rank}>
+                              {rank}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-nome">Nome Completo *</Label>
+                      <Input
+                        id="edit-nome"
+                        value={formData.nome}
+                        onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-cpf">CPF</Label>
+                      <Input
+                        id="edit-cpf"
+                        value={formData.cpf}
+                        onChange={(e) => setFormData({...formData, cpf: e.target.value})}
+                        placeholder="000.000.000-00"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-destino">Destino</Label>
+                      <Input
+                        id="edit-destino"
+                        value={formData.destino}
+                        onChange={(e) => setFormData({...formData, destino: e.target.value})}
+                        placeholder="Ex: SBRF, SBCO"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-peso">Peso PAX (kg)</Label>
+                      <Input
+                        id="edit-peso"
+                        type="number"
+                        value={formData.peso}
+                        onChange={(e) => setFormData({...formData, peso: e.target.value})}
+                        min="0"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-pesoBagagem">Bagagem (kg)</Label>
+                      <Input
+                        id="edit-pesoBagagem"
+                        type="number"
+                        value={formData.pesoBagagem}
+                        onChange={(e) => setFormData({...formData, pesoBagagem: e.target.value})}
+                        min="0"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-pesoBagagemMao">Bag. Mão (kg)</Label>
+                      <Input
+                        id="edit-pesoBagagemMao"
+                        type="number"
+                        value={formData.pesoBagagemMao}
+                        onChange={(e) => setFormData({...formData, pesoBagagemMao: e.target.value})}
+                        min="0"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-prioridade">Prioridade</Label>
+                      <Select value={formData.prioridade.toString()} onValueChange={(value) => setFormData({...formData, prioridade: parseInt(value)})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a prioridade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PRIORITIES.map(priority => (
+                            <SelectItem key={priority.value} value={priority.value.toString()}>
+                              <PriorityTooltip priority={priority.value}>
+                                <span>{priority.label}</span>
+                              </PriorityTooltip>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-responsavelInscricao">Responsável pela Inscrição</Label>
+                      <Input
+                        id="edit-responsavelInscricao"
+                        value={formData.responsavelInscricao}
+                        onChange={(e) => setFormData({...formData, responsavelInscricao: e.target.value})}
+                        placeholder="O Próprio"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-parentesco">Parentesco</Label>
+                      <Input
+                        id="edit-parentesco"
+                        value={formData.parentesco}
+                        onChange={(e) => setFormData({...formData, parentesco: e.target.value})}
+                        placeholder="Ex: Cônjuge, Filho(a), etc."
+                      />
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        ))}
       </div>
 
       {sortedPassengers.length === 0 && (

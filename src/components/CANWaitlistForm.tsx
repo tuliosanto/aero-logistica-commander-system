@@ -59,22 +59,6 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
     'CIV', 'DEP'
   ];
 
-  const prioridades = [
-    { value: 1, label: '1 - Comandante Supremo' },
-    { value: 2, label: '2 - Ministro da Defesa' },
-    { value: 3, label: '3 - Comandante da Aeronáutica' },
-    { value: 4, label: '4 - Oficiais-Generais' },
-    { value: 5, label: '5 - Oficiais Superiores' },
-    { value: 6, label: '6 - Oficiais Intermediários' },
-    { value: 7, label: '7 - Oficiais Subalternos' },
-    { value: 8, label: '8 - Suboficiais e Sargentos' },
-    { value: 9, label: '9 - Cabos e Soldados' },
-    { value: 10, label: '10 - Dependentes de Militares' },
-    { value: 11, label: '11 - Servidores Civis' },
-    { value: 12, label: '12 - Pensionistas' },
-    { value: 13, label: '13 - Pessoas Autorizadas' }
-  ];
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
