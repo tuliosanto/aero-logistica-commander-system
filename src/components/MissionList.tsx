@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +23,26 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
     }
   };
 
+  const getCodigoBase = () => {
+    const codigos: { [key: string]: string } = {
+      'Base Aérea de Santa Maria': 'SM',
+      'Base Aérea do Galeão': 'GL',
+      'Base Aérea de Brasília': 'BR',
+      'Base Aérea de Manaus': 'MN',
+      'Base Aérea de Campo Grande': 'CG',
+    };
+    return codigos[currentUser.baseAerea] || 'XX';
+  };
+
+  const getChefePCAN = () => {
+    const savedConfig = localStorage.getItem(`baseConfig_${currentUser.baseAerea}`);
+    if (savedConfig) {
+      const config = JSON.parse(savedConfig);
+      return `${config.nomeChefe} - ${config.postoChefe}`;
+    }
+    return 'NÃO CONFIGURADO';
+  };
+
   const generateMissionReport = (mission: Mission) => {
     const reportWindow = window.open('', '_blank');
     if (!reportWindow) return;
@@ -37,12 +56,16 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
 
     const totalPaxWeight = mission.passageiros.reduce((sum, p) => sum + p.peso, 0);
     const totalBaggageWeight = mission.passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0);
+    const codigoBase = getCodigoBase();
+    const chefePCAN = getChefePCAN();
+    const despachante = `${currentUser.posto} ${currentUser.nomeGuerra}`;
 
     const reportContent = `
       <!DOCTYPE html>
-      <html>
+      <html lang="pt-BR">
         <head>
           <title>Relação de Passageiros - ${mission.ofrag}</title>
+          <meta charset="UTF-8">
           <style>
             @page { margin: 10mm; size: A4; }
             body { 
@@ -56,13 +79,19 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
               text-align: center; 
               margin-bottom: 10px;
               font-weight: bold;
-              border: 2px solid black;
-              padding: 5px;
+              border: 3px solid black;
+              padding: 8px;
+            }
+            .header-title {
+              font-size: 12px;
+              font-weight: bold;
+              margin: 2px 0;
             }
             .info-section {
               display: flex;
               margin-bottom: 10px;
               gap: 0;
+              height: 60px;
             }
             .aviao-box {
               border: 2px solid black;
@@ -73,6 +102,9 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
               font-weight: bold;
               width: 50px;
               background-color: #f5f5f5;
+              display: flex;
+              align-items: center;
+              justify-content: center;
             }
             .info-group {
               border: 2px solid black;
@@ -80,6 +112,9 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
               padding: 5px;
               flex: 1;
               font-size: 9px;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-around;
             }
             .info-group:last-child {
               max-width: 200px;
@@ -109,14 +144,27 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
               font-weight: bold;
               font-size: 7px;
             }
-            .nome-col { text-align: left; max-width: 150px; }
-            .cpf-col { font-family: monospace; font-size: 7px; }
+            .nome-col { 
+              text-align: left; 
+              max-width: 150px; 
+              font-size: 7px;
+            }
+            .cpf-col { 
+              font-family: monospace; 
+              font-size: 6px; 
+            }
             .footer-info {
               display: flex;
               justify-content: space-between;
               margin-top: 5px;
               font-size: 9px;
               font-weight: bold;
+              border: 1px solid black;
+              padding: 3px 5px;
+            }
+            .footer-info:last-child {
+              border-top: 0;
+              border-bottom: 3px solid black;
             }
             @media print { 
               body { margin: 0; } 
@@ -126,10 +174,10 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
         </head>
         <body>
           <div class="header">
-            <div>COMANDO DA AERONÁUTICA</div>
-            <div>BASE AÉREA DE SANTA MARIA</div>
-            <div>SISTEMA DO CORREIO AÉREO NACIONAL</div>
-            <div>RELAÇÃO DE PASSAGEIROS</div>
+            <div class="header-title">COMANDO DA AERONÁUTICA</div>
+            <div class="header-title">${currentUser.baseAerea.toUpperCase()}</div>
+            <div class="header-title">SISTEMA DO CORREIO AÉREO NACIONAL</div>
+            <div class="header-title">RELAÇÃO DE PASSAGEIROS</div>
           </div>
           
           <div class="info-section">
@@ -147,11 +195,11 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
             <div class="info-group">
               <div class="info-row">
                 <span class="info-label">TERMINAL:</span>
-                <span>POSTO CAN SANTA MARIA</span>
+                <span>POSTO CAN ${codigoBase}</span>
               </div>
               <div class="info-row">
                 <span class="info-label">ROTA:</span>
-                <span>${mission.trechos.join(' – ')}</span>
+                <span>${mission.trechos.join('')}</span>
               </div>
             </div>
             <div class="info-group">
@@ -174,7 +222,7 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
             <thead>
               <tr>
                 <th rowspan="2">Nº</th>
-                <th rowspan="2">NOME DOS PASSAGEIROS</th>
+                <th rowspan="2" colspan="3">NOME DOS PASSAGEIROS</th>
                 <th rowspan="2">CPF</th>
                 <th rowspan="2">DESTINO</th>
                 <th rowspan="2">PRIOR</th>
@@ -192,21 +240,21 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
               ${sortedPassengers.map((passenger, index) => `
                 <tr>
                   <td>${index + 1}</td>
-                  <td class="nome-col">${passenger.posto} ${passenger.nome}</td>
+                  <td class="nome-col" colspan="3">${passenger.posto} ${passenger.nome}</td>
                   <td class="cpf-col">${passenger.cpf}</td>
                   <td>${passenger.destino}</td>
                   <td>${passenger.prioridade}</td>
                   <td>${passenger.peso}</td>
                   <td>${passenger.pesoBagagem + passenger.pesoBagagemMao}</td>
                   <td></td>
-                  <td>${passenger.responsavelInscricao || ''}</td>
+                  <td>${passenger.responsavelInscricao || 'O PRÓPRIO'}</td>
                   <td>${passenger.parentesco || ''}</td>
                 </tr>
               `).join('')}
               ${Array.from({ length: Math.max(0, 25 - sortedPassengers.length) }, (_, i) => `
                 <tr>
                   <td>${sortedPassengers.length + i + 1}</td>
-                  <td></td>
+                  <td colspan="3"></td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -221,13 +269,13 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
           </table>
 
           <div class="footer-info">
-            <div>CHEFE DO PCAN-SM: João Marcos Aguirre - Cap R1</div>
+            <div>CHEFE DO PCAN-${codigoBase}: ${chefePCAN}</div>
             <div>SOMA&nbsp;&nbsp;&nbsp;&nbsp;${totalPaxWeight}&nbsp;&nbsp;&nbsp;&nbsp;${totalBaggageWeight}</div>
             <div>CMT ANV:</div>
           </div>
 
           <div class="footer-info">
-            <div>DESPACHANTE: 1S ADELINO</div>
+            <div>DESPACHANTE: ${despachante}</div>
             <div>TOTAL:&nbsp;&nbsp;&nbsp;&nbsp;${totalPaxWeight + totalBaggageWeight}</div>
             <div>MEC ANV:</div>
           </div>
