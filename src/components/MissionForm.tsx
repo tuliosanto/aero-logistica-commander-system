@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,12 +11,14 @@ import { toast } from '@/hooks/use-toast';
 
 interface MissionFormProps {
   onSave: (mission: Mission) => void;
+  onCancel?: () => void;
   currentUser: User;
   mission?: Mission;
 }
 
 const MissionForm = ({
   onSave,
+  onCancel,
   currentUser,
   mission
 }: MissionFormProps) => {
@@ -39,7 +40,8 @@ const MissionForm = ({
       ofrag: ofrag || '',
       operadorId: currentUser.id,
       passageiros,
-      createdAt: mission?.createdAt || new Date().toISOString()
+      createdAt: mission?.createdAt || new Date().toISOString(),
+      baseAerea: currentUser.baseAerea
     };
 
     onSave(missionData);
@@ -126,9 +128,16 @@ const MissionForm = ({
           </div>
         </div>
 
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-          {mission ? 'Atualizar Missão' : 'Cadastrar Missão'}
-        </Button>
+        <div className="flex gap-2">
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            {mission ? 'Atualizar Missão' : 'Cadastrar Missão'}
+          </Button>
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancelar
+            </Button>
+          )}
+        </div>
       </form>
 
       <Separator />

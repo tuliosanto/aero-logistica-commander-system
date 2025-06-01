@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,7 +48,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
     setShowMissionForm(true);
   };
 
-  const handleSaveMission = (missionData: Omit<Mission, 'id' | 'createdAt'>) => {
+  const handleSaveMission = (missionData: Mission) => {
     const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
     
     if (editingMission) {
@@ -67,7 +66,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
         ...missionData,
         id: Date.now().toString(),
         createdAt: new Date().toISOString(),
-        baseAerea: currentUser.baseAerea, // Adicionar a base aérea do usuário à missão
+        baseAerea: currentUser.baseAerea,
       };
       
       allMissions.push(newMission);
@@ -225,11 +224,10 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
 
             {selectedMission ? (
               <PassengerList
-                mission={selectedMission}
-                onUpdatePassengers={(passengers) => 
+                passengers={selectedMission.passageiros}
+                onPassengersChange={(passengers) => 
                   handleUpdatePassengers(selectedMission.id, passengers)
                 }
-                currentUser={currentUser}
               />
             ) : (
               <Card>
