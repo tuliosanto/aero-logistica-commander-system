@@ -118,7 +118,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             <img 
               src={gladioImage} 
               alt="Gládio FAB" 
-              className="w-16 h-16 object-contain"
+              //className="w-16 h-16 object-contain"
             />
           </div>
           <CardTitle className="text-2xl font-bold text-blue-800">
