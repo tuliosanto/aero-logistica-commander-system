@@ -311,7 +311,7 @@ const MissionForm = ({
               <Input 
                 id="trecho1" 
                 value={trecho1} 
-                onChange={e => setTrecho1(e.target.value)} 
+                onChange={e => setTrecho1(e.target.value.toUpperCase())} 
                 placeholder="Ex: SBGL, SBBR, etc."
               />
             </div>
@@ -321,7 +321,7 @@ const MissionForm = ({
               <Input 
                 id="trecho2" 
                 value={trecho2} 
-                onChange={e => setTrecho2(e.target.value)} 
+                onChange={e => setTrecho2(e.target.value.toUpperCase())} 
                 placeholder="Ex: SBGL, SBBR, etc."
               />
             </div>
@@ -341,7 +341,7 @@ const MissionForm = ({
               <Input 
                 id="trecho4" 
                 value={trecho4} 
-                onChange={e => setTrecho4(e.target.value)} 
+                onChange={e => setTrecho4(e.target.value.toUpperCase())} 
                 placeholder="Ex: SBGL, SBBR, etc."
               />
             </div>
@@ -351,7 +351,7 @@ const MissionForm = ({
               <Input 
                 id="trecho5" 
                 value={trecho5} 
-                onChange={e => setTrecho5(e.target.value)} 
+                onChange={e => setTrecho5(e.target.value.toUpperCase())} 
                 placeholder="Ex: SBGL, SBBR, etc."
               />
             </div>
@@ -361,7 +361,7 @@ const MissionForm = ({
               <Input 
                 id="trecho6" 
                 value={trecho6} 
-                onChange={e => setTrecho6(e.target.value)} 
+                onChange={e => setTrecho6(e.target.value.toUpperCase())} 
                 placeholder="Ex: SBGL, SBBR, etc."
               />
             </div>
