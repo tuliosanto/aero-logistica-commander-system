@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { UserPlus, X } from 'lucide-react';
 import { Passenger } from '../types/Mission';
-import { POSTOS_MILITARES } from '../utils/constants';
+import { MILITARY_RANKS } from '../utils/constants';
 import { toast } from '@/hooks/use-toast';
 
 interface PassengerFormProps {
@@ -109,7 +109,7 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
                   <SelectValue placeholder="Selecione o posto" />
                 </SelectTrigger>
                 <SelectContent>
-                  {POSTOS_MILITARES.map((p) => (
+                  {MILITARY_RANKS.map((p) => (
                     <SelectItem key={p} value={p}>
                       {p}
                     </SelectItem>
