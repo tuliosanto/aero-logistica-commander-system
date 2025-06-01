@@ -87,7 +87,7 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
               <SelectValue placeholder="Selecione o posto" />
             </SelectTrigger>
             <SelectContent>
-              {MILITARY_RANKS.map(rank => (
+              {MILITARY_RANKS.filter(rank => rank && rank.trim() !== '').map(rank => (
                 <SelectItem key={rank} value={rank}>{rank}</SelectItem>
               ))}
             </SelectContent>
@@ -138,7 +138,7 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             <SelectValue placeholder="Selecione o destino" />
           </SelectTrigger>
           <SelectContent>
-            {AERODROMOS.map(aero => (
+            {AERODROMOS.filter(aero => aero?.code && aero.code.trim() !== '').map(aero => (
               <SelectItem key={aero.code} value={aero.code}>
                 {aero.code} - {aero.location}
               </SelectItem>
@@ -189,7 +189,7 @@ const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }:
             <SelectValue placeholder="Selecione a prioridade" />
           </SelectTrigger>
           <SelectContent>
-            {PRIORITIES.map(priority => (
+            {PRIORITIES.filter(priority => priority?.value && priority.value.toString().trim() !== '').map(priority => (
               <SelectItem key={priority.value} value={priority.value.toString()}>
                 <PriorityTooltip priority={priority.value}>
                   <span>{priority.label}</span>
