@@ -26,11 +26,11 @@ const PassengerList = ({ passengers, onPassengersChange, baseAerea }: PassengerL
     nome: '',
     cpf: '',
     destino: '',
-    peso: '',
-    pesoBagagem: '',
+    peso: '70',
+    pesoBagagem: '15',
     pesoBagagemMao: '',
     prioridade: '',
-    responsavelInscricao: 'O Próprio',
+    responsavelInscricao: 'O PRÓPRIO',
     parentesco: ''
   });
 
@@ -40,11 +40,11 @@ const PassengerList = ({ passengers, onPassengersChange, baseAerea }: PassengerL
       nome: '',
       cpf: '',
       destino: '',
-      peso: '',
-      pesoBagagem: '',
+      peso: '70',
+      pesoBagagem: '15',
       pesoBagagemMao: '',
       prioridade: '',
-      responsavelInscricao: 'O Próprio',
+      responsavelInscricao: 'O PRÓPRIO',
       parentesco: ''
     });
   };
