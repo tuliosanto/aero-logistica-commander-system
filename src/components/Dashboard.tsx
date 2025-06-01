@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +10,6 @@ import { Mission } from '../types/Mission';
 import { User } from '../types/User';
 import MissionForm from './MissionForm';
 import MissionList from './MissionList';
-import PassengerList from './PassengerList';
 import UserManagement from './UserManagement';
 import BaseConfigComponent from './BaseConfig';
 import { useBaseImage } from '../hooks/useBaseImage';
@@ -21,7 +21,6 @@ interface DashboardProps {
 
 const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
   const [missions, setMissions] = useState<Mission[]>([]);
-  const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [showMissionForm, setShowMissionForm] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [activeTab, setActiveTab] = useState('missions');
@@ -88,28 +87,6 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
     const updatedMissions = allMissions.filter((m: Mission) => m.id !== missionId);
     localStorage.setItem('missions', JSON.stringify(updatedMissions));
     loadMissions();
-    
-    if (selectedMission?.id === missionId) {
-      setSelectedMission(null);
-    }
-  };
-
-  const handleMissionSelect = (mission: Mission) => {
-    setSelectedMission(mission);
-    setActiveTab('passengers');
-  };
-
-  const handleUpdatePassengers = (missionId: string, passengers: any[]) => {
-    const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
-    const updatedMissions = allMissions.map((mission: Mission) =>
-      mission.id === missionId ? { ...mission, passageiros: passengers } : mission
-    );
-    localStorage.setItem('missions', JSON.stringify(updatedMissions));
-    loadMissions();
-    
-    if (selectedMission && selectedMission.id === missionId) {
-      setSelectedMission({ ...selectedMission, passageiros: passengers });
-    }
   };
 
   return (
@@ -148,14 +125,10 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
 
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className={`grid w-full ${currentUser.perfil !== 'Operador' ? 'grid-cols-3' : 'grid-cols-1'} mb-6`}>
             <TabsTrigger value="missions" className="flex items-center space-x-2">
               <Plane className="w-4 h-4" />
               <span>Missões</span>
-            </TabsTrigger>
-            <TabsTrigger value="passengers" className="flex items-center space-x-2">
-              <Users className="w-4 h-4" />
-              <span>Passageiros</span>
             </TabsTrigger>
             {currentUser.perfil !== 'Operador' && (
               <TabsTrigger value="users" className="flex items-center space-x-2">
@@ -210,36 +183,8 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
                 missions={missions}
                 onEdit={handleEditMission}
                 onDelete={handleDeleteMission}
-                onSelectMission={handleMissionSelect}
                 currentUser={currentUser}
               />
-            )}
-          </TabsContent>
-
-          <TabsContent value="passengers" className="space-y-6">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-800">Passageiros</h2>
-              <p className="text-gray-600">Gerencie os passageiros das missões</p>
-            </div>
-
-            {selectedMission ? (
-              <PassengerList
-                passengers={selectedMission.passageiros}
-                onPassengersChange={(passengers) => 
-                  handleUpdatePassengers(selectedMission.id, passengers)
-                }
-              />
-            ) : (
-              <Card>
-                <CardContent className="flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-lg text-gray-500">
-                      Selecione uma missão na aba "Missões" para gerenciar os passageiros
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
             )}
           </TabsContent>
 

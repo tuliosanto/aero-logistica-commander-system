@@ -10,11 +10,10 @@ interface MissionListProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
   onDelete: (missionId: string) => void;
-  onSelectMission?: (mission: Mission) => void;
   currentUser: User;
 }
 
-const MissionList = ({ missions, onEdit, onDelete, onSelectMission, currentUser }: MissionListProps) => {
+const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListProps) => {
   const handleDelete = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja excluir a missão OFRAG ${mission.ofrag}?`)) {
       onDelete(mission.id);
@@ -706,16 +705,6 @@ const MissionList = ({ missions, onEdit, onDelete, onSelectMission, currentUser 
                 >
                   Visualizar Impressão
                 </Button>
-                {onSelectMission && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => onSelectMission(mission)}
-                    className="bg-green-50 hover:bg-green-100"
-                  >
-                    Gerenciar Passageiros
-                  </Button>
-                )}
                 <Button 
                   size="sm" 
                   variant="outline"
