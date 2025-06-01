@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,14 +11,15 @@ import { Mission } from '../types/Mission';
 import CANWaitlistForm from './CANWaitlistForm';
 import { AERODROMOS } from '../utils/constants';
 import { toast } from '@/hooks/use-toast';
+import PriorityTooltip from './PriorityTooltip';
 
 interface CANWaitlistProps {
   currentUser: User;
-  missions: Mission[];
+  missions?: Mission[];
   onPassengerAllocated?: (passenger: CANWaitlistPassenger, missionId: string) => void;
 }
 
-const CANWaitlist = ({ currentUser, missions, onPassengerAllocated }: CANWaitlistProps) => {
+const CANWaitlist = ({ currentUser, missions = [], onPassengerAllocated }: CANWaitlistProps) => {
   const [waitlistPassengers, setWaitlistPassengers] = useState<CANWaitlistPassenger[]>([]);
   const [compatiblePassengers, setCompatiblePassengers] = useState<CANWaitlistPassenger[]>([]);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
@@ -46,7 +48,7 @@ const CANWaitlist = ({ currentUser, missions, onPassengerAllocated }: CANWaitlis
       return;
     }
 
-    // Extract destinations from all segments of the route
+    // Handle trechos as string and split by comma, then extract destinations
     const missionDestinations = selectedMission.trechos
       .split(',')
       .map(trecho => trecho.trim())
@@ -242,9 +244,11 @@ const CANWaitlist = ({ currentUser, missions, onPassengerAllocated }: CANWaitlis
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <Badge className={getPriorityColor(passenger.prioridade)}>
-                                  {passenger.prioridade}
-                                </Badge>
+                                <PriorityTooltip priority={passenger.prioridade}>
+                                  <Badge className={getPriorityColor(passenger.prioridade)}>
+                                    {passenger.prioridade}
+                                  </Badge>
+                                </PriorityTooltip>
                               </TableCell>
                               <TableCell>
                                 {new Date(passenger.dataInscricao).toLocaleDateString('pt-BR')}

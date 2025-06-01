@@ -162,7 +162,7 @@ const Dashboard = ({
               <h2 className="text-3xl font-bold text-gray-800">Inscrições Ativas</h2>
               <p className="text-gray-600">Gerencie passageiros na lista de espera do Correio Aéreo Nacional</p>
             </div>
-            <CANWaitlist currentUser={currentUser} />
+            <CANWaitlist currentUser={currentUser} missions={missions} />
           </TabsContent>
 
           {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && <TabsContent value="users" className="space-y-6">

@@ -11,19 +11,20 @@ import PriorityTooltip from './PriorityTooltip';
 
 interface CANWaitlistFormProps {
   passenger?: CANWaitlistPassenger | null;
-  onSave: (passenger: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => void;
-  onCancel: () => void;
+  onSave?: (passenger: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => void;
+  onSubmit?: (passenger: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => void;
+  onCancel?: () => void;
   currentUser: User;
 }
 
-const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitlistFormProps) => {
+const CANWaitlistForm = ({ passenger, onSave, onSubmit, onCancel, currentUser }: CANWaitlistFormProps) => {
   const [posto, setPosto] = useState(passenger?.posto || '');
   const [nome, setNome] = useState(passenger?.nome || '');
   const [cpf, setCpf] = useState(passenger?.cpf || '');
   const [telefone, setTelefone] = useState(passenger?.telefone || '');
   const [destino, setDestino] = useState(passenger?.destino || '');
-  const [peso, setPeso] = useState(passenger?.peso || '');
-  const [pesoBagagem, setPesoBagagem] = useState(passenger?.pesoBagagem || '');
+  const [peso, setPeso] = useState<number>(passenger?.peso || 70);
+  const [pesoBagagem, setPesoBagagem] = useState<number>(passenger?.pesoBagagem || 0);
   const [pesoBagagemMao, setPesoBagagemMao] = useState(passenger?.pesoBagagemMao || 0);
   const [prioridade, setPrioridade] = useState(passenger?.prioridade || 13);
   const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || 'O PRÓPRIO');
@@ -31,7 +32,7 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
+    const passengerData = {
       posto,
       nome,
       cpf,
@@ -43,7 +44,14 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
       prioridade,
       responsavelInscricao,
       parentesco
-    });
+    };
+    
+    if (onSave) {
+      onSave(passengerData);
+    }
+    if (onSubmit) {
+      onSubmit(passengerData);
+    }
   };
 
   const formatCPF = (value: string) => {
@@ -218,9 +226,11 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
         <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
           {passenger ? 'Atualizar' : 'Cadastrar'} Passageiro
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+        )}
       </div>
     </form>
   );

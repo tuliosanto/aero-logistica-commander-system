@@ -17,13 +17,15 @@ interface PassengerListProps {
   onPassengersChange: (passengers: Passenger[]) => void;
   showMoveToWaitlist?: boolean;
   onMoveToWaitlist?: (passenger: Passenger) => void;
+  onComplete?: () => void;
 }
 
 const PassengerList = ({ 
   passengers, 
   onPassengersChange, 
   showMoveToWaitlist = false, 
-  onMoveToWaitlist
+  onMoveToWaitlist,
+  onComplete
 }: PassengerListProps) => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -453,7 +455,7 @@ const PassengerList = ({
                           maxLength={15}
                         />
                       ) : (
-                        <span className="font-mono text-sm">{passenger.telefone}</span>
+                        <span className="font-mono text-sm">{passenger.telefone || '-'}</span>
                       )}
                     </TableCell>
                     <TableCell>
