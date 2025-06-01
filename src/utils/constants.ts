@@ -75,7 +75,21 @@ export const AERODROMOS = [
   { code: 'SBCC', name: 'Cabo Frio', location: 'Cabo Frio - RJ' }
 ];
 
-export const PRIORITIES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+export const PRIORITIES = [
+  { value: 1, label: 'Prioridade 1 - Emergência Médica' },
+  { value: 2, label: 'Prioridade 2 - Viagem a Serviço' },
+  { value: 3, label: 'Prioridade 3 - Tratamento Médico' },
+  { value: 4, label: 'Prioridade 4 - Casos Especiais' },
+  { value: 5, label: 'Prioridade 5 - Militares Ativa' },
+  { value: 6, label: 'Prioridade 6 - Militares e Veteranos' },
+  { value: 7, label: 'Prioridade 7 - Dependentes e Servidores' },
+  { value: 8, label: 'Prioridade 8 - Marinha/Exército Serviço' },
+  { value: 9, label: 'Prioridade 9 - Forças Auxiliares Serviço' },
+  { value: 10, label: 'Prioridade 10 - Marinha/Exército' },
+  { value: 11, label: 'Prioridade 11 - Forças Auxiliares' },
+  { value: 12, label: 'Prioridade 12 - Dependentes Servidores' },
+  { value: 13, label: 'Prioridade 13 - Cidadãos Brasileiros' }
+];
 
 export const getRankOrder = (rank: string): number => {
   return MILITARY_RANKS.indexOf(rank);

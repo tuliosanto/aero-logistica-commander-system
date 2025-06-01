@@ -245,7 +245,6 @@ const PassengerList = ({
     reportWindow.print();
   };
 
-  // Missing function definitions
   const saveEdit = (passengerId: string) => {
     handleSubmit(new Event('submit') as any);
   };
@@ -593,7 +592,7 @@ const PassengerList = ({
 
                     <div className="space-y-2">
                       <Label htmlFor="edit-prioridade">Prioridade</Label>
-                      <Select value={formData.prioridade.toString()} onValueChange={(value) => setFormData({...formData, prioridade: parseInt(value)})}>
+                      <Select value={formData.prioridade.toString()} onValueChange={(value) => setFormData({...formData, prioridade: value})}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a prioridade" />
                         </SelectTrigger>
