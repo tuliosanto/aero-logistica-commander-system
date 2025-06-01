@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -5,21 +6,33 @@ import { Mission } from '../types/Mission';
 import { User } from '../types/User';
 import { toast } from '@/hooks/use-toast';
 import { AIR_BASES } from '../utils/constants';
+import { Check } from 'lucide-react';
 
 interface MissionListProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
   onDelete: (missionId: string) => void;
+  onComplete: (missionId: string) => void;
   currentUser: User;
 }
 
-const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListProps) => {
+const MissionList = ({ missions, onEdit, onDelete, onComplete, currentUser }: MissionListProps) => {
   const handleDelete = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja excluir a missão OFRAG ${mission.ofrag}?`)) {
       onDelete(mission.id);
       toast({
         title: "Missão excluída",
         description: `OFRAG ${mission.ofrag} foi excluída com sucesso.`,
+      });
+    }
+  };
+
+  const handleComplete = (mission: Mission) => {
+    if (confirm(`Tem certeza que deseja concluir a missão OFRAG ${mission.ofrag}?`)) {
+      onComplete(mission.id);
+      toast({
+        title: "Missão concluída",
+        description: `OFRAG ${mission.ofrag} foi marcada como concluída.`,
       });
     }
   };
@@ -688,12 +701,17 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                   <Badge variant="outline" className="bg-yellow-50 text-yellow-700 font-semibold">
                     {new Date(mission.dataVoo).toLocaleDateString('pt-BR')}
                   </Badge>
+                  {mission.isCompleted && (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 font-semibold">
+                      Concluída
+                    </Badge>
+                  )}
                 </CardTitle>
                 <p className="text-sm text-gray-600 mt-1">
                   OFRAG {mission.ofrag}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {mission.trechos}
+                  {mission.trechos.join(' - ')}
                 </p>
               </div>
               <div className="flex space-x-2">
@@ -705,6 +723,17 @@ const MissionList = ({ missions, onEdit, onDelete, currentUser }: MissionListPro
                 >
                   Visualizar Impressão
                 </Button>
+                {!mission.isCompleted && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleComplete(mission)}
+                    className="bg-green-50 hover:bg-green-100 text-green-700"
+                  >
+                    <Check className="w-4 h-4 mr-1" />
+                    Concluir
+                  </Button>
+                )}
                 <Button 
                   size="sm" 
                   variant="outline"

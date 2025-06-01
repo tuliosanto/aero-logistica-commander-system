@@ -35,9 +35,15 @@ const PriorityTooltip = ({ priority, children }: PriorityTooltipProps) => {
         <TooltipTrigger asChild>
           {children}
         </TooltipTrigger>
-        <TooltipContent className="max-w-md p-3 text-sm">
+        <TooltipContent 
+          className="max-w-md p-3 text-sm z-50" 
+          side="top"
+          sideOffset={5}
+          avoidCollisions={true}
+          collisionPadding={10}
+        >
           <div className="font-semibold mb-2">PRIORIDADE {priority}</div>
-          <div>{description}</div>
+          <div className="whitespace-normal break-words">{description}</div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

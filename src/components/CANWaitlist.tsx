@@ -1,243 +1,180 @@
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, UserPlus, Trash2, Plane } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { CANWaitlistPassenger } from '../types/CANWaitlist';
-import { User } from '../types/User';
-import CANWaitlistForm from './CANWaitlistForm';
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown, ChevronRight, Trash2, UserPlus } from 'lucide-react';
+import { CANWaitlistEntry } from '../types/CANWaitlist';
+import { getRankOrder } from '../utils/constants';
+import PriorityTooltip from './PriorityTooltip';
 
 interface CANWaitlistProps {
-  currentUser: User;
+  waitlist: CANWaitlistEntry[];
+  onAddToMission: (entry: CANWaitlistEntry) => void;
+  onRemove: (id: string) => void;
 }
 
-const CANWaitlist = ({ currentUser }: CANWaitlistProps) => {
-  const [waitlistPassengers, setWaitlistPassengers] = useState<CANWaitlistPassenger[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingPassenger, setEditingPassenger] = useState<CANWaitlistPassenger | null>(null);
+const destinationColors = [
+  'bg-blue-100 text-blue-800 border-blue-300',
+  'bg-green-100 text-green-800 border-green-300',
+  'bg-purple-100 text-purple-800 border-purple-300',
+  'bg-orange-100 text-orange-800 border-orange-300',
+  'bg-pink-100 text-pink-800 border-pink-300',
+  'bg-indigo-100 text-indigo-800 border-indigo-300',
+  'bg-yellow-100 text-yellow-800 border-yellow-300',
+  'bg-red-100 text-red-800 border-red-300',
+];
 
-  useEffect(() => {
-    loadWaitlistPassengers();
-  }, [currentUser.baseAerea]);
+const CANWaitlist = ({ waitlist, onAddToMission, onRemove }: CANWaitlistProps) => {
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
-  const loadWaitlistPassengers = () => {
-    const allPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
-    // Filtrar passageiros apenas da base aérea do usuário logado
-    const basePassengers = allPassengers.filter((passenger: CANWaitlistPassenger) => 
-      passenger.baseAerea === currentUser.baseAerea
-    );
-    setWaitlistPassengers(basePassengers);
-  };
+  const groupedWaitlist = useMemo(() => {
+    const groups = waitlist.reduce((acc, entry) => {
+      if (!acc[entry.destino]) {
+        acc[entry.destino] = [];
+      }
+      acc[entry.destino].push(entry);
+      return acc;
+    }, {} as Record<string, CANWaitlistEntry[]>);
 
-  const handleSavePassenger = (passengerData: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => {
-    const allPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
-    
-    if (editingPassenger) {
-      const updatedPassengers = allPassengers.map((p: CANWaitlistPassenger) =>
-        p.id === editingPassenger.id 
-          ? { 
-              ...passengerData, 
-              id: editingPassenger.id, 
-              dataInscricao: editingPassenger.dataInscricao,
-              baseAerea: currentUser.baseAerea 
-            } 
-          : p
-      );
-      localStorage.setItem('canWaitlist', JSON.stringify(updatedPassengers));
-      
-      toast({
-        title: "Passageiro atualizado",
-        description: `${passengerData.posto} ${passengerData.nome} foi atualizado na lista de espera.`,
+    // Sort each group by priority first, then by military rank
+    Object.keys(groups).forEach(destino => {
+      groups[destino].sort((a, b) => {
+        if (a.prioridade !== b.prioridade) {
+          return a.prioridade - b.prioridade;
+        }
+        
+        const rankOrderA = getRankOrder(a.posto);
+        const rankOrderB = getRankOrder(b.posto);
+        
+        if (rankOrderA !== -1 && rankOrderB !== -1) {
+          return rankOrderA - rankOrderB;
+        } else if (rankOrderA !== -1) {
+          return -1;
+        } else if (rankOrderB !== -1) {
+          return 1;
+        }
+        
+        return a.posto.localeCompare(b.posto);
       });
+    });
+
+    return groups;
+  }, [waitlist]);
+
+  const toggleGroup = (destino: string) => {
+    const newCollapsed = new Set(collapsedGroups);
+    if (newCollapsed.has(destino)) {
+      newCollapsed.delete(destino);
     } else {
-      const newPassenger: CANWaitlistPassenger = {
-        ...passengerData,
-        id: Date.now().toString(),
-        dataInscricao: new Date().toISOString(),
-        baseAerea: currentUser.baseAerea,
-      };
-      
-      allPassengers.push(newPassenger);
-      localStorage.setItem('canWaitlist', JSON.stringify(allPassengers));
-      
-      toast({
-        title: "Passageiro cadastrado",
-        description: `${passengerData.posto} ${passengerData.nome} foi adicionado à lista de espera.`,
-      });
+      newCollapsed.add(destino);
     }
-    
-    loadWaitlistPassengers();
-    setShowForm(false);
-    setEditingPassenger(null);
+    setCollapsedGroups(newCollapsed);
   };
 
-  const handleEditPassenger = (passenger: CANWaitlistPassenger) => {
-    setEditingPassenger(passenger);
-    setShowForm(true);
+  const getDestinationColor = (index: number) => {
+    return destinationColors[index % destinationColors.length];
   };
 
-  const handleDeletePassenger = (passengerId: string) => {
-    const passenger = waitlistPassengers.find(p => p.id === passengerId);
-    if (!passenger) return;
-
-    if (confirm(`Tem certeza que deseja remover ${passenger.posto} ${passenger.nome} da lista de espera?`)) {
-      const allPassengers = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
-      const updatedPassengers = allPassengers.filter((p: CANWaitlistPassenger) => p.id !== passengerId);
-      localStorage.setItem('canWaitlist', JSON.stringify(updatedPassengers));
-      loadWaitlistPassengers();
-      
-      toast({
-        title: "Passageiro removido",
-        description: `${passenger.posto} ${passenger.nome} foi removido da lista de espera.`,
-      });
-    }
-  };
-
-  const getPriorityColor = (priority: number) => {
-    if (priority <= 3) return 'bg-red-100 text-red-800';
-    if (priority <= 6) return 'bg-orange-100 text-orange-800';
-    if (priority <= 9) return 'bg-yellow-100 text-yellow-800';
-    if (priority <= 12) return 'bg-green-100 text-green-800';
-    return 'bg-blue-100 text-blue-800';
-  };
+  if (waitlist.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Lista de Espera CAN</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-500 text-center py-4">Nenhum passageiro na lista de espera.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-semibold">Lista de Espera CAN</h3>
-          <p className="text-sm text-gray-600">
-            {waitlistPassengers.length} passageiro{waitlistPassengers.length !== 1 ? 's' : ''} aguardando voo
-          </p>
-        </div>
-        <Button 
-          onClick={() => {
-            setEditingPassenger(null);
-            setShowForm(true);
-          }}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Novo Passageiro
-        </Button>
-      </div>
-
-      {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {editingPassenger ? 'Editar Passageiro' : 'Cadastrar Passageiro na Lista de Espera'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CANWaitlistForm
-              passenger={editingPassenger}
-              onSave={handleSavePassenger}
-              onCancel={() => {
-                setShowForm(false);
-                setEditingPassenger(null);
-              }}
-              currentUser={currentUser}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {waitlistPassengers.length > 0 ? (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Passageiro</TableHead>
-                  <TableHead>CPF</TableHead>
-                  <TableHead>Telefone</TableHead>
-                  <TableHead>Destino</TableHead>
-                  <TableHead>Peso Total</TableHead>
-                  <TableHead>Prioridade</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Responsável</TableHead>
-                  <TableHead>Data Inscrição</TableHead>
-                  <TableHead>Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {waitlistPassengers
-                  .sort((a, b) => a.prioridade - b.prioridade)
-                  .map((passenger) => (
-                  <TableRow key={passenger.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{passenger.posto} {passenger.nome}</p>
-                        <p className="text-sm text-gray-500">
-                          {passenger.parentesco && `(${passenger.parentesco})`}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">{passenger.cpf}</TableCell>
-                    <TableCell className="font-mono text-sm">{passenger.telefone}</TableCell>
-                    <TableCell>{passenger.destino}</TableCell>
-                    <TableCell>
-                      {passenger.peso + passenger.pesoBagagem + passenger.pesoBagagemMao} kg
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getPriorityColor(passenger.prioridade)}>
-                        {passenger.prioridade}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {passenger.isAllocated ? (
-                        <Badge className="bg-orange-100 text-orange-800">
-                          <Plane className="w-3 h-3 mr-1" />
-                          Alocado em Voo
-                        </Badge>
+    <Card>
+      <CardHeader>
+        <CardTitle>Lista de Espera CAN ({waitlist.length} passageiros)</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {Object.entries(groupedWaitlist).map(([destino, entries], groupIndex) => {
+          const isCollapsed = collapsedGroups.has(destino);
+          const colorClass = getDestinationColor(groupIndex);
+          
+          return (
+            <div key={destino} className={`border rounded-lg ${colorClass.split(' ')[0]} border-2`}>
+              <Collapsible>
+                <CollapsibleTrigger
+                  onClick={() => toggleGroup(destino)}
+                  className="w-full"
+                >
+                  <div className={`p-3 rounded-t-lg flex items-center justify-between hover:opacity-80 transition-opacity ${colorClass}`}>
+                    <div className="flex items-center space-x-2">
+                      {isCollapsed ? (
+                        <ChevronRight className="w-4 h-4" />
                       ) : (
-                        <Badge className="bg-green-100 text-green-800">
-                          Aguardando
-                        </Badge>
+                        <ChevronDown className="w-4 h-4" />
                       )}
-                    </TableCell>
-                    <TableCell>{passenger.responsavelInscricao}</TableCell>
-                    <TableCell>
-                      {new Date(passenger.dataInscricao).toLocaleDateString('pt-BR')}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEditPassenger(passenger)}
-                          disabled={passenger.isAllocated}
-                        >
-                          <UserPlus className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDeletePassenger(passenger.id)}
-                          disabled={passenger.isAllocated}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                      <span className="font-semibold">
+                        {destino} ({entries.length} passageiro{entries.length !== 1 ? 's' : ''})
+                      </span>
+                    </div>
+                  </div>
+                </CollapsibleTrigger>
+                
+                <CollapsibleContent>
+                  <div className="bg-white rounded-b-lg border-t">
+                    {entries.map((entry, index) => (
+                      <div
+                        key={entry.id}
+                        className={`p-3 flex items-center justify-between ${
+                          index !== entries.length - 1 ? 'border-b' : ''
+                        }`}
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-medium">
+                              {entry.posto} {entry.nome}
+                            </span>
+                            <PriorityTooltip priority={entry.prioridade}>
+                              <Badge variant="outline" className="cursor-help">
+                                Prioridade {entry.prioridade}
+                              </Badge>
+                            </PriorityTooltip>
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <p>CPF: {entry.cpf}</p>
+                            <p>Peso: {entry.peso}kg | Bagagem: {entry.pesoBagagem + entry.pesoBagagemMao}kg</p>
+                            <p>Data de Inscrição: {new Date(entry.dataInscricao).toLocaleDateString('pt-BR')}</p>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onAddToMission(entry)}
+                            className="bg-green-50 hover:bg-green-100 text-green-700"
+                          >
+                            <UserPlus className="w-4 h-4 mr-1" />
+                            Adicionar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => onRemove(entry.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-gray-500">Nenhum passageiro na lista de espera.</p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
   );
 };
 
