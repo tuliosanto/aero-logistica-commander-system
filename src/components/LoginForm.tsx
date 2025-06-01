@@ -155,7 +155,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="baseAerea">Base Aérea *</Label>
+              <Label htmlFor="baseAerea">Base Aérea</Label>
               <Select value={baseAerea} onValueChange={setBaseAerea}>
                 <SelectTrigger className="focus:ring-blue-500 focus:border-blue-500">
                   <SelectValue placeholder="Selecione sua base" />
