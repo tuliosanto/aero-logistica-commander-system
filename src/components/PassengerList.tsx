@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Check } from 'lucide-react';
+import { Check, ArrowLeft } from 'lucide-react';
 import { Passenger } from '../types/Mission';
 import { MILITARY_RANKS, PRIORITIES, getRankOrder, AIR_BASES } from '../utils/constants';
 import { toast } from '@/hooks/use-toast';
@@ -16,9 +15,17 @@ interface PassengerListProps {
   passengers: Passenger[];
   onPassengersChange: (passengers: Passenger[]) => void;
   baseAerea?: string;
+  showMoveToWaitlist?: boolean;
+  onMoveToWaitlist?: (passenger: Passenger) => void;
 }
 
-const PassengerList = ({ passengers, onPassengersChange, baseAerea }: PassengerListProps) => {
+const PassengerList = ({ 
+  passengers, 
+  onPassengersChange, 
+  baseAerea,
+  showMoveToWaitlist = false,
+  onMoveToWaitlist
+}: PassengerListProps) => {
   const [isAddingPassenger, setIsAddingPassenger] = useState(false);
   const [editingPassenger, setEditingPassenger] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -428,6 +435,17 @@ const PassengerList = ({ passengers, onPassengersChange, baseAerea }: PassengerL
                     >
                       Editar
                     </Button>
+                    {showMoveToWaitlist && onMoveToWaitlist && (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => onMoveToWaitlist(passenger)}
+                        className="text-orange-600 hover:bg-orange-50"
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-1" />
+                        Lista de Espera
+                      </Button>
+                    )}
                     <Button 
                       size="sm" 
                       variant="destructive"
