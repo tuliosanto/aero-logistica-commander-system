@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -236,6 +237,7 @@ const MissionForm = ({
   };
 
   const compatiblePassengers = getCompatibleWaitlistPassengers();
+  const weights = calculateTotalWeights();
 
   return (
     <div className="space-y-6">
