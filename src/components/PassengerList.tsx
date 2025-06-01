@@ -3,18 +3,27 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trash2, UserCheck, UserX } from 'lucide-react';
+import { Trash2, UserCheck, UserX, CheckCircle, ArrowLeft } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Passenger } from '../types/Mission';
 import { getRankOrder } from '../utils/constants';
 import PriorityTooltip from './PriorityTooltip';
 
 interface PassengerListProps {
   passengers: Passenger[];
-  onRemove: (passengerId: string) => void;
-  onToggleCheckIn: (passengerId: string) => void;
+  onPassengersChange: (passengers: Passenger[]) => void;
+  showMoveToWaitlist?: boolean;
+  onMoveToWaitlist?: (passenger: Passenger) => void;
+  onComplete?: () => void;
 }
 
-const PassengerList = ({ passengers, onRemove, onToggleCheckIn }: PassengerListProps) => {
+const PassengerList = ({ 
+  passengers, 
+  onPassengersChange, 
+  showMoveToWaitlist = false,
+  onMoveToWaitlist,
+  onComplete
+}: PassengerListProps) => {
   // Sort passengers by priority first, then by military rank
   const sortedPassengers = [...passengers].sort((a, b) => {
     // First sort by priority (lower number = higher priority)
@@ -38,6 +47,18 @@ const PassengerList = ({ passengers, onRemove, onToggleCheckIn }: PassengerListP
     return a.posto.localeCompare(b.posto);
   });
 
+  const handleRemove = (passengerId: string) => {
+    const updatedPassengers = passengers.filter(p => p.id !== passengerId);
+    onPassengersChange(updatedPassengers);
+  };
+
+  const handleToggleCheckIn = (passengerId: string) => {
+    const updatedPassengers = passengers.map(p => 
+      p.id === passengerId ? { ...p, checkedIn: !p.checkedIn } : p
+    );
+    onPassengersChange(updatedPassengers);
+  };
+
   if (passengers.length === 0) {
     return (
       <Card>
@@ -54,7 +75,34 @@ const PassengerList = ({ passengers, onRemove, onToggleCheckIn }: PassengerListP
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Lista de Passageiros ({passengers.length})</CardTitle>
+        <CardTitle className="flex justify-between items-center">
+          <span>Lista de Passageiros ({passengers.length})</span>
+          {onComplete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="bg-green-600 hover:bg-green-700">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Concluir Missão
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Concluir Missão</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tem certeza que deseja concluir esta missão? Esta ação não pode ser desfeita.
+                    Os passageiros da lista de espera serão removidos permanentemente.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={onComplete} className="bg-green-600 hover:bg-green-700">
+                    Concluir
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -113,7 +161,7 @@ const PassengerList = ({ passengers, onRemove, onToggleCheckIn }: PassengerListP
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => onToggleCheckIn(passenger.id)}
+                    onClick={() => handleToggleCheckIn(passenger.id)}
                     className={passenger.checkedIn 
                       ? "bg-red-50 hover:bg-red-100 text-red-700" 
                       : "bg-green-50 hover:bg-green-100 text-green-700"
@@ -131,10 +179,21 @@ const PassengerList = ({ passengers, onRemove, onToggleCheckIn }: PassengerListP
                       </>
                     )}
                   </Button>
+                  {showMoveToWaitlist && passenger.fromWaitlist && onMoveToWaitlist && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onMoveToWaitlist(passenger)}
+                      className="bg-yellow-50 hover:bg-yellow-100 text-yellow-700"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-1" />
+                      Retornar
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => onRemove(passenger.id)}
+                    onClick={() => handleRemove(passenger.id)}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

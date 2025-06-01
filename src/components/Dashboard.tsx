@@ -7,42 +7,60 @@ import { PlusCircle, Users, Settings, LogOut, Plane, UserPlus } from 'lucide-rea
 import { toast } from '@/hooks/use-toast';
 import { Mission } from '../types/Mission';
 import { User } from '../types/User';
+import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import MissionForm from './MissionForm';
 import MissionList from './MissionList';
 import UserManagement from './UserManagement';
 import BaseConfigComponent from './BaseConfig';
 import CANWaitlist from './CANWaitlist';
 import { useBaseImage } from '../hooks/useBaseImage';
+
 interface DashboardProps {
   currentUser: User;
   onLogout: () => void;
 }
+
 const Dashboard = ({
   currentUser,
   onLogout
 }: DashboardProps) => {
   const [missions, setMissions] = useState<Mission[]>([]);
+  const [waitlist, setWaitlist] = useState<CANWaitlistPassenger[]>([]);
   const [showMissionForm, setShowMissionForm] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [activeTab, setActiveTab] = useState(currentUser.perfil === 'Secretario' ? 'waitlist' : 'missions');
   const baseImage = useBaseImage(currentUser.baseAerea);
+
   useEffect(() => {
     loadMissions();
+    loadWaitlist();
   }, [currentUser.baseAerea]);
+
   const loadMissions = () => {
     const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
     // Filtrar missões apenas da base aérea do usuário logado
     const baseMissions = allMissions.filter((mission: Mission) => mission.baseAerea === currentUser.baseAerea);
     setMissions(baseMissions);
   };
+
+  const loadWaitlist = () => {
+    const allWaitlist = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
+    const baseWaitlist = allWaitlist.filter((entry: CANWaitlistPassenger) => 
+      entry.baseAerea === currentUser.baseAerea
+    );
+    setWaitlist(baseWaitlist);
+  };
+
   const handleCreateMission = () => {
     setEditingMission(null);
     setShowMissionForm(true);
   };
+
   const handleEditMission = (mission: Mission) => {
     setEditingMission(mission);
     setShowMissionForm(true);
   };
+
   const handleSaveMission = (missionData: Mission) => {
     const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
     if (editingMission) {
@@ -74,18 +92,56 @@ const Dashboard = ({
     setShowMissionForm(false);
     setEditingMission(null);
   };
+
   const handleDeleteMission = (missionId: string) => {
     const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
     const updatedMissions = allMissions.filter((m: Mission) => m.id !== missionId);
     localStorage.setItem('missions', JSON.stringify(updatedMissions));
     loadMissions();
   };
+
+  const handleCompleteMission = (mission: Mission) => {
+    const allMissions = JSON.parse(localStorage.getItem('missions') || '[]');
+    const updatedMissions = allMissions.map((m: Mission) => 
+      m.id === mission.id ? { ...mission, isCompleted: true } : m
+    );
+    localStorage.setItem('missions', JSON.stringify(updatedMissions));
+    loadMissions();
+    
+    toast({
+      title: "Missão concluída",
+      description: `OFRAG ${mission.ofrag} foi concluída com sucesso.`
+    });
+  };
+
+  const handleAddToMission = (entry: CANWaitlistPassenger) => {
+    // This function can be implemented to add waitlist passengers to missions
+    toast({
+      title: "Funcionalidade em desenvolvimento",
+      description: "Em breve você poderá adicionar passageiros diretamente às missões."
+    });
+  };
+
+  const handleRemoveFromWaitlist = (id: string) => {
+    const allWaitlist = JSON.parse(localStorage.getItem('canWaitlist') || '[]');
+    const updatedWaitlist = allWaitlist.filter((entry: CANWaitlistPassenger) => entry.id !== id);
+    localStorage.setItem('canWaitlist', JSON.stringify(updatedWaitlist));
+    loadWaitlist();
+    
+    toast({
+      title: "Passageiro removido",
+      description: "Passageiro foi removido da lista de espera."
+    });
+  };
+
   const getTabsCount = () => {
     if (currentUser.perfil === 'Operador') return 'grid-cols-2';
     if (currentUser.perfil === 'Secretario') return 'grid-cols-1';
     return 'grid-cols-4';
   };
-  return <div className="min-h-screen bg-slate-50">
+
+  return (
+    <div className="min-h-screen bg-slate-50">
       <nav className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-3">
@@ -112,25 +168,32 @@ const Dashboard = ({
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className={`grid w-full ${getTabsCount()} mb-6`}>
-            {currentUser.perfil !== 'Secretario' && <TabsTrigger value="missions" className="flex items-center space-x-2">
+            {currentUser.perfil !== 'Secretario' && (
+              <TabsTrigger value="missions" className="flex items-center space-x-2">
                 <Plane className="w-4 h-4" />
                 <span>Missões</span>
-              </TabsTrigger>}
+              </TabsTrigger>
+            )}
             <TabsTrigger value="waitlist" className="flex items-center space-x-2">
               <UserPlus className="w-4 h-4" />
               <span>Inscrições CAN</span>
             </TabsTrigger>
-            {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && <TabsTrigger value="users" className="flex items-center space-x-2">
+            {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
+              <TabsTrigger value="users" className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
                 <span>Usuários</span>
-              </TabsTrigger>}
-            {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && <TabsTrigger value="config" className="flex items-center space-x-2">
+              </TabsTrigger>
+            )}
+            {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
+              <TabsTrigger value="config" className="flex items-center space-x-2">
                 <Settings className="w-4 h-4" />
                 <span>Configurações</span>
-              </TabsTrigger>}
+              </TabsTrigger>
+            )}
           </TabsList>
 
-          {currentUser.perfil !== 'Secretario' && <TabsContent value="missions" className="space-y-6">
+          {currentUser.perfil !== 'Secretario' && (
+            <TabsContent value="missions" className="space-y-6">
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-3xl font-bold text-gray-800">Missões</h2>
@@ -142,46 +205,72 @@ const Dashboard = ({
                 </Button>
               </div>
 
-              {showMissionForm ? <Card>
+              {showMissionForm ? (
+                <Card>
                   <CardHeader>
                     <CardTitle>
                       {editingMission ? 'Editar Missão' : 'Nova Missão'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <MissionForm mission={editingMission} onSave={handleSaveMission} onCancel={() => {
-                setShowMissionForm(false);
-                setEditingMission(null);
-              }} currentUser={currentUser} />
+                    <MissionForm 
+                      mission={editingMission} 
+                      onSave={handleSaveMission} 
+                      onCancel={() => {
+                        setShowMissionForm(false);
+                        setEditingMission(null);
+                      }} 
+                      currentUser={currentUser} 
+                    />
                   </CardContent>
-                </Card> : <MissionList missions={missions} onEdit={handleEditMission} onDelete={handleDeleteMission} currentUser={currentUser} />}
-            </TabsContent>}
+                </Card>
+              ) : (
+                <MissionList 
+                  missions={missions} 
+                  onEdit={handleEditMission} 
+                  onDelete={handleDeleteMission} 
+                  onComplete={handleCompleteMission}
+                  currentUser={currentUser} 
+                />
+              )}
+            </TabsContent>
+          )}
 
           <TabsContent value="waitlist" className="space-y-6">
             <div>
               <h2 className="text-3xl font-bold text-gray-800">Inscrições Ativas</h2>
               <p className="text-gray-600">Gerencie passageiros na lista de espera do Correio Aéreo Nacional</p>
             </div>
-            <CANWaitlist currentUser={currentUser} />
+            <CANWaitlist 
+              waitlist={waitlist}
+              onAddToMission={handleAddToMission}
+              onRemove={handleRemoveFromWaitlist}
+            />
           </TabsContent>
 
-          {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && <TabsContent value="users" className="space-y-6">
+          {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
+            <TabsContent value="users" className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-gray-800">Usuários</h2>
                 <p className="text-gray-600">Gerencie os usuários do sistema</p>
               </div>
               <UserManagement currentUser={currentUser} />
-            </TabsContent>}
+            </TabsContent>
+          )}
 
-          {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && <TabsContent value="config" className="space-y-6">
+          {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
+            <TabsContent value="config" className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-gray-800">Configurações da Base</h2>
                 <p className="text-gray-600">Configure os dados da sua base aérea</p>
               </div>
               <BaseConfigComponent currentUser={currentUser} />
-            </TabsContent>}
+            </TabsContent>
+          )}
         </Tabs>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Dashboard;
