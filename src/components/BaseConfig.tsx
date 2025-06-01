@@ -80,6 +80,13 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
   return (
     <div className="space-y-6">
       <Card>
+        <div className="flex justify-center items-center">
+            <img 
+              src={baseImage} 
+              alt={`Logo da ${currentUser.baseAerea}`}
+              className="max-w-full max-h-64 object-contain"
+            />
+          </div>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-blue-700">
             Configurações da Base Aérea - {currentUser.baseAerea}
@@ -116,14 +123,6 @@ const BaseConfigComponent = ({ currentUser }: BaseConfigProps) => {
             >
               {isLoading ? 'Salvando...' : 'Salvar Configurações'}
             </Button>
-          </div>
-          
-          <div className="flex justify-center items-center">
-            <img 
-              src={baseImage} 
-              alt={`Logo da ${currentUser.baseAerea}`}
-              className="max-w-full max-h-64 object-contain"
-            />
           </div>
         </CardContent>
       </Card>
