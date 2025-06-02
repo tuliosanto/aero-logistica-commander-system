@@ -611,7 +611,8 @@ window.onload = function() {
   const selectedDateMissions = selectedDate ? getMissionsForDate(selectedDate) : [];
   const uniqueDates = getUniqueDates();
   if (missions.length === 0) {
-    return <Card>
+    return (
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
@@ -621,9 +622,11 @@ window.onload = function() {
         <CardContent>
           <p className="text-gray-500 text-center py-8">Nenhuma missão arquivada encontrada.</p>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
-  return <div className="space-y-6">
+  return (
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
@@ -768,6 +771,7 @@ window.onload = function() {
               </CardContent>
             </Card>)}
         </div>}
-    </div>;
+    </div>
+  );
 };
 export default ArchivedMissions;
