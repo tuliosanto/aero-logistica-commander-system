@@ -6,8 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import { User } from '../types/User';
-import { MILITARY_RANKS, PRIORITIES, AERODROMOS } from '../utils/constants';
-import PriorityTooltip from './PriorityTooltip';
+import { MILITARY_RANKS, AERODROMOS } from '../utils/constants';
 
 interface CANWaitlistFormProps {
   passenger?: CANWaitlistPassenger | null;
@@ -23,9 +22,6 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
   const [telefone, setTelefone] = useState(passenger?.telefone || '');
   const [destino, setDestino] = useState(passenger?.destino || '');
   const [peso, setPeso] = useState<number>(passenger?.peso || 0);
-  const [pesoBagagem, setPesoBagagem] = useState<number>(passenger?.pesoBagagem || 0);
-  const [pesoBagagemMao, setPesoBagagemMao] = useState(passenger?.pesoBagagemMao || 0);
-  const [prioridade, setPrioridade] = useState(passenger?.prioridade || 13);
   const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || 'O PRÓPRIO');
   const [parentesco, setParentesco] = useState(passenger?.parentesco || '');
 
@@ -38,9 +34,9 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
       telefone,
       destino,
       peso,
-      pesoBagagem,
-      pesoBagagemMao,
-      prioridade,
+      pesoBagagem: 0, // Valor padrão
+      pesoBagagemMao: 0, // Valor padrão
+      prioridade: 13, // Valor padrão
       responsavelInscricao,
       parentesco
     });
@@ -139,57 +135,15 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="peso">Peso (kg)</Label>
-          <Input 
-            id="peso" 
-            type="number" 
-            value={peso} 
-            onChange={e => setPeso(Number(e.target.value))} 
-            min="1"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="pesoBagagem">Bagagem Despachada (kg)</Label>
-          <Input 
-            id="pesoBagagem" 
-            type="number" 
-            value={pesoBagagem} 
-            onChange={e => setPesoBagagem(Number(e.target.value))} 
-            min="0"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="pesoBagagemMao">Bagagem de Mão (kg)</Label>
-          <Input 
-            id="pesoBagagemMao" 
-            type="number" 
-            value={pesoBagagemMao} 
-            onChange={e => setPesoBagagemMao(Number(e.target.value))} 
-            min="0"
-          />
-        </div>
-      </div>
-
       <div className="space-y-2">
-        <Label htmlFor="prioridade">Prioridade</Label>
-        <Select value={prioridade.toString()} onValueChange={(value) => setPrioridade(parseInt(value))}>
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione a prioridade" />
-          </SelectTrigger>
-          <SelectContent>
-            {PRIORITIES.map(priority => (
-              <SelectItem key={priority.value} value={priority.value.toString()}>
-                <PriorityTooltip priority={priority.value}>
-                  <span>{priority.label}</span>
-                </PriorityTooltip>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label htmlFor="peso">Peso (kg)</Label>
+        <Input 
+          id="peso" 
+          type="number" 
+          value={peso} 
+          onChange={e => setPeso(Number(e.target.value))} 
+          min="1"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

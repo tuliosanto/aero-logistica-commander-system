@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +7,7 @@ import { User } from '../types/User';
 import { toast } from '@/hooks/use-toast';
 import { AIR_BASES } from '../utils/constants';
 import { Check, Archive } from 'lucide-react';
+
 interface MissionListProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
@@ -14,6 +16,7 @@ interface MissionListProps {
   onArchive: (missionId: string) => void;
   currentUser: User;
 }
+
 const MissionList = ({
   missions,
   onEdit,
@@ -31,6 +34,7 @@ const MissionList = ({
       });
     }
   };
+
   const handleComplete = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja concluir a missão OFRAG ${mission.ofrag}?`)) {
       onComplete(mission.id);
@@ -40,6 +44,7 @@ const MissionList = ({
       });
     }
   };
+
   const handleArchive = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja arquivar a missão OFRAG ${mission.ofrag}?`)) {
       onArchive(mission.id);
@@ -49,13 +54,16 @@ const MissionList = ({
       });
     }
   };
+
   const getCodigoBase = () => {
     return currentUser.baseAerea.slice(-2);
   };
+
   const getBaseFullName = () => {
     const base = AIR_BASES.find(b => b.code === currentUser.baseAerea);
     return base ? base.name : currentUser.baseAerea;
   };
+
   const getChefePCAN = () => {
     const savedConfig = localStorage.getItem(`baseConfig_${currentUser.baseAerea}`);
     if (savedConfig) {
@@ -64,15 +72,18 @@ const MissionList = ({
     }
     return 'NÃO CONFIGURADO';
   };
+
   const generateMissionReport = (mission: Mission) => {
     const reportWindow = window.open('', '_blank');
     if (!reportWindow) return;
+
     const sortedPassengers = [...mission.passageiros].sort((a, b) => {
       if (a.prioridade !== b.prioridade) {
         return a.prioridade - b.prioridade;
       }
       return 0;
     });
+
     const totalPaxWeight = mission.passageiros.reduce((sum, p) => sum + p.peso, 0);
     const totalBaggageWeight = mission.passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0);
     const codigoBase = getCodigoBase();
@@ -80,14 +91,19 @@ const MissionList = ({
     const chefePCAN = getChefePCAN();
     const despachante = `${currentUser.posto} ${currentUser.nomeGuerra}`;
 
-    // Divide passengers into pages
+    // Corrigir formato dos horários
+    const formatHorario = (horario?: string) => {
+      if (!horario) return '';
+      return horario;
+    };
+
     const firstPagePassengers = sortedPassengers.slice(0, 25);
     const secondPagePassengers = sortedPassengers.slice(25);
     const needsSecondPage = sortedPassengers.length > 25;
+
     const generatePassengerRows = (passengers: any[], startIndex: number, totalRows: number) => {
       const rows = [];
 
-      // Add passenger rows
       for (let i = 0; i < passengers.length; i++) {
         const passenger = passengers[i];
         rows.push(`
@@ -109,10 +125,9 @@ const MissionList = ({
         `);
       }
 
-      // Add empty rows to fill the page
       for (let i = passengers.length; i < totalRows; i++) {
         const rowNumber = startIndex + i + 1;
-        const isLastRows = i >= 15; // Last 10 rows have different styling
+        const isLastRows = i >= 15;
 
         rows.push(`
           <tr style='height:14.25pt'>
@@ -134,8 +149,10 @@ const MissionList = ({
       }
       return rows.join('');
     };
+
     const firstPageRows = generatePassengerRows(firstPagePassengers, 0, 25);
     const secondPageRows = needsSecondPage ? generatePassengerRows(secondPagePassengers, 25, 25) : '';
+
     const reportContent = `
       <!DOCTYPE html>
       <html lang="pt-BR">
@@ -506,13 +523,13 @@ const MissionList = ({
               <td colspan='4' rowspan='2' class='x61' style='border-right:1px solid #000000;border-bottom:1px solid #000000;height:25.5pt;'>${mission.trechos}</td>
               <td class='x53'></td>
               <td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>CHAMADA (H):</td>
-              <td class='x73'>12:30</td>
+              <td class='x73'>${formatHorario(mission.horarioChamada)}</td>
               <td class='x50'></td><td class='x50'></td><td class='x53'></td>
             </tr>
             <tr style='height:14.25pt'>
               <td class='x53'></td><td class='x53'></td>
               <td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>DECOLAGEM (H):</td>
-              <td class='x73'>13:30</td>
+              <td class='x73'>${formatHorario(mission.horarioDecolagem)}</td>
               <td class='x50'></td><td class='x50'></td><td class='x53'></td>
             </tr>
             <tr style='height:14.25pt'>
@@ -614,13 +631,13 @@ const MissionList = ({
               <td colspan='4' rowspan='2' class='x61' style='border-right:1px solid #000000;border-bottom:1px solid #000000;height:25.5pt;'>${mission.trechos}</td>
               <td class='x53'></td>
               <td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>CHAMADA (H):</td>
-              <td class='x73'>12:30</td>
+              <td class='x73'>${formatHorario(mission.horarioChamada)}</td>
               <td class='x50'></td><td class='x50'></td><td class='x53'></td>
             </tr>
             <tr style='height:14.25pt'>
               <td class='x53'></td><td class='x53'></td>
               <td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>DECOLAGEM (H):</td>
-              <td class='x73'>13:30</td>
+              <td class='x73'>${formatHorario(mission.horarioDecolagem)}</td>
               <td class='x50'></td><td class='x50'></td><td class='x53'></td>
             </tr>
             <tr style='height:14.25pt'>
@@ -675,17 +692,24 @@ const MissionList = ({
         </body>
       </html>
     `;
+
     reportWindow.document.write(reportContent);
     reportWindow.document.close();
   };
+
   if (missions.length === 0) {
-    return <div className="text-center py-8 text-gray-500">
+    return (
+      <div className="text-center py-8 text-gray-500">
         <p className="text-lg">Nenhuma missão ativa.</p>
         <p className="text-sm">Clique em "Nova Missão" para começar.</p>
-      </div>;
+      </div>
+    );
   }
-  return <div className="space-y-4">
-      {missions.map(mission => <Card key={mission.id} className="hover:shadow-md transition-shadow">
+
+  return (
+    <div className="space-y-4">
+      {missions.map(mission => (
+        <Card key={mission.id} className="hover:shadow-md transition-shadow">
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
@@ -697,12 +721,16 @@ const MissionList = ({
                   <Badge variant="outline" className="bg-yellow-50 text-yellow-700 font-semibold">
                     {new Date(mission.dataVoo).toLocaleDateString('pt-BR')}
                   </Badge>
-                  {mission.isCompleted && <Badge variant="outline" className="bg-green-50 text-green-700 font-semibold">
+                  {mission.isCompleted && (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 font-semibold">
                       Concluída
-                    </Badge>}
-                  {mission.isArchived && <Badge variant="outline" className="bg-gray-50 text-gray-700 font-semibold">
+                    </Badge>
+                  )}
+                  {mission.isArchived && (
+                    <Badge variant="outline" className="bg-gray-50 text-gray-700 font-semibold">
                       Arquivada
-                    </Badge>}
+                    </Badge>
+                  )}
                 </CardTitle>
                 <p className="text-sm text-gray-600 mt-1">
                   OFRAG {mission.ofrag}
@@ -715,20 +743,28 @@ const MissionList = ({
                 <Button size="sm" variant="outline" onClick={() => generateMissionReport(mission)} className="bg-blue-50 hover:bg-blue-100">
                   Visualizar Impressão
                 </Button>
-                {!mission.isCompleted && !mission.isArchived && <Button size="sm" variant="outline" onClick={() => handleComplete(mission)} className="bg-green-50 hover:bg-green-100 text-green-700">
+                {!mission.isCompleted && !mission.isArchived && (
+                  <Button size="sm" variant="outline" onClick={() => handleComplete(mission)} className="bg-green-50 hover:bg-green-100 text-green-700">
                     <Check className="w-4 h-4 mr-1" />
                     Concluir
-                  </Button>}
-                {mission.isCompleted && !mission.isArchived && <Button size="sm" variant="outline" onClick={() => handleArchive(mission)} className="bg-gray-50 hover:bg-gray-100 text-gray-700">
+                  </Button>
+                )}
+                {mission.isCompleted && !mission.isArchived && (
+                  <Button size="sm" variant="outline" onClick={() => handleArchive(mission)} className="bg-gray-50 hover:bg-gray-100 text-gray-700">
                     <Archive className="w-4 h-4 mr-1" />
                     Arquivar
-                  </Button>}
-                {!mission.isArchived && <Button size="sm" variant="outline" onClick={() => onEdit(mission)}>
+                  </Button>
+                )}
+                {!mission.isArchived && (
+                  <Button size="sm" variant="outline" onClick={() => onEdit(mission)}>
                     Editar
-                  </Button>}
-                <Button size="sm" variant="destructive" onClick={() => handleDelete(mission)}>
-                  Excluir
-                </Button>
+                  </Button>
+                )}
+                {!mission.isCompleted && (
+                  <Button size="sm" variant="destructive" onClick={() => handleDelete(mission)}>
+                    Excluir
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
@@ -740,7 +776,10 @@ const MissionList = ({
               </div>
             </div>
           </CardContent>
-        </Card>)}
-    </div>;
+        </Card>
+      ))}
+    </div>
+  );
 };
+
 export default MissionList;

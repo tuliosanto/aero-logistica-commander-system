@@ -5,40 +5,51 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Mission } from '../types/Mission';
 import { User } from '../types/User';
-import { Calendar as CalendarIcon, Plane, Users, Weight, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar as CalendarIcon, Plane, Users, Weight, FileText } from 'lucide-react';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import ArchivedMissionsFilter from './ArchivedMissionsFilter';
+
 interface ArchivedMissionsProps {
   missions: Mission[];
   currentUser: User;
 }
+
 const ArchivedMissions = ({
   missions,
   currentUser
 }: ArchivedMissionsProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
+  const [filteredMissions, setFilteredMissions] = useState<Mission[]>(missions);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
+
   const formatDateForPrint = (dateString: string) => {
     return format(parseISO(dateString), 'MM/dd/yyyy');
   };
+
   const formatTimeForPrint = (timeString: string) => {
     if (!timeString) return '';
     return timeString;
   };
+
   const getMissionsForDate = (date: Date) => {
-    return missions.filter(mission => isSameDay(parseISO(mission.dataVoo), date));
+    return filteredMissions.filter(mission => isSameDay(parseISO(mission.dataVoo), date));
   };
+
   const getUniqueDates = () => {
-    const dates = missions.map(mission => parseISO(mission.dataVoo));
+    const dates = filteredMissions.map(mission => parseISO(mission.dataVoo));
     const uniqueDates = dates.filter((date, index, self) => index === self.findIndex(d => isSameDay(d, date)));
     return uniqueDates.sort((a, b) => b.getTime() - a.getTime());
   };
+
   const handlePrint = (mission: Mission) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
+
     const printContent = `
 <!DOCTYPE html>
 <html lang="">
@@ -603,13 +614,21 @@ window.onload = function() {
 </body>
 </html>
     `;
+
     printWindow.document.write(printContent);
     printWindow.document.close();
   };
+
   const selectedDateMissions = selectedDate ? getMissionsForDate(selectedDate) : [];
   const uniqueDates = getUniqueDates();
+
+  const handleFilter = (filtered: Mission[]) => {
+    setFilteredMissions(filtered);
+  };
+
   if (missions.length === 0) {
-    return <Card>
+    return (
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
@@ -619,40 +638,62 @@ window.onload = function() {
         <CardContent>
           <p className="text-gray-500 text-center py-8">Nenhuma missão arquivada encontrada.</p>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
-  return <div className="space-y-6">
+
+  return (
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
-          <h2 className="text-lg font-semibold">Missões Arquivadas ({missions.length})</h2>
+          <h2 className="text-lg font-semibold">Missões Arquivadas ({filteredMissions.length})</h2>
         </div>
         <div className="flex gap-2">
-          <Button variant={viewMode === 'calendar' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('calendar')}>
+          <Button 
+            variant={viewMode === 'calendar' ? 'default' : 'outline'} 
+            size="sm" 
+            onClick={() => setViewMode('calendar')}
+          >
             <CalendarIcon className="w-4 h-4 mr-2" />
             Calendário
           </Button>
-          <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('list')}>
+          <Button 
+            variant={viewMode === 'list' ? 'default' : 'outline'} 
+            size="sm" 
+            onClick={() => setViewMode('list')}
+          >
             Lista
           </Button>
         </div>
       </div>
 
-      {viewMode === 'calendar' ? <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <ArchivedMissionsFilter missions={missions} onFilter={handleFilter} />
+
+      {viewMode === 'calendar' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle className="text-sm">Selecione uma data</CardTitle>
             </CardHeader>
             <CardContent>
-              <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={{
-            hasMissions: uniqueDates
-          }} modifiersStyles={{
-            hasMissions: {
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              fontWeight: 'bold'
-            }
-          }} locale={ptBR} className="rounded-md border my-0 py-0 px-0 mx-[65px]" />
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                modifiers={{
+                  hasMissions: uniqueDates
+                }}
+                modifiersStyles={{
+                  hasMissions: {
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    fontWeight: 'bold'
+                  }
+                }}
+                locale={ptBR}
+                className="rounded-md border my-0 py-0 px-0 mx-[65px]"
+              />
               <div className="mt-4 text-xs text-gray-600">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-blue-500 rounded"></div>
@@ -663,13 +704,13 @@ window.onload = function() {
           </Card>
 
           <div className="lg:col-span-2">
-            {selectedDate && selectedDateMissions.length > 0 ? <div className="space-y-4">
+            {selectedDate && selectedDateMissions.length > 0 ? (
+              <div className="space-y-4">
                 <h3 className="text-md font-medium">
-                  Missões do dia {format(selectedDate, 'dd/MM/yyyy', {
-              locale: ptBR
-            })}
+                  Missões do dia {format(selectedDate, 'dd/MM/yyyy', { locale: ptBR })}
                 </h3>
-                {selectedDateMissions.map(mission => <Card key={mission.id} className="w-full">
+                {selectedDateMissions.map(mission => (
+                  <Card key={mission.id} className="w-full">
                     <CardHeader className="py-[5px]">
                       <CardTitle className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
@@ -704,23 +745,30 @@ window.onload = function() {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>)}
-              </div> : selectedDate ? <Card>
+                  </Card>
+                ))}
+              </div>
+            ) : selectedDate ? (
+              <Card>
                 <CardContent className="py-8">
                   <p className="text-gray-500 text-center">
-                    Nenhuma missão arquivada encontrada para {format(selectedDate, 'dd/MM/yyyy', {
-                locale: ptBR
-              })}
+                    Nenhuma missão arquivada encontrada para {format(selectedDate, 'dd/MM/yyyy', { locale: ptBR })}
                   </p>
                 </CardContent>
-              </Card> : <Card>
+              </Card>
+            ) : (
+              <Card>
                 <CardContent className="py-8">
                   <p className="text-gray-500 text-center">Selecione uma data no calendário</p>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
           </div>
-        </div> : <div className="space-y-4">
-          {missions.map(mission => <Card key={mission.id} className="w-full">
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredMissions.map(mission => (
+            <Card key={mission.id} className="w-full">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -758,8 +806,12 @@ window.onload = function() {
                   Relatório de Voo
                 </Button>
               </CardContent>
-            </Card>)}
-        </div>}
-    </div>;
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
+
 export default ArchivedMissions;
