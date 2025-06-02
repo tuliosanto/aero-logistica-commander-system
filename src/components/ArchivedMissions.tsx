@@ -691,7 +691,7 @@ window.onload = function() {
                           className="bg-blue-50 hover:bg-blue-100 text-blue-700"
                         >
                           <FileText className="w-4 h-4 mr-2" />
-                            Relatório de Voo
+                            Relatório do Voo
                         </Button>
                       </CardTitle>
                     </CardHeader>
@@ -708,8 +708,7 @@ window.onload = function() {
                       </div>
                       
                       <div>
-                        <p className="text-sm font-medium text-gray-700">Trechos:</p>
-                        <p className="text-sm text-gray-600">{mission.trechos.join(' → ')}</p>
+                        <p className="text-sm font-medium text-gray-700">Trechos: {mission.trechos.join(' → ')}</p>
                       </div>
                     </CardContent>
                   </Card>)}
