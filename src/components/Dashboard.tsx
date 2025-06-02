@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle, Users, Settings, LogOut, Plane, UserPlus, Archive } from 'lucide-react';
+import { PlusCircle, Users, Settings, LogOut, Plane, UserPlus, Archive, Shield, MapPin } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Mission } from '../types/Mission';
 import { User } from '../types/User';
@@ -236,23 +235,39 @@ const Dashboard = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+      <nav className="bg-white/95 backdrop-blur-sm nav-shadow border-b border-blue-100 px-6 py-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <img src={baseImage} alt={`Logo da ${currentUser.baseAerea}`} className="h-8 w-8 object-contain" />
-            <h1 className="text-xl font-bold text-blue-700">Sistema de Gerenciamento de Passageiros</h1>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 rounded-lg shadow-lg">
+              <img src={baseImage} alt={`Logo da ${currentUser.baseAerea}`} className="h-8 w-8 object-contain filter brightness-0 invert" />
+              <div className="text-white">
+                <h1 className="text-lg font-bold">Sistema de Gerenciamento</h1>
+                <p className="text-xs opacity-90">Correio Aéreo Nacional</p>
+              </div>
+            </div>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-800">
-                {currentUser.posto} {currentUser.nomeGuerra}
-              </p>
-              <p className="text-xs text-gray-600">
-                {currentUser.baseAerea} - {currentUser.perfil}
-              </p>
+            <div className="text-right bg-gradient-to-r from-blue-50 to-slate-50 px-4 py-2 rounded-lg border border-blue-200">
+              <div className="flex items-center space-x-2">
+                <Shield className="w-4 h-4 text-blue-600" />
+                <p className="text-sm font-bold text-slate-800">
+                  {currentUser.posto} {currentUser.nomeGuerra}
+                </p>
+              </div>
+              <div className="flex items-center space-x-2 mt-1">
+                <MapPin className="w-3 h-3 text-blue-500" />
+                <p className="text-xs text-slate-600">
+                  {currentUser.baseAerea} - {currentUser.perfil}
+                </p>
+              </div>
             </div>
-            <Button variant="outline" size="sm" onClick={onLogout} className="text-gray-600 hover:text-gray-800">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onLogout} 
+              className="text-slate-600 hover:text-slate-800 hover:bg-red-50 hover:border-red-200 transition-all duration-200"
+            >
               <LogOut className="w-4 h-4 mr-2" />
               Sair
             </Button>
@@ -262,31 +277,46 @@ const Dashboard = ({
 
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`grid w-full ${getTabsCount()} mb-6`}>
+          <TabsList className={`grid w-full ${getTabsCount()} mb-6 bg-white/80 backdrop-blur-sm border border-blue-200 shadow-lg`}>
             {currentUser.perfil !== 'Secretario' && (
-              <TabsTrigger value="missions" className="flex items-center space-x-2">
+              <TabsTrigger 
+                value="missions" 
+                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white transition-all duration-200"
+              >
                 <Plane className="w-4 h-4" />
                 <span>Missões</span>
               </TabsTrigger>
             )}
             {currentUser.perfil !== 'Secretario' && (
-              <TabsTrigger value="archived" className="flex items-center space-x-2">
+              <TabsTrigger 
+                value="archived" 
+                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white transition-all duration-200"
+              >
                 <Archive className="w-4 h-4" />
                 <span>Arquivadas</span>
               </TabsTrigger>
             )}
-            <TabsTrigger value="waitlist" className="flex items-center space-x-2">
+            <TabsTrigger 
+              value="waitlist" 
+              className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white transition-all duration-200"
+            >
               <UserPlus className="w-4 h-4" />
               <span>Inscrições CAN</span>
             </TabsTrigger>
             {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
-              <TabsTrigger value="users" className="flex items-center space-x-2">
+              <TabsTrigger 
+                value="users" 
+                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-200"
+              >
                 <Users className="w-4 h-4" />
                 <span>Usuários</span>
               </TabsTrigger>
             )}
             {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
-              <TabsTrigger value="config" className="flex items-center space-x-2">
+              <TabsTrigger 
+                value="config" 
+                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white transition-all duration-200"
+              >
                 <Settings className="w-4 h-4" />
                 <span>Configurações</span>
               </TabsTrigger>
@@ -296,24 +326,29 @@ const Dashboard = ({
           {currentUser.perfil !== 'Secretario' && (
             <TabsContent value="missions" className="space-y-6">
               <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-800">Missões Ativas</h2>
-                  <p className="text-gray-600">Gerencie as missões do Correio Aéreo Nacional</p>
+                <div className="space-y-2">
+                  <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">
+                    Missões Ativas
+                  </h2>
+                  <p className="text-slate-600 text-lg">Gerencie as missões do Correio Aéreo Nacional</p>
                 </div>
-                <Button onClick={handleCreateMission} className="bg-blue-600 hover:bg-blue-700">
-                  <PlusCircle className="w-4 h-4 mr-2" />
+                <Button 
+                  onClick={handleCreateMission} 
+                  className="aviation-button text-white px-6 py-3 text-base"
+                >
+                  <PlusCircle className="w-5 h-5 mr-2" />
                   Nova Missão
                 </Button>
               </div>
 
               {showMissionForm ? (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>
+                <Card className="aviation-card">
+                  <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+                    <CardTitle className="text-xl">
                       {editingMission ? 'Editar Missão' : 'Nova Missão'}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-6">
                     <MissionForm 
                       mission={editingMission} 
                       onSave={handleSaveMission} 
@@ -328,14 +363,16 @@ const Dashboard = ({
                   </CardContent>
                 </Card>
               ) : (
-                <MissionList 
-                  missions={missions} 
-                  onEdit={handleEditMission} 
-                  onDelete={handleDeleteMission} 
-                  onComplete={handleCompleteMission}
-                  onArchive={handleArchiveMission}
-                  currentUser={currentUser} 
-                />
+                <div className="aviation-card rounded-xl p-6">
+                  <MissionList 
+                    missions={missions} 
+                    onEdit={handleEditMission} 
+                    onDelete={handleDeleteMission} 
+                    onComplete={handleCompleteMission}
+                    onArchive={handleArchiveMission}
+                    currentUser={currentUser} 
+                  />
+                </div>
               )}
             </TabsContent>
           )}
