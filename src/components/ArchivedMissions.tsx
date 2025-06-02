@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,43 +8,34 @@ import { User } from '../types/User';
 import { Calendar as CalendarIcon, Plane, Users, Weight, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
 interface ArchivedMissionsProps {
   missions: Mission[];
   currentUser: User;
 }
-
-const ArchivedMissions = ({ missions, currentUser }: ArchivedMissionsProps) => {
+const ArchivedMissions = ({
+  missions,
+  currentUser
+}: ArchivedMissionsProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
-
   const formatDateForPrint = (dateString: string) => {
     return format(parseISO(dateString), 'MM/dd/yyyy');
   };
-
   const formatTimeForPrint = (timeString: string) => {
     if (!timeString) return '';
     return timeString;
   };
-
   const getMissionsForDate = (date: Date) => {
-    return missions.filter(mission => 
-      isSameDay(parseISO(mission.dataVoo), date)
-    );
+    return missions.filter(mission => isSameDay(parseISO(mission.dataVoo), date));
   };
-
   const getUniqueDates = () => {
     const dates = missions.map(mission => parseISO(mission.dataVoo));
-    const uniqueDates = dates.filter((date, index, self) => 
-      index === self.findIndex(d => isSameDay(d, date))
-    );
+    const uniqueDates = dates.filter((date, index, self) => index === self.findIndex(d => isSameDay(d, date)));
     return uniqueDates.sort((a, b) => b.getTime() - a.getTime());
   };
-
   const handlePrint = (mission: Mission) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -564,7 +554,9 @@ ${mission.passageiros.map((p, index) => `
 <td class='x50'></td>
 <td class='x53'></td>
  </tr>`).join('')}
-${Array.from({ length: Math.max(0, 25 - mission.passageiros.length) }, (_, i) => `
+${Array.from({
+      length: Math.max(0, 25 - mission.passageiros.length)
+    }, (_, i) => `
  <tr style='height:14.25pt'>
 <td class='x47' style='height:12.75pt;'>${mission.passageiros.length + i + 1}</td>
 <td colspan='3' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'></td>
@@ -613,17 +605,13 @@ window.onload = function() {
 </body>
 </html>
     `;
-
     printWindow.document.write(printContent);
     printWindow.document.close();
   };
-
   const selectedDateMissions = selectedDate ? getMissionsForDate(selectedDate) : [];
   const uniqueDates = getUniqueDates();
-
   if (missions.length === 0) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
@@ -633,60 +621,40 @@ window.onload = function() {
         <CardContent>
           <p className="text-gray-500 text-center py-8">Nenhuma missão arquivada encontrada.</p>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
           <h2 className="text-lg font-semibold">Missões Arquivadas ({missions.length})</h2>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant={viewMode === 'calendar' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('calendar')}
-          >
+          <Button variant={viewMode === 'calendar' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('calendar')}>
             <CalendarIcon className="w-4 h-4 mr-2" />
             Calendário
           </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('list')}
-          >
+          <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('list')}>
             Lista
           </Button>
         </div>
       </div>
 
-      {viewMode === 'calendar' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {viewMode === 'calendar' ? <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle className="text-sm">Selecione uma data</CardTitle>
             </CardHeader>
             <CardContent>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                modifiers={{
-                  hasMissions: uniqueDates
-                }}
-                modifiersStyles={{
-                  hasMissions: {
-                    backgroundColor: '#3b82f6',
-                    color: 'white',
-                    fontWeight: 'bold'
-                  }
-                }}
-                locale={ptBR}
-                className="rounded-md border"
-              />
+              <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={{
+            hasMissions: uniqueDates
+          }} modifiersStyles={{
+            hasMissions: {
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              fontWeight: 'bold'
+            }
+          }} locale={ptBR} className="rounded-md border" />
               <div className="mt-4 text-xs text-gray-600">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-blue-500 rounded"></div>
@@ -697,14 +665,14 @@ window.onload = function() {
           </Card>
 
           <div className="lg:col-span-2">
-            {selectedDate && selectedDateMissions.length > 0 ? (
-              <div className="space-y-4">
+            {selectedDate && selectedDateMissions.length > 0 ? <div className="space-y-4">
                 <h3 className="text-md font-medium">
-                  Missões do dia {format(selectedDate, 'dd/MM/yyyy', { locale: ptBR })}
+                  Missões do dia {format(selectedDate, 'dd/MM/yyyy', {
+              locale: ptBR
+            })}
                 </h3>
-                {selectedDateMissions.map((mission) => (
-                  <Card key={mission.id} className="w-full">
-                    <CardHeader>
+                {selectedDateMissions.map(mission => <Card key={mission.id} className="w-full">
+                    <CardHeader className="py-[5px]">
                       <CardTitle className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <Plane className="w-5 h-5 text-blue-600" />
@@ -715,7 +683,7 @@ window.onload = function() {
                         </div>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="space-y-3 my-0 py-0">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                         <div className="flex items-center space-x-2">
                           <Users className="w-4 h-4 text-gray-500" />
@@ -732,40 +700,28 @@ window.onload = function() {
                         <p className="text-sm text-gray-600">{mission.trechos.join(' → ')}</p>
                       </div>
 
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handlePrint(mission)}
-                        className="bg-blue-50 hover:bg-blue-100 text-blue-700"
-                      >
+                      <Button size="sm" variant="outline" onClick={() => handlePrint(mission)} className="bg-blue-50 hover:bg-blue-100 text-blue-700">
                         <FileText className="w-4 h-4 mr-2" />
                         Relatório de Voo
                       </Button>
                     </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : selectedDate ? (
-              <Card>
+                  </Card>)}
+              </div> : selectedDate ? <Card>
                 <CardContent className="py-8">
                   <p className="text-gray-500 text-center">
-                    Nenhuma missão arquivada encontrada para {format(selectedDate, 'dd/MM/yyyy', { locale: ptBR })}
+                    Nenhuma missão arquivada encontrada para {format(selectedDate, 'dd/MM/yyyy', {
+                locale: ptBR
+              })}
                   </p>
                 </CardContent>
-              </Card>
-            ) : (
-              <Card>
+              </Card> : <Card>
                 <CardContent className="py-8">
                   <p className="text-gray-500 text-center">Selecione uma data no calendário</p>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
           </div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {missions.map((mission) => (
-            <Card key={mission.id} className="w-full">
+        </div> : <div className="space-y-4">
+          {missions.map(mission => <Card key={mission.id} className="w-full">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -798,22 +754,13 @@ window.onload = function() {
                   <p className="text-sm text-gray-600">{mission.trechos.join(' → ')}</p>
                 </div>
 
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => handlePrint(mission)}
-                  className="bg-blue-50 hover:bg-blue-100 text-blue-700"
-                >
+                <Button size="sm" variant="outline" onClick={() => handlePrint(mission)} className="bg-blue-50 hover:bg-blue-100 text-blue-700">
                   <FileText className="w-4 h-4 mr-2" />
                   Relatório de Voo
                 </Button>
               </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+            </Card>)}
+        </div>}
+    </div>;
 };
-
 export default ArchivedMissions;
