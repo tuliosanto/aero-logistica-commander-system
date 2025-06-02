@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -111,9 +112,6 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
 
   return (
     <div className="min-h-screen aviation-bg">
-      {/* Subtle geometric patterns */}
-      <div className="absolute inset-0 aviation-pattern opacity-30"></div>
-      
       {/* Floating aviation elements */}
       <div className="absolute top-10 right-10 text-blue-500/20 floating-element">
         <Plane className="w-12 h-12" />

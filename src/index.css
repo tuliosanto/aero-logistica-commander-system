@@ -104,31 +104,14 @@
 }
 
 @layer components {
-  /* Aviation Background Patterns */
+  /* Aviation Background - Simple gradient instead of patterns */
   .aviation-bg {
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #bae6fd 50%, #7dd3fc 75%, #38bdf8 100%);
-    position: relative;
-  }
-  
-  .aviation-bg::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 25%),
-      radial-gradient(circle at 75% 75%, rgba(14, 165, 233, 0.08) 0%, transparent 25%),
-      linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%);
-    background-size: 200px 200px, 150px 150px, 100px 100px;
-    animation: float-pattern 20s ease-in-out infinite;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 25%, #e2e8f0 50%, #cbd5e1 75%, #94a3b8 100%);
   }
 
-  @keyframes float-pattern {
-    0%, 100% { transform: translateX(0) translateY(0); }
-    33% { transform: translateX(10px) translateY(-5px); }
-    66% { transform: translateX(-5px) translateY(10px); }
+  /* Dashboard Background - Clean subtle gradient */
+  .dashboard-bg {
+    background: linear-gradient(to bottom right, #f8fafc, #f1f5f9, #e2e8f0);
   }
 
   /* Card Styles */
@@ -187,6 +170,27 @@
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
   }
 
+  /* Tab Animations */
+  .tab-missions {
+    @apply data-[state=active]:aviation-button data-[state=active]:text-white;
+  }
+
+  .tab-archived {
+    @apply data-[state=active]:bg-gradient-to-r data-[state=active]:from-slate-500 data-[state=active]:to-slate-600 data-[state=active]:text-white;
+  }
+
+  .tab-waitlist {
+    @apply data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white;
+  }
+
+  .tab-users {
+    @apply data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white;
+  }
+
+  .tab-config {
+    @apply data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white;
+  }
+
   /* Floating Animation */
   .floating-element {
     animation: gentle-float 8s ease-in-out infinite;
@@ -227,16 +231,5 @@
     box-shadow: 
       0 0 0 3px rgba(59, 130, 246, 0.1),
       0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-
-  /* Geometric Patterns */
-  .aviation-pattern {
-    background-image: 
-      linear-gradient(30deg, rgba(59, 130, 246, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.05) 87.5%, rgba(59, 130, 246, 0.05)),
-      linear-gradient(150deg, rgba(59, 130, 246, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.05) 87.5%, rgba(59, 130, 246, 0.05)),
-      linear-gradient(30deg, rgba(59, 130, 246, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.05) 87.5%, rgba(59, 130, 246, 0.05)),
-      linear-gradient(150deg, rgba(59, 130, 246, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.05) 87.5%, rgba(59, 130, 246, 0.05));
-    background-size: 80px 140px;
-    background-position: 0 0, 0 0, 40px 70px, 40px 70px;
   }
 }

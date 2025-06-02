@@ -235,15 +235,15 @@ const Dashboard = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 aviation-pattern">
+    <div className="min-h-screen dashboard-bg">
       <nav className="aviation-nav px-6 py-4 sticky top-0 z-50">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 rounded-xl shadow-lg ring-2 ring-blue-200">
-              <img src={baseImage} alt={`Logo da ${currentUser.baseAerea}`} className="h-8 w-8 object-contain filter brightness-0 invert" />
-              <div className="text-white">
+            <div className="flex items-center space-x-3 aviation-card px-4 py-2 rounded-xl shadow-lg">
+              <img src={baseImage} alt={`Logo da ${currentUser.baseAerea}`} className="h-8 w-8 object-contain" />
+              <div className="text-slate-700">
                 <h1 className="text-lg font-bold">Sistema de Gerenciamento</h1>
-                <p className="text-xs opacity-90">Correio Aéreo Nacional</p>
+                <p className="text-xs text-slate-600">Correio Aéreo Nacional</p>
               </div>
             </div>
           </div>
@@ -281,7 +281,7 @@ const Dashboard = ({
             {currentUser.perfil !== 'Secretario' && (
               <TabsTrigger 
                 value="missions" 
-                className="flex items-center space-x-2 data-[state=active]:aviation-button data-[state=active]:text-white transition-all duration-200 rounded-lg py-2 px-4"
+                className="flex items-center space-x-2 tab-missions transition-all duration-200 rounded-lg py-2 px-4"
               >
                 <Plane className="w-4 h-4" />
                 <span>Missões</span>
@@ -290,7 +290,7 @@ const Dashboard = ({
             {currentUser.perfil !== 'Secretario' && (
               <TabsTrigger 
                 value="archived" 
-                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-slate-500 data-[state=active]:to-slate-600 data-[state=active]:text-white transition-all duration-200 rounded-lg py-2 px-4"
+                className="flex items-center space-x-2 tab-archived transition-all duration-200 rounded-lg py-2 px-4"
               >
                 <Archive className="w-4 h-4" />
                 <span>Arquivadas</span>
@@ -298,7 +298,7 @@ const Dashboard = ({
             )}
             <TabsTrigger 
               value="waitlist" 
-              className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white transition-all duration-200 rounded-lg py-2 px-4"
+              className="flex items-center space-x-2 tab-waitlist transition-all duration-200 rounded-lg py-2 px-4"
             >
               <UserPlus className="w-4 h-4" />
               <span>Inscrições CAN</span>
@@ -306,7 +306,7 @@ const Dashboard = ({
             {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
               <TabsTrigger 
                 value="users" 
-                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-200 rounded-lg py-2 px-4"
+                className="flex items-center space-x-2 tab-users transition-all duration-200 rounded-lg py-2 px-4"
               >
                 <Users className="w-4 h-4" />
                 <span>Usuários</span>
@@ -315,7 +315,7 @@ const Dashboard = ({
             {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
               <TabsTrigger 
                 value="config" 
-                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white transition-all duration-200 rounded-lg py-2 px-4"
+                className="flex items-center space-x-2 tab-config transition-all duration-200 rounded-lg py-2 px-4"
               >
                 <Settings className="w-4 h-4" />
                 <span>Configurações</span>
