@@ -652,7 +652,7 @@ window.onload = function() {
               color: 'white',
               fontWeight: 'bold'
             }
-          }} locale={ptBR} className="rounded-md border" />
+          }} locale={ptBR} className="rounded-md border my-0 py-0 px-0 mx-[65px]" />
               <div className="mt-4 text-xs text-gray-600">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-blue-500 rounded"></div>
