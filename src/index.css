@@ -44,10 +44,12 @@
     --sidebar-border: 210 25% 88%;
     --sidebar-ring: 220 85% 55%;
 
-    /* Aviation themed gradients */
-    --sky-gradient: linear-gradient(135deg, #87CEEB 0%, #4682B4 50%, #1e3a8a 100%);
-    --cloud-gradient: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    --horizon-gradient: linear-gradient(0deg, #fbbf24 0%, #f59e0b 25%, #3b82f6 75%, #1e40af 100%);
+    /* New Aviation themed variables */
+    --aviation-primary: #1e40af;
+    --aviation-secondary: #3b82f6;
+    --aviation-accent: #0ea5e9;
+    --aviation-light: #e0f2fe;
+    --aviation-dark: #0c4a6e;
   }
 
   .dark {
@@ -102,16 +104,13 @@
 }
 
 @layer components {
-  .aviation-gradient {
-    background: var(--sky-gradient);
-  }
-  
-  .cloud-texture {
-    background: var(--cloud-gradient);
+  /* Aviation Background Patterns */
+  .aviation-bg {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #bae6fd 50%, #7dd3fc 75%, #38bdf8 100%);
     position: relative;
   }
   
-  .cloud-texture::before {
+  .aviation-bg::before {
     content: '';
     position: absolute;
     top: 0;
@@ -119,30 +118,44 @@
     right: 0;
     bottom: 0;
     background-image: 
-      radial-gradient(circle at 20% 80%, rgba(255,255,255,0.2) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(255,255,255,0.1) 0%, transparent 50%);
-    pointer-events: none;
+      radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 25%),
+      radial-gradient(circle at 75% 75%, rgba(14, 165, 233, 0.08) 0%, transparent 25%),
+      linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%);
+    background-size: 200px 200px, 150px 150px, 100px 100px;
+    animation: float-pattern 20s ease-in-out infinite;
   }
-  
-  .horizon-gradient {
-    background: var(--horizon-gradient);
+
+  @keyframes float-pattern {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    33% { transform: translateX(10px) translateY(-5px); }
+    66% { transform: translateX(-5px) translateY(10px); }
   }
-  
+
+  /* Card Styles */
   .aviation-card {
-    @apply bg-white/95 backdrop-blur-sm border-0 shadow-xl;
-    background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 100%);
+    @apply bg-white/95 backdrop-blur-md border border-blue-200/50 shadow-xl;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
+    box-shadow: 
+      0 20px 25px -5px rgba(59, 130, 246, 0.1),
+      0 10px 10px -5px rgba(59, 130, 246, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
   }
-  
+
+  /* Button Styles */
   .aviation-button {
-    @apply relative overflow-hidden transition-all duration-300;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    @apply relative overflow-hidden transition-all duration-300 font-semibold;
+    background: linear-gradient(135deg, var(--aviation-primary) 0%, var(--aviation-secondary) 50%, var(--aviation-accent) 100%);
+    box-shadow: 
+      0 4px 15px rgba(30, 64, 175, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(30, 64, 175, 0.2);
   }
   
   .aviation-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    box-shadow: 
+      0 8px 25px rgba(30, 64, 175, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
   
   .aviation-button::before {
@@ -152,33 +165,78 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s ease;
   }
   
   .aviation-button:hover::before {
     left: 100%;
   }
-  
-  .nav-shadow {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  /* Navigation */
+  .aviation-nav {
+    @apply bg-white/90 backdrop-blur-lg border-b border-blue-200/30;
+    box-shadow: 
+      0 4px 6px -1px rgba(59, 130, 246, 0.1),
+      0 2px 4px -1px rgba(59, 130, 246, 0.06);
+  }
+
+  /* Tab Styles */
+  .aviation-tabs {
+    @apply bg-white/80 backdrop-blur-sm border border-blue-200/40;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Floating Animation */
+  .floating-element {
+    animation: gentle-float 8s ease-in-out infinite;
   }
   
-  .floating-card {
-    animation: float 6s ease-in-out infinite;
+  @keyframes gentle-float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(2deg); }
+  }
+
+  /* Pulse Effect */
+  .aviation-pulse {
+    animation: aviation-pulse 3s ease-in-out infinite;
   }
   
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+  @keyframes aviation-pulse {
+    0%, 100% { 
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+      transform: scale(1);
+    }
+    50% { 
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+      transform: scale(1.02);
+    }
   }
-  
-  .pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite alternate;
+
+  /* Gradient Text */
+  .aviation-text-gradient {
+    background: linear-gradient(135deg, var(--aviation-primary) 0%, var(--aviation-secondary) 50%, var(--aviation-accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  
-  @keyframes pulse-glow {
-    from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-    to { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
+
+  /* Input Focus */
+  .aviation-input:focus {
+    @apply ring-2 ring-blue-500/50 border-blue-400;
+    box-shadow: 
+      0 0 0 3px rgba(59, 130, 246, 0.1),
+      0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Geometric Patterns */
+  .aviation-pattern {
+    background-image: 
+      linear-gradient(30deg, rgba(59, 130, 246, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.05) 87.5%, rgba(59, 130, 246, 0.05)),
+      linear-gradient(150deg, rgba(59, 130, 246, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.05) 87.5%, rgba(59, 130, 246, 0.05)),
+      linear-gradient(30deg, rgba(59, 130, 246, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.05) 87.5%, rgba(59, 130, 246, 0.05)),
+      linear-gradient(150deg, rgba(59, 130, 246, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.05) 87.5%, rgba(59, 130, 246, 0.05));
+    background-size: 80px 140px;
+    background-position: 0 0, 0 0, 40px 70px, 40px 70px;
   }
 }

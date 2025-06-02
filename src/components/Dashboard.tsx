@@ -235,11 +235,11 @@ const Dashboard = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
-      <nav className="bg-white/95 backdrop-blur-sm nav-shadow border-b border-blue-100 px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 aviation-pattern">
+      <nav className="aviation-nav px-6 py-4 sticky top-0 z-50">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 rounded-lg shadow-lg">
+            <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 rounded-xl shadow-lg ring-2 ring-blue-200">
               <img src={baseImage} alt={`Logo da ${currentUser.baseAerea}`} className="h-8 w-8 object-contain filter brightness-0 invert" />
               <div className="text-white">
                 <h1 className="text-lg font-bold">Sistema de Gerenciamento</h1>
@@ -248,7 +248,7 @@ const Dashboard = ({
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="text-right bg-gradient-to-r from-blue-50 to-slate-50 px-4 py-2 rounded-lg border border-blue-200">
+            <div className="text-right aviation-card px-4 py-2 rounded-lg">
               <div className="flex items-center space-x-2">
                 <Shield className="w-4 h-4 text-blue-600" />
                 <p className="text-sm font-bold text-slate-800">
@@ -266,7 +266,7 @@ const Dashboard = ({
               variant="outline" 
               size="sm" 
               onClick={onLogout} 
-              className="text-slate-600 hover:text-slate-800 hover:bg-red-50 hover:border-red-200 transition-all duration-200"
+              className="text-slate-600 hover:text-slate-800 hover:bg-red-50 hover:border-red-200 transition-all duration-200 font-semibold"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sair
@@ -277,11 +277,11 @@ const Dashboard = ({
 
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`grid w-full ${getTabsCount()} mb-6 bg-white/80 backdrop-blur-sm border border-blue-200 shadow-lg`}>
+          <TabsList className={`grid w-full ${getTabsCount()} mb-6 aviation-tabs p-1 rounded-xl`}>
             {currentUser.perfil !== 'Secretario' && (
               <TabsTrigger 
                 value="missions" 
-                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white transition-all duration-200"
+                className="flex items-center space-x-2 data-[state=active]:aviation-button data-[state=active]:text-white transition-all duration-200 rounded-lg py-2 px-4"
               >
                 <Plane className="w-4 h-4" />
                 <span>Missões</span>
@@ -290,7 +290,7 @@ const Dashboard = ({
             {currentUser.perfil !== 'Secretario' && (
               <TabsTrigger 
                 value="archived" 
-                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white transition-all duration-200"
+                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-slate-500 data-[state=active]:to-slate-600 data-[state=active]:text-white transition-all duration-200 rounded-lg py-2 px-4"
               >
                 <Archive className="w-4 h-4" />
                 <span>Arquivadas</span>
@@ -298,7 +298,7 @@ const Dashboard = ({
             )}
             <TabsTrigger 
               value="waitlist" 
-              className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white transition-all duration-200"
+              className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white transition-all duration-200 rounded-lg py-2 px-4"
             >
               <UserPlus className="w-4 h-4" />
               <span>Inscrições CAN</span>
@@ -306,7 +306,7 @@ const Dashboard = ({
             {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
               <TabsTrigger 
                 value="users" 
-                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-200"
+                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-200 rounded-lg py-2 px-4"
               >
                 <Users className="w-4 h-4" />
                 <span>Usuários</span>
@@ -315,7 +315,7 @@ const Dashboard = ({
             {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
               <TabsTrigger 
                 value="config" 
-                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white transition-all duration-200"
+                className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white transition-all duration-200 rounded-lg py-2 px-4"
               >
                 <Settings className="w-4 h-4" />
                 <span>Configurações</span>
@@ -327,14 +327,14 @@ const Dashboard = ({
             <TabsContent value="missions" className="space-y-6">
               <div className="flex justify-between items-center">
                 <div className="space-y-2">
-                  <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">
+                  <h2 className="text-4xl font-bold aviation-text-gradient">
                     Missões Ativas
                   </h2>
                   <p className="text-slate-600 text-lg">Gerencie as missões do Correio Aéreo Nacional</p>
                 </div>
                 <Button 
                   onClick={handleCreateMission} 
-                  className="aviation-button text-white px-6 py-3 text-base"
+                  className="aviation-button text-white px-6 py-3 text-base rounded-xl"
                 >
                   <PlusCircle className="w-5 h-5 mr-2" />
                   Nova Missão
@@ -342,8 +342,8 @@ const Dashboard = ({
               </div>
 
               {showMissionForm ? (
-                <Card className="aviation-card">
-                  <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+                <Card className="aviation-card rounded-xl">
+                  <CardHeader className="aviation-button text-white rounded-t-xl">
                     <CardTitle className="text-xl">
                       {editingMission ? 'Editar Missão' : 'Nova Missão'}
                     </CardTitle>
@@ -380,30 +380,32 @@ const Dashboard = ({
           {currentUser.perfil !== 'Secretario' && (
             <TabsContent value="archived" className="space-y-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-800">Missões Arquivadas</h2>
+                <h2 className="text-3xl font-bold aviation-text-gradient">Missões Arquivadas</h2>
                 <p className="text-gray-600">Histórico de missões concluídas e arquivadas</p>
               </div>
-              <ArchivedMissions 
-                missions={archivedMissions} 
-                currentUser={currentUser} 
-              />
+              <div className="aviation-card rounded-xl p-6">
+                <ArchivedMissions 
+                  missions={archivedMissions} 
+                  currentUser={currentUser} 
+                />
+              </div>
             </TabsContent>
           )}
 
           <TabsContent value="waitlist" className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-3xl font-bold text-gray-800">Inscrições Ativas</h2>
+                <h2 className="text-3xl font-bold aviation-text-gradient">Inscrições Ativas</h2>
                 <p className="text-gray-600">Gerencie passageiros na lista de espera do Correio Aéreo Nacional</p>
               </div>
-              <Button onClick={handleCreateWaitlistEntry} className="bg-green-600 hover:bg-green-700">
+              <Button onClick={handleCreateWaitlistEntry} className="bg-green-600 hover:bg-green-700 rounded-xl">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 Nova Inscrição CAN
               </Button>
             </div>
             
             {showWaitlistForm ? (
-              <Card>
+              <Card className="aviation-card rounded-xl">
                 <CardHeader>
                   <CardTitle>
                     {editingWaitlistPassenger ? 'Editar Inscrição CAN' : 'Nova Inscrição CAN'}
@@ -422,32 +424,38 @@ const Dashboard = ({
                 </CardContent>
               </Card>
             ) : (
-              <CANWaitlist 
-                waitlist={waitlist}
-                onAddToMission={handleAddToMission}
-                onRemove={handleRemoveFromWaitlist}
-                onEdit={handleEditWaitlistPassenger}
-              />
+              <div className="aviation-card rounded-xl p-6">
+                <CANWaitlist 
+                  waitlist={waitlist}
+                  onAddToMission={handleAddToMission}
+                  onRemove={handleRemoveFromWaitlist}
+                  onEdit={handleEditWaitlistPassenger}
+                />
+              </div>
             )}
           </TabsContent>
 
           {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
             <TabsContent value="users" className="space-y-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-800">Usuários</h2>
+                <h2 className="text-3xl font-bold aviation-text-gradient">Usuários</h2>
                 <p className="text-gray-600">Gerencie os usuários do sistema</p>
               </div>
-              <UserManagement currentUser={currentUser} />
+              <div className="aviation-card rounded-xl p-6">
+                <UserManagement currentUser={currentUser} />
+              </div>
             </TabsContent>
           )}
 
           {currentUser.perfil !== 'Operador' && currentUser.perfil !== 'Secretario' && (
             <TabsContent value="config" className="space-y-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-800">Configurações da Base</h2>
+                <h2 className="text-3xl font-bold aviation-text-gradient">Configurações da Base</h2>
                 <p className="text-gray-600">Configure os dados da sua base aérea</p>
               </div>
-              <BaseConfigComponent currentUser={currentUser} />
+              <div className="aviation-card rounded-xl p-6">
+                <BaseConfigComponent currentUser={currentUser} />
+              </div>
             </TabsContent>
           )}
         </Tabs>
