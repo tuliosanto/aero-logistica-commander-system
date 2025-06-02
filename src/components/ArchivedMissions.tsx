@@ -693,7 +693,7 @@ window.onload = function() {
                           <FileText className="w-4 h-4 mr-2" />
                             Relatório de Voo
                         </Button>
-                      /CardTitle>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3 my-0 py-0">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
