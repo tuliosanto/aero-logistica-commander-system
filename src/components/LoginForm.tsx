@@ -130,7 +130,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
               <img 
                 src={gladioImage} 
                 alt="Gládio FAB" 
-                className="w-20 h-20 object-contain filter brightness-0 invert"
+                className="w-30 h-20 object-contain"
               />
             </div>
             <CardTitle className="text-3xl font-bold aviation-text-gradient mb-2">
@@ -187,7 +187,6 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 type="submit" 
                 className="w-full aviation-button text-white font-semibold py-3 px-4 rounded-lg"
               >
-                <Shield className="w-4 h-4 mr-2" />
                 Entrar no Sistema
               </Button>
             </form>
