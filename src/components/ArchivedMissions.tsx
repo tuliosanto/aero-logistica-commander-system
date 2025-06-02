@@ -680,6 +680,10 @@ window.onload = function() {
                           <Badge variant="outline" className="bg-gray-50 text-gray-700 font-semibold text-xs">
                             Arquivada
                           </Badge>
+                          <Button size="sm" variant="outline" onClick={() => handlePrint(mission)} className="bg-blue-50 hover:bg-blue-100 text-blue-700">
+                            <FileText className="w-4 h-4 mr-2" />
+                            Relatório de Voo
+                          </Button>
                         </div>
                       </CardTitle>
                     </CardHeader>
@@ -699,11 +703,6 @@ window.onload = function() {
                         <p className="text-sm font-medium text-gray-700">Trechos:</p>
                         <p className="text-sm text-gray-600">{mission.trechos.join(' → ')}</p>
                       </div>
-
-                      <Button size="sm" variant="outline" onClick={() => handlePrint(mission)} className="bg-blue-50 hover:bg-blue-100 text-blue-700">
-                        <FileText className="w-4 h-4 mr-2" />
-                        Relatório de Voo
-                      </Button>
                     </CardContent>
                   </Card>)}
               </div> : selectedDate ? <Card>
