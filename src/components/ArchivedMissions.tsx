@@ -701,15 +701,16 @@ window.onload = function() {
                           <Users className="w-4 h-4 text-gray-500" />
                           <span>{mission.passageiros.length} passageiros</span>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Weight className="w-4 h-4 text-gray-500" />
-                          <span>{mission.passageiros.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg total</span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Weight className="w-4 h-4 text-gray-500" />
+                              <span>{mission.passageiros.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg total</span>
+                          </div>
+
+                          <div className="ml-4">
+                            <p className="text-sm font-medium text-gray-700">Trechos: {mission.trechos.join(' → ')}</p>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Trechos: {mission.trechos.join(' → ')}</p>
-                      </div>
                     </CardContent>
                   </Card>)}
               </div> : selectedDate ? <Card>
