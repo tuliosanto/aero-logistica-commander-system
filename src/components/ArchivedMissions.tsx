@@ -688,7 +688,7 @@ window.onload = function() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3 my-0 py-0">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm px-px mx-px my-[10px]">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm px-px my-[10px] mx-0">
                         <div className="flex items-center space-x-2">
                           <Users className="w-4 h-4 text-gray-500" />
                           <span>{mission.passageiros.length} passageiros</span>
@@ -699,7 +699,7 @@ window.onload = function() {
                             <span>{mission.passageiros.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg total</span>
                           </div>
                           <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-700 px-0 mx-[2px]">Trechos: {mission.trechos.join(' → ')}</p>
+                            <p className="text-sm font-medium text-gray-700 py-0 px-0 mx-[3px]">Trechos: {mission.trechos.join(' → ')}</p>
                           </div>
                         </div>
                       </div>
