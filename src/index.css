@@ -222,7 +222,7 @@
     background: linear-gradient(135deg, var(--aviation-primary) 0%, var(--aviation-secondary) 50%, var(--aviation-accent) 100%);
     -webkit-background-clip: text;
     background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-text-fill-color: white;
   }
 
   /* Input Focus */
