@@ -126,7 +126,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
         <Card className="w-full max-w-md aviation-card aviation-pulse">
           <CardHeader className="text-center pb-6">
-            <div className="mx-auto mb-6 w-24 h-24 flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-600 to-blue-800 shadow-xl ring-4 ring-blue-100">
+            <div className="mx-auto mb-6 w-24 h-24 flex items-center justify-center">
               <img 
                 src={gladioImage} 
                 alt="Gládio FAB" 
