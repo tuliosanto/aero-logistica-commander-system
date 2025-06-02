@@ -1,4 +1,4 @@
-
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { User } from '../types/User';
 import { toast } from '@/hooks/use-toast';
 import { AIR_BASES } from '../utils/constants';
 import { Check, Archive } from 'lucide-react';
+import MissionConsultModal from './MissionConsultModal';
 
 interface MissionListProps {
   missions: Mission[];
@@ -25,6 +26,9 @@ const MissionList = ({
   onArchive,
   currentUser
 }: MissionListProps) => {
+  const [showMissionModal, setShowMissionModal] = useState(false);
+  const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
+
   const handleDelete = (mission: Mission) => {
     if (confirm(`Tem certeza que deseja excluir a missão OFRAG ${mission.ofrag}?`)) {
       onDelete(mission.id);
@@ -53,6 +57,11 @@ const MissionList = ({
         description: `OFRAG ${mission.ofrag} foi arquivada com sucesso.`
       });
     }
+  };
+
+  const handleConsultMission = (mission: Mission) => {
+    setSelectedMission(mission);
+    setShowMissionModal(true);
   };
 
   const getCodigoBase = () => {
@@ -756,9 +765,17 @@ const MissionList = ({
                   </Button>
                 )}
                 {!mission.isArchived && (
-                  <Button size="sm" variant="outline" onClick={() => onEdit(mission)}>
-                    Editar
-                  </Button>
+                  <>
+                    {mission.isCompleted ? (
+                      <Button size="sm" variant="outline" onClick={() => handleConsultMission(mission)} className="bg-green-50 hover:bg-green-100 text-green-700">
+                        Consultar
+                      </Button>
+                    ) : (
+                      <Button size="sm" variant="outline" onClick={() => onEdit(mission)}>
+                        Editar
+                      </Button>
+                    )}
+                  </>
                 )}
                 {!mission.isCompleted && (
                   <Button size="sm" variant="destructive" onClick={() => handleDelete(mission)}>
@@ -778,6 +795,18 @@ const MissionList = ({
           </CardContent>
         </Card>
       ))}
+
+      {/* Mission Consultation Modal */}
+      {showMissionModal && selectedMission && (
+        <MissionConsultModal
+          mission={selectedMission}
+          onClose={() => {
+            setShowMissionModal(false);
+            setSelectedMission(null);
+          }}
+          currentUser={currentUser}
+        />
+      )}
     </div>
   );
 };

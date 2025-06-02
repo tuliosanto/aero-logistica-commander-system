@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Mission } from '../types/Mission';
 import { User } from '../types/User';
-import { Calendar as CalendarIcon, Plane, Users, Weight, FileText } from 'lucide-react';
+import { Calendar as CalendarIcon, Plane, Users, Weight, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ArchivedMissionsFilter from './ArchivedMissionsFilter';
+import MissionConsultModal from './MissionConsultModal';
 
 interface ArchivedMissionsProps {
   missions: Mission[];
@@ -21,610 +22,137 @@ const ArchivedMissions = ({
 }: ArchivedMissionsProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
-  const [filteredMissions, setFilteredMissions] = useState<Mission[]>(missions);
+  const [showMissionModal, setShowMissionModal] = useState(false);
+  const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+  const formatDate = (date: Date): string => {
+    return format(date, 'yyyy-MM-dd');
   };
 
-  const formatDateForPrint = (dateString: string) => {
-    return format(parseISO(dateString), 'MM/dd/yyyy');
+  const formatDateForPrint = (date: Date): string => {
+    return format(date, 'dd/MM/yyyy', { locale: ptBR });
   };
 
-  const formatTimeForPrint = (timeString: string) => {
-    if (!timeString) return '';
-    return timeString;
+  const formatTimeForPrint = (date: Date): string => {
+    return format(date, 'HH:mm', { locale: ptBR });
   };
 
-  const getMissionsForDate = (date: Date) => {
-    return filteredMissions.filter(mission => isSameDay(parseISO(mission.dataVoo), date));
+  const getMissionsForDate = (date: Date): Mission[] => {
+    const formattedDate = formatDate(date);
+    return missions.filter(mission => formatDate(parseISO(mission.dataVoo)) === formattedDate);
   };
 
-  const getUniqueDates = () => {
-    const dates = filteredMissions.map(mission => parseISO(mission.dataVoo));
-    const uniqueDates = dates.filter((date, index, self) => index === self.findIndex(d => isSameDay(d, date)));
-    return uniqueDates.sort((a, b) => b.getTime() - a.getTime());
+  const getUniqueDates = (): Date[] => {
+    const uniqueDates = new Set<string>();
+    return missions.map(mission => parseISO(mission.dataVoo))
+      .filter(date => {
+        const formattedDate = formatDate(date);
+        if (!uniqueDates.has(formattedDate)) {
+          uniqueDates.add(formattedDate);
+          return true;
+        }
+        return false;
+      });
   };
 
   const handlePrint = (mission: Mission) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    const reportWindow = window.open('', '_blank');
+    if (!reportWindow) return;
 
-    const printContent = `
-<!DOCTYPE html>
-<html lang="">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="ProgId" content="Excel.Sheet">
-<style>
-a{
-  color:blue;
-}
-a:visited{
-  color:purple;
-}
-table{
-  border: 0;
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-.x40 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:12pt;
- font-weight:700;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:3px solid #000000;
- border-right:3px solid #000000;
- border-bottom:none;
- border-left:3px solid #000000;
-}
-.x41 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:12pt;
- font-weight:700;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:none;
- border-right:3px solid #000000;
- border-bottom:none;
- border-left:3px solid #000000;
-}
-.x42 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:12pt;
- font-weight:700;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:3px solid #000000;
- border-bottom:none;
- border-left:3px solid #000000;
-}
-.x43 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:none;
- border-right:none;
- border-bottom:none;
- border-left:3px solid #000000;
-}
-.x44 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:3px solid #000000;
-}
-.x45 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:9pt;
- font-weight:700;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:3px solid #000000;
-}
-.x47 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:3px solid #000000;
-}
-.x48 {
- text-align:left;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:3px solid #000000;
-}
-.x49 {
- text-align:left;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:3px solid #000000;
- border-left:3px solid #000000;
-}
-.x50 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
-}
-.x51 {
- text-align:left;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x52 {
- text-align:center;
- vertical-align:middle;
- white-space:normal;word-wrap:break-word;
- background:auto;
- font-size:9pt;
- font-weight:700;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x53 {
- text-align:left;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
-}
-.x55 {
- text-align:left;
- vertical-align:middle;
- white-space:normal;word-wrap:break-word;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x61 {
- text-align:center;
- vertical-align:middle;
- white-space:normal;word-wrap:break-word;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x62 {
- text-align:center;
- vertical-align:middle;
- white-space:normal;word-wrap:break-word;
- background:auto;
- font-size:9pt;
- font-weight:700;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x65 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x66 {
- text-align:left;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:9pt;
- font-weight:700;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x68 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- color:#000000;
- font-size:9pt;
- font-weight:700;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:1px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x69 {
- text-align:left;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:9pt;
- font-weight:700;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:3px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x71 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:none;
- border-right:3px solid #000000;
- border-bottom:none;
- border-left:none;
-}
-.x72 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- color:#000000;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:3px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x73 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:3px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x74 {
- text-align:center;
- vertical-align:middle;
- white-space:normal;word-wrap:break-word;
- background:auto;
- font-size:9pt;
- font-weight:700;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:3px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-.x76 {
- text-align:center;
- vertical-align:middle;
- white-space:nowrap;
- background:auto;
- font-size:10pt;
- font-weight:400;
- font-style:normal;
- font-family:Arial,sans-serif;
- border-top:1px solid #000000;
- border-right:3px solid #000000;
- border-bottom:1px solid #000000;
- border-left:1px solid #000000;
-}
-@media print {
-  body { margin: 0; }
-  .no-print { display: none; }
-}
-</style>
-</head>
-<body link='blue' vlink='purple' bgcolor='white'>
-<div id='section'>
-<div id='table_0'>
-<table style='border-collapse:collapse; table-layout:fixed;width:978pt'>
- <col style='background:none;width:23.25pt'>
- <col style='background:none;width:161.25pt'>
- <col style='background:none;width:89.25pt'>
- <col style='background:none;width:51.75pt'>
- <col style='background:none;width:75pt'>
- <col style='background:none;width:61.5pt'>
- <col style='background:none;width:45.75pt'>
- <col style='background:none;width:52.5pt'>
- <col style='background:none;width:43.5pt'>
- <col style='background:none;width:21.75pt'>
- <col span='2' style='background:none;width:86.25pt'>
- <col style='background:none;width:80.25pt'>
- <col span='2' style='background:none;width:50.25pt'>
- <tr style='height:16.5pt'>
-<td colspan='12' class='x40' style='border-right:3px solid #000000;height:14.25pt;'><span style='font-size:12pt;color:#000000;font-weight:700;text-decoration:none;font-family:Arial,sans-serif;'>COMANDO DA AERONÁUTICA</span></td>
-<td class='x50' style='width:80.25pt;'></td>
-<td class='x50' style='width:50.25pt;'></td>
-<td class='x50' style='width:50.25pt;'></td>
- </tr>
- <tr style='height:16.5pt'>
-<td colspan='12' class='x41' style='border-right:3px solid #000000;height:16.5pt;'>${currentUser.baseAerea || 'BASE AÉREA DE SANTA MARIA'}</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
- </tr>
- <tr style='height:16.5pt'>
-<td colspan='12' class='x41' style='border-right:3px solid #000000;height:16.5pt;'>SISTEMA DO CORREIO AÉREO NACIONAL</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
- </tr>
- <tr style='height:16.5pt'>
-<td colspan='12' class='x42' style='border-right:3px solid #000000;border-top:1px solid #000000;height:15.75pt;'>RELAÇÃO DE PASSAGEIROS</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'>&nbsp;</td>
- </tr>
- <tr style='height:7.5pt'>
-<td class='x43' style='height:7.5pt;'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x71'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>
- <tr style='height:15pt'>
-<td rowspan='3' class='x44' style='border-bottom:1px solid #000000;height:40.5pt;'><div style='white-space:nowrap;width:40px;height:31px;margin-top:-0px;margin-left:4px;transform: rotate(-90deg);-o-transform: rotate(-90deg);-webkit-transform: rotate(-90deg);-moz-transform: rotate(-90deg);-ms-transform: rotate(-90deg);'>AVIÃO</div></td>
-<td class='x51'>MODELO: ${mission.aeronave}</td>
-<td class='x53'></td>
-<td colspan='5' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>TERMINAL: POSTO CAN ${currentUser.baseAerea?.replace('BASE AÉREA DE ', '') || 'SANTA MARIA'}</td>
-<td class='x53'></td>
-<td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>DATA DO VOO:</td>
-<td class='x72'>${formatDateForPrint(mission.dataVoo)}</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>
- <tr style='height:12.75pt'>
-<td rowspan='2' class='x51' style='border-bottom:1px solid #000000;height:25.5pt;'>MATRÍCULA: ${mission.matricula || ''}</td>
-<td class='x53'></td>
-<td rowspan='2' class='x55' style='border-bottom:1px solid #000000;height:25.5pt;'>ROTA:</td>
-<td colspan='4' rowspan='2' class='x61' style='border-right:1px solid #000000;border-bottom:1px solid #000000;height:25.5pt;'>${mission.trechos.join(' – ')}</td>
-<td class='x53'></td>
-<td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>CHAMADA (H):</td>
-<td class='x73'>${formatTimeForPrint(mission.horarioChamada || '')}</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>
- <tr style='height:14.25pt'>
-<td class='x53'></td>
-<td class='x53'></td>
-<td colspan='2' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>DECOLAGEM (H):</td>
-<td class='x73'>${formatTimeForPrint(mission.horarioDecolagem || '')}</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>
- <tr style='height:14.25pt'>
-<td class='x43' style='height:14.25pt;'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x71'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>
- <tr style='height:12.75pt'>
-<td rowspan='2' class='x45' style='border-bottom:1px solid #000000;height:24pt;'>N°</td>
-<td colspan='3' rowspan='2' class='x52' style='border-right:1px solid #000000;border-bottom:1px solid #000000;height:24pt;'>NOME DOS PASSAGEIROS</td>
-<td rowspan='2' class='x62' style='border-bottom:1px solid #000000;height:24pt;'>CPF</td>
-<td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>DESTINO</td>
-<td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>PRIOR</td>
-<td colspan='2' class='x52' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>PESO</td>
-<td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>N°</td>
-<td rowspan='2' class='x52' style='border-bottom:1px solid #000000;height:24pt;'>RESPONSÁVEL PELA INSCRIÇÃO</td>
-<td rowspan='2' class='x74' style='border-bottom:1px solid #000000;height:24pt;'>PARENTESCO</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>
- <tr style='height:12.75pt'>
-<td class='x52'>PAX</td>
-<td class='x52'>BAG</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>
-${mission.passageiros.map((p, index) => `
- <tr style='height:14.25pt'>
-<td class='x47' style='height:12.75pt;'>${index + 1}</td>
-<td colspan='3' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>${p.posto} ${p.nome}</td>
-<td class='x51'>${p.cpf}</td>
-<td class='x65'>${p.destino}</td>
-<td class='x65'>${p.prioridade}</td>
-<td class='x65'>${p.peso}</td>
-<td class='x65'>${p.pesoBagagem + p.pesoBagagemMao}</td>
-<td class='x65'></td>
-<td class='x65'>${p.responsavelInscricao || ''}</td>
-<td class='x76'>${p.parentesco || ''}</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>`).join('')}
-${Array.from({
-      length: Math.max(0, 25 - mission.passageiros.length)
-    }, (_, i) => `
- <tr style='height:14.25pt'>
-<td class='x47' style='height:12.75pt;'>${mission.passageiros.length + i + 1}</td>
-<td colspan='3' class='x51' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'></td>
-<td class='x51'></td>
-<td class='x65'></td>
-<td class='x65'></td>
-<td class='x65'></td>
-<td class='x65'></td>
-<td class='x65'></td>
-<td class='x65'></td>
-<td class='x76'></td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>`).join('')}
- <tr style='height:16.5pt'>
-<td colspan='6' class='x48' style='border-right:1px solid #000000;border-bottom:1px solid #000000;height:15pt;'>CHEFE DO PCAN: ${currentUser.nome || ''}</td>
-<td class='x66'>SOMA</td>
-<td class='x68'>${mission.passageiros.reduce((sum, p) => sum + p.peso, 0)}</td>
-<td class='x68'>${mission.passageiros.reduce((sum, p) => sum + p.pesoBagagem + p.pesoBagagemMao, 0)}</td>
-<td colspan='3' class='x69' style='border-right:3px solid #000000;border-bottom:1px solid #000000;'>CMT ANV:</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>
- <tr style='height:16.5pt'>
-<td colspan='6' class='x49' style='border-right:1px solid #000000;border-bottom:3px solid #000000;height:13.5pt;'>DESPACHANTE:</td>
-<td class='x66'>TOTAL:</td>
-<td colspan='2' class='x68' style='border-right:1px solid #000000;border-bottom:1px solid #000000;'>${mission.passageiros.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)}</td>
-<td colspan='3' class='x69' style='border-right:3px solid #000000;border-bottom:1px solid #000000;'>MEC ANV:</td>
-<td class='x50'></td>
-<td class='x50'></td>
-<td class='x53'></td>
- </tr>
-</table>
-</div>
-</div>
-<script>
-window.onload = function() {
-  window.print();
-  window.onafterprint = function() {
-    window.close();
-  }
-}
-</script>
-</body>
-</html>
+    const reportContent = `
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title>Relatório de Missão - ${mission.ofrag}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+          }
+          h1 {
+            text-align: center;
+            color: #333;
+          }
+          .mission-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+          }
+          .mission-info h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+          }
+          .passengers-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          .passengers-list th, .passengers-list td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+          }
+          .passengers-list th {
+            background-color: #f5f5f5;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Relatório de Missão</h1>
+        <div class="mission-info">
+          <h2>Informações da Missão</h2>
+          <p><strong>Aeronave:</strong> ${mission.aeronave}</p>
+          <p><strong>Matrícula:</strong> ${mission.matricula}</p>
+          <p><strong>Data do Voo:</strong> ${formatDateForPrint(parseISO(mission.dataVoo))}</p>
+          <p><strong>OFRAG:</strong> ${mission.ofrag}</p>
+          <p><strong>Trechos:</strong> ${mission.trechos.join(' → ')}</p>
+          ${mission.horarioChamada ? `<p><strong>Horário de Chamada:</strong> ${mission.horarioChamada}</p>` : ''}
+          ${mission.horarioDecolagem ? `<p><strong>Horário de Decolagem:</strong> ${mission.horarioDecolagem}</p>` : ''}
+        </div>
+        <h2>Lista de Passageiros</h2>
+        <table class="passengers-list">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Posto</th>
+              <th>CPF</th>
+              <th>Destino</th>
+              <th>Peso (kg)</th>
+              <th>Bagagem (kg)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${mission.passageiros.map(passenger => `
+              <tr>
+                <td>${passenger.nome}</td>
+                <td>${passenger.posto}</td>
+                <td>${passenger.cpf}</td>
+                <td>${passenger.destino}</td>
+                <td>${passenger.peso}</td>
+                <td>${passenger.pesoBagagem + passenger.pesoBagagemMao}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+      </html>
     `;
 
-    printWindow.document.write(printContent);
-    printWindow.document.close();
+    reportWindow.document.write(reportContent);
+    reportWindow.document.close();
+    reportWindow.print();
+  };
+
+  const handleConsultMission = (mission: Mission) => {
+    setSelectedMission(mission);
+    setShowMissionModal(true);
   };
 
   const selectedDateMissions = selectedDate ? getMissionsForDate(selectedDate) : [];
   const uniqueDates = getUniqueDates();
-
-  const handleFilter = (filtered: Mission[]) => {
-    setFilteredMissions(filtered);
-  };
 
   if (missions.length === 0) {
     return (
@@ -636,7 +164,9 @@ window.onload = function() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-500 text-center py-8">Nenhuma missão arquivada encontrada.</p>
+          <p className="text-gray-500 text-center py-8">
+            Nenhuma missão arquivada encontrada.
+          </p>
         </CardContent>
       </Card>
     );
@@ -647,42 +177,44 @@ window.onload = function() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
-          <h2 className="text-lg font-semibold">Missões Arquivadas ({filteredMissions.length})</h2>
+          <h3 className="text-lg font-semibold">Missões Arquivadas ({missions.length})</h3>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant={viewMode === 'calendar' ? 'default' : 'outline'} 
-            size="sm" 
+          <Button
+            variant={viewMode === 'calendar' ? 'default' : 'outline'}
+            size="sm"
             onClick={() => setViewMode('calendar')}
           >
             <CalendarIcon className="w-4 h-4 mr-2" />
             Calendário
           </Button>
-          <Button 
-            variant={viewMode === 'list' ? 'default' : 'outline'} 
-            size="sm" 
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'outline'}
+            size="sm"
             onClick={() => setViewMode('list')}
           >
-            Lista
+            <FileText className="w-4 h-4 mr-2" />
+            Ver Todas
           </Button>
         </div>
       </div>
 
-      <ArchivedMissionsFilter missions={missions} onFilter={handleFilter} />
-
-      {viewMode === 'calendar' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-1">
+      {viewMode === 'list' ? (
+        <ArchivedMissionsFilter missions={missions} onFilter={() => {}} />
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Selecione uma data</CardTitle>
+              <CardTitle className="text-lg">Selecionar Data</CardTitle>
             </CardHeader>
             <CardContent>
               <Calendar
                 mode="single"
                 selected={selectedDate}
                 onSelect={setSelectedDate}
+                locale={ptBR}
                 modifiers={{
-                  hasMissions: uniqueDates
+                  hasMissions: (date) => uniqueDates.some(d => isSameDay(d, date))
                 }}
                 modifiersStyles={{
                   hasMissions: {
@@ -691,124 +223,98 @@ window.onload = function() {
                     fontWeight: 'bold'
                   }
                 }}
-                locale={ptBR}
-                className="rounded-md border my-0 py-0 px-0 mx-[65px]"
+                className="rounded-md border"
               />
-              <div className="mt-4 text-xs text-gray-600">
+              <div className="mt-4 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                  <span>Datas com missões</span>
+                  <span>Datas com missões arquivadas</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <div className="lg:col-span-2">
-            {selectedDate && selectedDateMissions.length > 0 ? (
-              <div className="space-y-4">
-                <h3 className="text-md font-medium">
-                  Missões do dia {format(selectedDate, 'dd/MM/yyyy', { locale: ptBR })}
-                </h3>
-                {selectedDateMissions.map(mission => (
-                  <Card key={mission.id} className="w-full">
-                    <CardHeader className="py-[5px]">
-                      <CardTitle className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Plane className="w-5 h-5 text-blue-600" />
-                          <span className="text-sm">
-                            {mission.aeronave} - {mission.matricula} - OFRAG{mission.ofrag}
-                          </span>
-                          <Badge variant="outline" className="bg-gray-50 text-gray-700 font-semibold text-xs">
-                            Arquivada
-                          </Badge>
-                        </div>
-                        <Button size="sm" variant="outline" onClick={() => handlePrint(mission)} className="bg-blue-50 hover:bg-blue-100 text-blue-700">
-                          <FileText className="w-4 h-4 mr-2" />
-                          Relatório do Voo
-                        </Button>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 my-0 py-0">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm px-px my-[10px] mx-0">
-                        <div className="flex items-center space-x-2">
-                          <Users className="w-4 h-4 text-gray-500" />
-                          <span>{mission.passageiros.length} passageiros</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <Weight className="w-4 h-4 text-gray-500" />
-                            <span>{mission.passageiros.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg total</span>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">
+                Missões de {selectedDate ? format(selectedDate, 'dd/MM/yyyy', { locale: ptBR }) : ''}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {selectedDateMissions.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">
+                  Nenhuma missão arquivada nesta data.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {selectedDateMissions.map((mission) => (
+                    <div
+                      key={mission.id}
+                      className="p-3 border rounded-lg bg-gray-50"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Plane className="w-4 h-4 text-blue-600" />
+                            <span className="font-medium text-blue-700">
+                              {mission.aeronave} - {mission.matricula}
+                            </span>
+                            <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
+                              OFRAG {mission.ofrag}
+                            </Badge>
                           </div>
-                          <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-700 py-0 px-0 mx-[3px]">Trechos: {mission.trechos.join(' → ')}</p>
+                          <p className="text-sm text-gray-600 mb-1">
+                            {mission.trechos.join(' → ')}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <Users className="w-3 h-3" />
+                              {mission.passageiros.length} passageiros
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Weight className="w-3 h-3" />
+                              {mission.passageiros.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg
+                            </div>
                           </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleConsultMission(mission)}
+                            className="bg-green-50 hover:bg-green-100 text-green-700"
+                          >
+                            Consultar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handlePrint(mission)}
+                            className="bg-blue-50 hover:bg-blue-100"
+                          >
+                            Imprimir
+                          </Button>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : selectedDate ? (
-              <Card>
-                <CardContent className="py-8">
-                  <p className="text-gray-500 text-center">
-                    Nenhuma missão arquivada encontrada para {format(selectedDate, 'dd/MM/yyyy', { locale: ptBR })}
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="py-8">
-                  <p className="text-gray-500 text-center">Selecione uma data no calendário</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredMissions.map(mission => (
-            <Card key={mission.id} className="w-full">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Plane className="w-5 h-5 text-blue-600" />
-                    <span>{mission.aeronave} - {mission.matricula} - OFRAG{mission.ofrag}</span>
-                    <Badge variant="outline" className="bg-gray-50 text-gray-700 font-semibold">
-                      Arquivada
-                    </Badge>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center space-x-2">
-                    <CalendarIcon className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">{formatDate(mission.dataVoo)}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Users className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">{mission.passageiros.length} passageiros</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Weight className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">{mission.passageiros.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg total</span>
-                  </div>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Trechos:</p>
-                  <p className="text-sm text-gray-600">{mission.trechos.join(' → ')}</p>
-                </div>
+      )}
 
-                <Button size="sm" variant="outline" onClick={() => handlePrint(mission)} className="bg-blue-50 hover:bg-blue-100 text-blue-700">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Relatório de Voo
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      {/* Mission Consultation Modal */}
+      {showMissionModal && selectedMission && (
+        <MissionConsultModal
+          mission={selectedMission}
+          onClose={() => {
+            setShowMissionModal(false);
+            setSelectedMission(null);
+          }}
+          currentUser={currentUser}
+        />
       )}
     </div>
   );

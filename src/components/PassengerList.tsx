@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Trash2, UserCheck, UserX, ArrowLeft, UserPlus } from 'lucide-react';
 import { Passenger } from '../types/Mission';
 import { getRankOrder } from '../utils/constants';
 import PriorityTooltip from './PriorityTooltip';
+import EditPassengerModal from './EditPassengerModal';
 
 interface PassengerListProps {
   passengers: Passenger[];
@@ -24,6 +25,9 @@ const PassengerList = ({
   showAddPassengerButton = false,
   onAddPassenger
 }: PassengerListProps) => {
+  const [editingPassenger, setEditingPassenger] = useState<Passenger | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
   // Sort passengers by priority first, then by military rank
   const sortedPassengers = [...passengers].sort((a, b) => {
     // First sort by priority (lower number = higher priority)
@@ -59,6 +63,20 @@ const PassengerList = ({
     onPassengersChange(updatedPassengers);
   };
 
+  const handleEditPassenger = (passenger: Passenger) => {
+    setEditingPassenger(passenger);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEditedPassenger = (updatedPassenger: Passenger) => {
+    const updatedPassengers = passengers.map(p => 
+      p.id === updatedPassenger.id ? updatedPassenger : p
+    );
+    onPassengersChange(updatedPassengers);
+    setShowEditModal(false);
+    setEditingPassenger(null);
+  };
+
   if (passengers.length === 0) {
     return (
       <Card>
@@ -81,121 +99,144 @@ const PassengerList = ({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>Lista de Passageiros ({passengers.length})</span>
-          {showAddPassengerButton && onAddPassenger && (
-            <Button onClick={onAddPassenger} className="bg-blue-600 hover:bg-blue-700">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Novo Passageiro
-            </Button>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {sortedPassengers.map((passenger, index) => (
-            <div
-              key={passenger.id}
-              className={`p-3 border rounded-lg ${
-                passenger.checkedIn 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-white border-gray-200'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="font-bold text-blue-600 text-sm">#{index + 1}</span>
-                    <span className="font-medium">
-                      {passenger.posto} {passenger.nome}
-                    </span>
-                    <PriorityTooltip priority={passenger.prioridade}>
-                      <Badge variant="outline" className="cursor-help">
-                        Prioridade {passenger.prioridade}
-                      </Badge>
-                    </PriorityTooltip>
-                    {passenger.fromWaitlist && (
-                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
-                        Lista de Espera
-                      </Badge>
-                    )}
-                    {passenger.checkedIn && (
-                      <Badge variant="outline" className="bg-green-50 text-green-700">
-                        Check-in Realizado
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="text-sm text-gray-600 grid grid-cols-2 gap-2">
-                    <div>
-                      <p><span className="font-medium">CPF:</span> {passenger.cpf}</p>
-                      <p><span className="font-medium">Destino:</span> {passenger.destino}</p>
-                    </div>
-                    <div>
-                      <p><span className="font-medium">Peso:</span> {passenger.peso}kg</p>
-                      <p><span className="font-medium">Bagagem:</span> {passenger.pesoBagagem + passenger.pesoBagagemMao}kg</p>
-                    </div>
-                  </div>
-                  {passenger.responsavelInscricao && passenger.responsavelInscricao !== 'O PRÓPRIO' && (
-                    <div className="text-sm text-gray-600 mt-1">
-                      <p><span className="font-medium">Responsável:</span> {passenger.responsavelInscricao}</p>
-                      {passenger.parentesco && (
-                        <p><span className="font-medium">Parentesco:</span> {passenger.parentesco}</p>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center">
+            <span>Lista de Passageiros ({passengers.length})</span>
+            {showAddPassengerButton && onAddPassenger && (
+              <Button onClick={onAddPassenger} className="bg-blue-600 hover:bg-blue-700">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Novo Passageiro
+              </Button>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {sortedPassengers.map((passenger, index) => (
+              <div
+                key={passenger.id}
+                className={`p-3 border rounded-lg ${
+                  passenger.checkedIn 
+                    ? 'bg-green-50 border-green-200' 
+                    : 'bg-white border-gray-200'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="font-bold text-blue-600 text-sm">#{index + 1}</span>
+                      <span className="font-medium">
+                        {passenger.posto} {passenger.nome}
+                      </span>
+                      <PriorityTooltip priority={passenger.prioridade}>
+                        <Badge variant="outline" className="cursor-help">
+                          Prioridade {passenger.prioridade}
+                        </Badge>
+                      </PriorityTooltip>
+                      {passenger.fromWaitlist && (
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
+                          Lista de Espera
+                        </Badge>
+                      )}
+                      {passenger.checkedIn && (
+                        <Badge variant="outline" className="bg-green-50 text-green-700">
+                          Check-in Realizado
+                        </Badge>
                       )}
                     </div>
-                  )}
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleToggleCheckIn(passenger.id)}
-                    className={passenger.checkedIn 
-                      ? "bg-red-50 hover:bg-red-100 text-red-700" 
-                      : "bg-green-50 hover:bg-green-100 text-green-700"
-                    }
-                  >
-                    {passenger.checkedIn ? (
-                      <>
-                        <UserX className="w-4 h-4 mr-1" />
-                        Desfazer Check-in
-                      </>
-                    ) : (
-                      <>
-                        <UserCheck className="w-4 h-4 mr-1" />
-                        Check-in
-                      </>
+                    <div className="text-sm text-gray-600 grid grid-cols-2 gap-2">
+                      <div>
+                        <p><span className="font-medium">CPF:</span> {passenger.cpf}</p>
+                        <p><span className="font-medium">Destino:</span> {passenger.destino}</p>
+                      </div>
+                      <div>
+                        <p><span className="font-medium">Peso:</span> {passenger.peso}kg</p>
+                        <p><span className="font-medium">Bagagem:</span> {passenger.pesoBagagem + passenger.pesoBagagemMao}kg</p>
+                      </div>
+                    </div>
+                    {passenger.responsavelInscricao && passenger.responsavelInscricao !== 'O PRÓPRIO' && (
+                      <div className="text-sm text-gray-600 mt-1">
+                        <p><span className="font-medium">Responsável:</span> {passenger.responsavelInscricao}</p>
+                        {passenger.parentesco && (
+                          <p><span className="font-medium">Parentesco:</span> {passenger.parentesco}</p>
+                        )}
+                      </div>
                     )}
-                  </Button>
-                  {showMoveToWaitlist && passenger.fromWaitlist && onMoveToWaitlist && (
+                  </div>
+                  <div className="flex space-x-2">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => onMoveToWaitlist(passenger)}
-                      className="bg-yellow-50 hover:bg-yellow-100 text-yellow-700"
+                      onClick={() => handleToggleCheckIn(passenger.id)}
+                      className={passenger.checkedIn 
+                        ? "bg-red-50 hover:bg-red-100 text-red-700" 
+                        : "bg-green-50 hover:bg-green-100 text-green-700"
+                      }
                     >
-                      <ArrowLeft className="w-4 h-4 mr-1" />
-                      Retornar
+                      {passenger.checkedIn ? (
+                        <>
+                          <UserX className="w-4 h-4 mr-1" />
+                          Desfazer Check-in
+                        </>
+                      ) : (
+                        <>
+                          <UserCheck className="w-4 h-4 mr-1" />
+                          Check-in
+                        </>
+                      )}
                     </Button>
-                  )}
-                  {/* Só mostra o botão de excluir se NÃO for da lista de espera */}
-                  {!passenger.fromWaitlist && (
+                    {/* Edit button for all passengers */}
                     <Button
                       size="sm"
-                      variant="destructive"
-                      onClick={() => handleRemove(passenger.id)}
+                      variant="outline"
+                      onClick={() => handleEditPassenger(passenger)}
+                      className="bg-blue-50 hover:bg-blue-100 text-blue-700"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      Editar
                     </Button>
-                  )}
+                    {showMoveToWaitlist && passenger.fromWaitlist && onMoveToWaitlist && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onMoveToWaitlist(passenger)}
+                        className="bg-yellow-50 hover:bg-yellow-100 text-yellow-700"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-1" />
+                        Retornar
+                      </Button>
+                    )}
+                    {/* Only show delete button if NOT from waitlist */}
+                    {!passenger.fromWaitlist && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRemove(passenger.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Edit Passenger Modal */}
+      {showEditModal && editingPassenger && (
+        <EditPassengerModal
+          passenger={editingPassenger}
+          onSave={handleSaveEditedPassenger}
+          onCancel={() => {
+            setShowEditModal(false);
+            setEditingPassenger(null);
+          }}
+        />
+      )}
+    </>
   );
 };
 
