@@ -8,39 +8,46 @@ import { User } from '../types/User';
 import { Calendar as CalendarIcon, Plane, Users, Weight, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
 interface ArchivedMissionsProps {
   missions: Mission[];
   currentUser: User;
 }
+
 const ArchivedMissions = ({
   missions,
   currentUser
 }: ArchivedMissionsProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
+
   const formatDateForPrint = (dateString: string) => {
     return format(parseISO(dateString), 'MM/dd/yyyy');
   };
+
   const formatTimeForPrint = (timeString: string) => {
     if (!timeString) return '';
     return timeString;
   };
+
   const getMissionsForDate = (date: Date) => {
     return missions.filter(mission => isSameDay(parseISO(mission.dataVoo), date));
   };
+
   const getUniqueDates = () => {
     const dates = missions.map(mission => parseISO(mission.dataVoo));
     const uniqueDates = dates.filter((date, index, self) => index === self.findIndex(d => isSameDay(d, date)));
     return uniqueDates.sort((a, b) => b.getTime() - a.getTime());
   };
+
   const handlePrint = (mission: Mission) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    // Use the exact same HTML structure as RELAPAX.html
     const printContent = `
 <!DOCTYPE html>
 <html lang="">
@@ -608,8 +615,10 @@ window.onload = function() {
     printWindow.document.write(printContent);
     printWindow.document.close();
   };
+
   const selectedDateMissions = selectedDate ? getMissionsForDate(selectedDate) : [];
   const uniqueDates = getUniqueDates();
+
   if (missions.length === 0) {
     return (
       <Card>
@@ -625,6 +634,7 @@ window.onload = function() {
       </Card>
     );
   }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -643,21 +653,30 @@ window.onload = function() {
         </div>
       </div>
 
-      {viewMode === 'calendar' ? <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {viewMode === 'calendar' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle className="text-sm">Selecione uma data</CardTitle>
             </CardHeader>
             <CardContent>
-              <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={{
-            hasMissions: uniqueDates
-          }} modifiersStyles={{
-            hasMissions: {
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              fontWeight: 'bold'
-            }
-          }} locale={ptBR} className="rounded-md border" />
+              <Calendar 
+                mode="single" 
+                selected={selectedDate} 
+                onSelect={setSelectedDate} 
+                modifiers={{
+                  hasMissions: uniqueDates
+                }} 
+                modifiersStyles={{
+                  hasMissions: {
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    fontWeight: 'bold'
+                  }
+                }} 
+                locale={ptBR} 
+                className="rounded-md border" 
+              />
               <div className="mt-4 text-xs text-gray-600">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-blue-500 rounded"></div>
@@ -668,25 +687,24 @@ window.onload = function() {
           </Card>
 
           <div className="lg:col-span-2">
-            {selectedDate && selectedDateMissions.length > 0 ? <div className="space-y-4">
+            {selectedDate && selectedDateMissions.length > 0 ? (
+              <div className="space-y-4">
                 <h3 className="text-md font-medium">
-                  Missões do dia {format(selectedDate, 'dd/MM/yyyy', {
-              locale: ptBR
-            })}
+                  Missões do dia {format(selectedDate, 'dd/MM/yyyy', { locale: ptBR })}
                 </h3>
-                {selectedDateMissions.map(mission => <Card key={mission.id} className="w-full">
+                {selectedDateMissions.map(mission => (
+                  <Card key={mission.id} className="w-full">
                     <CardHeader className="py-[5px]">
                       <CardTitle className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <Plane className="w-5 h-5 text-blue-600" />
-                            <span className="text-sm">
-                              {mission.aeronave} - {mission.matricula} - OFRAG{mission.ofrag}
-                            </span>
+                          <span className="text-sm">
+                            {mission.aeronave} - {mission.matricula} - OFRAG{mission.ofrag}
+                          </span>
                           <Badge variant="outline" className="bg-gray-50 text-gray-700 font-semibold text-xs">
                             Arquivada
                           </Badge>
                         </div>
-
                         <Button
                           size="sm"
                           variant="outline"
@@ -694,7 +712,7 @@ window.onload = function() {
                           className="bg-blue-50 hover:bg-blue-100 text-blue-700"
                         >
                           <FileText className="w-4 h-4 mr-2" />
-                            Relatório do Voo
+                          Relatório do Voo
                         </Button>
                       </CardTitle>
                     </CardHeader>
@@ -707,31 +725,38 @@ window.onload = function() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
                             <Weight className="w-4 h-4 text-gray-500" />
-                              <span>{mission.passageiros.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg total</span>
+                            <span>{mission.passageiros.reduce((sum, p) => sum + p.peso + p.pesoBagagem + p.pesoBagagemMao, 0)} kg total</span>
                           </div>
-
                           <div className="ml-4">
                             <p className="text-sm font-medium text-gray-700">Trechos: {mission.trechos.join(' → ')}</p>
                           </div>
                         </div>
+                      </div>
                     </CardContent>
-                  </Card>)}
-              </div> : selectedDate ? <Card>
+                  </Card>
+                ))}
+              </div>
+            ) : selectedDate ? (
+              <Card>
                 <CardContent className="py-8">
                   <p className="text-gray-500 text-center">
-                    Nenhuma missão arquivada encontrada para {format(selectedDate, 'dd/MM/yyyy', {
-                locale: ptBR
-              })}
+                    Nenhuma missão arquivada encontrada para {format(selectedDate, 'dd/MM/yyyy', { locale: ptBR })}
                   </p>
                 </CardContent>
-              </Card> : <Card>
+              </Card>
+            ) : (
+              <Card>
                 <CardContent className="py-8">
                   <p className="text-gray-500 text-center">Selecione uma data no calendário</p>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
           </div>
-        </div> : <div className="space-y-4">
-          {missions.map(mission => <Card key={mission.id} className="w-full">
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {missions.map(mission => (
+            <Card key={mission.id} className="w-full">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -769,9 +794,12 @@ window.onload = function() {
                   Relatório de Voo
                 </Button>
               </CardContent>
-            </Card>)}
-        </div>}
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
+
 export default ArchivedMissions;
