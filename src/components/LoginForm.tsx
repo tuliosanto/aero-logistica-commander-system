@@ -126,7 +126,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
         <Card className="w-full max-w-md aviation-card aviation-pulse">
           <CardHeader className="text-center pb-6">
-            <div className="mx-auto mb-6 w-24 h-24 flex items-center justify-center rounded-full">
+            <div className="mx-auto mb-3 w-24 h-24 flex items-center justify-center rounded-full">
               <img 
                 src={gladioImage} 
                 alt="Gládio FAB" 
