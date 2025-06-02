@@ -9,7 +9,226 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      base_configs: {
+        Row: {
+          base_aerea: Database["public"]["Enums"]["base_aerea"]
+          cep: string | null
+          cidade: string | null
+          comandante: string | null
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          id: string
+          nome_completo: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_aerea: Database["public"]["Enums"]["base_aerea"]
+          cep?: string | null
+          cidade?: string | null
+          comandante?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome_completo: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_aerea?: Database["public"]["Enums"]["base_aerea"]
+          cep?: string | null
+          cidade?: string | null
+          comandante?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome_completo?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      can_waitlist: {
+        Row: {
+          base_aerea: Database["public"]["Enums"]["base_aerea"]
+          created_at: string
+          data_inscricao: string
+          destino: string
+          email: string | null
+          id: string
+          nome: string
+          observacoes: string | null
+          origem: string
+          posto: Database["public"]["Enums"]["posto_militar"]
+          prioridade: Database["public"]["Enums"]["prioridade_can"]
+          telefone: string | null
+        }
+        Insert: {
+          base_aerea: Database["public"]["Enums"]["base_aerea"]
+          created_at?: string
+          data_inscricao?: string
+          destino: string
+          email?: string | null
+          id?: string
+          nome: string
+          observacoes?: string | null
+          origem: string
+          posto: Database["public"]["Enums"]["posto_militar"]
+          prioridade?: Database["public"]["Enums"]["prioridade_can"]
+          telefone?: string | null
+        }
+        Update: {
+          base_aerea?: Database["public"]["Enums"]["base_aerea"]
+          created_at?: string
+          data_inscricao?: string
+          destino?: string
+          email?: string | null
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          origem?: string
+          posto?: Database["public"]["Enums"]["posto_militar"]
+          prioridade?: Database["public"]["Enums"]["prioridade_can"]
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      missions: {
+        Row: {
+          aeronave: string
+          base_aerea: Database["public"]["Enums"]["base_aerea"]
+          comandante: string
+          created_at: string
+          created_by: string | null
+          data_missao: string
+          destino: string
+          id: string
+          observacoes: string | null
+          ofrag: string
+          origem: string
+          status: Database["public"]["Enums"]["mission_status"]
+          updated_at: string
+        }
+        Insert: {
+          aeronave: string
+          base_aerea: Database["public"]["Enums"]["base_aerea"]
+          comandante: string
+          created_at?: string
+          created_by?: string | null
+          data_missao: string
+          destino: string
+          id?: string
+          observacoes?: string | null
+          ofrag: string
+          origem: string
+          status?: Database["public"]["Enums"]["mission_status"]
+          updated_at?: string
+        }
+        Update: {
+          aeronave?: string
+          base_aerea?: Database["public"]["Enums"]["base_aerea"]
+          comandante?: string
+          created_at?: string
+          created_by?: string | null
+          data_missao?: string
+          destino?: string
+          id?: string
+          observacoes?: string | null
+          ofrag?: string
+          origem?: string
+          status?: Database["public"]["Enums"]["mission_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      passengers: {
+        Row: {
+          created_at: string
+          destino: string
+          from_waitlist: boolean | null
+          id: string
+          mission_id: string | null
+          nome: string
+          observacoes: string | null
+          posto: Database["public"]["Enums"]["posto_militar"]
+          waitlist_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          destino: string
+          from_waitlist?: boolean | null
+          id?: string
+          mission_id?: string | null
+          nome: string
+          observacoes?: string | null
+          posto: Database["public"]["Enums"]["posto_militar"]
+          waitlist_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          destino?: string
+          from_waitlist?: boolean | null
+          id?: string
+          mission_id?: string | null
+          nome?: string
+          observacoes?: string | null
+          posto?: Database["public"]["Enums"]["posto_militar"]
+          waitlist_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "passengers_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          base_aerea: Database["public"]["Enums"]["base_aerea"]
+          created_at: string
+          id: string
+          nome_guerra: string
+          perfil: Database["public"]["Enums"]["user_profile"]
+          posto: Database["public"]["Enums"]["posto_militar"]
+          senha: string
+          updated_at: string
+        }
+        Insert: {
+          base_aerea: Database["public"]["Enums"]["base_aerea"]
+          created_at?: string
+          id?: string
+          nome_guerra: string
+          perfil: Database["public"]["Enums"]["user_profile"]
+          posto: Database["public"]["Enums"]["posto_militar"]
+          senha: string
+          updated_at?: string
+        }
+        Update: {
+          base_aerea?: Database["public"]["Enums"]["base_aerea"]
+          created_at?: string
+          id?: string
+          nome_guerra?: string
+          perfil?: Database["public"]["Enums"]["user_profile"]
+          posto?: Database["public"]["Enums"]["posto_militar"]
+          senha?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +237,40 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      base_aerea:
+        | "BAAF"
+        | "BAAN"
+        | "BABE"
+        | "BABR"
+        | "BABV"
+        | "BACG"
+        | "BACO"
+        | "BAFL"
+        | "BAFZ"
+        | "BAGL"
+        | "BAMN"
+        | "BANT"
+        | "BAPV"
+        | "BARF"
+        | "BASC"
+        | "BASM"
+        | "BASP"
+        | "BAST"
+        | "BASV"
+      mission_status: "Ativa" | "Concluida" | "Arquivada"
+      posto_militar:
+        | "CEL AV"
+        | "TC AV"
+        | "MAJ AV"
+        | "CAP AV"
+        | "TEN AV"
+        | "ASP AV"
+        | "SO AV"
+        | "SGT AV"
+        | "CB AV"
+        | "SD AV"
+      prioridade_can: "Alta" | "Normal" | "Baixa"
+      user_profile: "Administrador" | "Operador" | "Secretario"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +385,43 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      base_aerea: [
+        "BAAF",
+        "BAAN",
+        "BABE",
+        "BABR",
+        "BABV",
+        "BACG",
+        "BACO",
+        "BAFL",
+        "BAFZ",
+        "BAGL",
+        "BAMN",
+        "BANT",
+        "BAPV",
+        "BARF",
+        "BASC",
+        "BASM",
+        "BASP",
+        "BAST",
+        "BASV",
+      ],
+      mission_status: ["Ativa", "Concluida", "Arquivada"],
+      posto_militar: [
+        "CEL AV",
+        "TC AV",
+        "MAJ AV",
+        "CAP AV",
+        "TEN AV",
+        "ASP AV",
+        "SO AV",
+        "SGT AV",
+        "CB AV",
+        "SD AV",
+      ],
+      prioridade_can: ["Alta", "Normal", "Baixa"],
+      user_profile: ["Administrador", "Operador", "Secretario"],
+    },
   },
 } as const
