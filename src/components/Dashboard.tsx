@@ -202,7 +202,7 @@ const Dashboard = ({
     return 'grid-cols-5';
   };
   return <div className="min-h-screen dashboard-bg">
-      <nav className="aviation-nav px-6 py-4 sticky top-0 z-50 bg-[fab-blue-900]">
+      <nav className="aviation-nav px-6 py-4 sticky top-0 z-50 bg-[fab-blue-700] bg-blue-950">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3 aviation-card px-4 py-2 rounded-xl shadow-lg">
