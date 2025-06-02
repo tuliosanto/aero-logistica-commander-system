@@ -240,7 +240,7 @@ const Dashboard = ({
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className={`grid w-full ${getTabsCount()} mb-6 aviation-tabs p-1 rounded-xl`}>
             {currentUser.perfil !== 'Secretario' && <TabsTrigger value="missions" className="flex items-center space-x-2 tab-missions transition-all duration-200 rounded-lg py-2 px-4">
-                <Plane className="w-4 h-4" />
+                <Plane className="w-4 h-4 text-4xl font-bold aviation-text-gradient" />
                 <span>Missões</span>
               </TabsTrigger>}
             {currentUser.perfil !== 'Secretario' && <TabsTrigger value="archived" className="flex items-center space-x-2 tab-archived transition-all duration-200 rounded-lg py-2 px-4">
