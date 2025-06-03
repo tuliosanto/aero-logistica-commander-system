@@ -4,19 +4,15 @@ export interface CANWaitlistPassenger {
   posto: string;
   nome: string;
   cpf: string;
-  telefone: string; // Novo campo de telefone
+  telefone?: string;
   destino: string;
   peso: number;
   pesoBagagem: number;
   pesoBagagemMao: number;
-  prioridade: number; // 1-13 como nas missões
+  prioridade: number;
   responsavelInscricao: string;
-  parentesco: string;
+  parentesco?: string;
   dataInscricao: string;
   baseAerea: string;
-  isAllocated?: boolean; // Nova propriedade para indicar se está alocado em uma missão
-  missionId?: string; // ID da missão onde está alocado
+  isAllocated?: boolean;
 }
-
-// Alias for backward compatibility
-export type CANWaitlistEntry = CANWaitlistPassenger;
