@@ -122,6 +122,7 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
                 onChange={(e) => setCpf(e.target.value)}
                 onChange={handleCPFChange}
                 placeholder="Apenas Números"
+                maxLength={14}
                 required
               />
             </div>
