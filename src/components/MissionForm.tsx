@@ -248,8 +248,7 @@ const MissionForm = ({
             <Input 
               id="aeronave" 
               value={aeronave} 
-              onChange={e => setAeronave(e.target.value)} 
-              placeholder="Ex: KC-390, C-130, etc." 
+              onChange={e => setAeronave(e.target.value)}  
               required 
             />
           </div>
@@ -259,7 +258,6 @@ const MissionForm = ({
               id="matricula" 
               value={matricula} 
               onChange={e => setMatricula(e.target.value)} 
-              placeholder="Ex: FAB2855" 
             />
           </div>
         </div>
@@ -279,7 +277,6 @@ const MissionForm = ({
                 id="origem" 
                 value={origem} 
                 onChange={e => setOrigem(e.target.value)} 
-                placeholder="Ex: SBGL, SBBR, etc."
                 required 
               />
             </div>
@@ -290,7 +287,6 @@ const MissionForm = ({
                 id="trecho1" 
                 value={trecho1} 
                 onChange={e => setTrecho1(e.target.value.toUpperCase())} 
-                placeholder="SB(XX)"
               />
             </div>
 
@@ -300,7 +296,6 @@ const MissionForm = ({
                 id="trecho2" 
                 value={trecho2} 
                 onChange={e => setTrecho2(e.target.value.toUpperCase())} 
-                placeholder="SB(XX)"
               />
             </div>
 
@@ -310,7 +305,6 @@ const MissionForm = ({
                 id="trecho3" 
                 value={trecho3} 
                 onChange={e => setTrecho3(e.target.value.toUpperCase())} 
-                placeholder="SB(XX)"
               />
             </div>
 
@@ -320,7 +314,6 @@ const MissionForm = ({
                 id="trecho4" 
                 value={trecho4} 
                 onChange={e => setTrecho4(e.target.value.toUpperCase())} 
-                placeholder="SB(XX)"
               />
             </div>
 
@@ -330,7 +323,6 @@ const MissionForm = ({
                 id="trecho5" 
                 value={trecho5} 
                 onChange={e => setTrecho5(e.target.value.toUpperCase())} 
-                placeholder="SB(XX)"
               />
             </div>
 
@@ -340,7 +332,6 @@ const MissionForm = ({
                 id="trecho6" 
                 value={trecho6} 
                 onChange={e => setTrecho6(e.target.value.toUpperCase())} 
-                placeholder="SB(XX)"
               />
             </div>
           </div>
@@ -374,7 +365,6 @@ const MissionForm = ({
               id="ofrag" 
               value={ofrag} 
               onChange={e => setOfrag(e.target.value)} 
-              placeholder="Ex: 2024/001" 
             />
           </div>
         </div>
@@ -387,7 +377,6 @@ const MissionForm = ({
               type="time"
               value={horarioChamada} 
               onChange={e => setHorarioChamada(e.target.value)} 
-              placeholder="Ex: 14:30" 
             />
           </div>
           <div className="space-y-2">
@@ -397,7 +386,6 @@ const MissionForm = ({
               type="time"
               value={horarioDecolagem} 
               onChange={e => setHorarioDecolagem(e.target.value)} 
-              placeholder="Ex: 15:00" 
             />
           </div>
         </div>
