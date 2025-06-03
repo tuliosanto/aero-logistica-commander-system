@@ -58,8 +58,8 @@ const ArchivedMissions = ({
   };
 
   const handlePrint = (mission: Mission) => {
-    const reportWindow = window.open('', '_blank');
-    if (!reportWindow) return;
+    //const reportWindow = window.open('', '_blank');
+    //if (!reportWindow) return;
 
     // Use the same HTML structure as the original "Relatório de Vôo"
     const reportContent = `
