@@ -119,7 +119,8 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
               <Input
                 id="cpf"
                 value={cpf}
-                onChange={(e) => setCpf(e.target.value)}{handleCPFChange}
+                onChange={(e) => setCpf(e.target.value)}
+                onChange={handleCPFChange}
                 placeholder="000.000.000-00"
                 required
               />
