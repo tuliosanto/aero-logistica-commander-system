@@ -34,8 +34,8 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
       telefone,
       destino,
       peso,
-      pesoBagagem: 0, // Valor padrão
-      pesoBagagemMao: 0, // Valor padrão
+      pesoBagagem,
+      pesoBagagemMao,
       prioridade: 13, // Valor padrão
       responsavelInscricao,
       parentesco
@@ -115,6 +115,7 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
             onChange={handleTelefoneChange}
             placeholder="(11) 99999-9999"
             maxLength={15}
+            required
           />
         </div>
       </div>
