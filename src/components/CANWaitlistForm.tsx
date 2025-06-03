@@ -7,8 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import { User } from '../types/User';
 import { MILITARY_RANKS, AERODROMOS } from '../utils/constants';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
 interface CANWaitlistFormProps {
   passenger?: CANWaitlistPassenger | null;
@@ -24,26 +22,11 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
   const [telefone, setTelefone] = useState(passenger?.telefone || '');
   const [destino, setDestino] = useState(passenger?.destino || '');
   const [peso, setPeso] = useState<number>(passenger?.peso || 0);
-  const [pesoBagagem, setPesoBagagem] = useState<number>(passenger?.pesoBagagem || 0);
-  const [pesoBagagemMao, setPesoBagagemMao] = useState<number>(passenger?.pesoBagagemMao || 0);
   const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || 'O PRÓPRIO');
   const [parentesco, setParentesco] = useState(passenger?.parentesco || '');
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validar CPF
-    const cpfNumerico = cpf.replace(/\D/g, '');
-    if (cpfNumerico.length !== 11) {
-      toast({
-        title: "CPF inválido",
-        description: "O CPF deve ter 11 dígitos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     onSave({
       posto,
       nome,
@@ -51,8 +34,8 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
       telefone,
       destino,
       peso,
-      pesoBagagem,
-      pesoBagagemMao,
+      pesoBagagem: 0, // Valor padrão
+      pesoBagagemMao: 0, // Valor padrão
       prioridade: 13, // Valor padrão
       responsavelInscricao,
       parentesco
@@ -67,45 +50,6 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCPF(e.target.value);
     setCpf(formatted);
-  };
-
-  const handleCPFBlur = async () => {
-    const cpfNumerico = cpf.replace(/\D/g, '');
-    if (cpfNumerico.length === 11) {
-      setIsLoadingProfile(true);
-      try {
-        const { data, error } = await supabase.rpc('get_passenger_by_cpf', {
-          cpf_input: parseInt(cpfNumerico)
-        });
-
-        if (error) {
-          console.error('Erro ao buscar dados do passageiro:', error);
-        } else if (data && data.length > 0) {
-          const profile = data[0];
-          
-          // Auto-preencher campos se encontrar o perfil
-          if (profile.nome && !nome) setNome(profile.nome);
-          if (profile.posto && !posto) setPosto(profile.posto);
-          if (profile.telefone && !telefone) setTelefone(profile.telefone);
-          if (profile.peso && !peso) setPeso(Number(profile.peso));
-          if (profile.peso_bagagem && !pesoBagagem) setPesoBagagem(Number(profile.peso_bagagem));
-          if (profile.peso_bagagem_mao && !pesoBagagemMao) setPesoBagagemMao(Number(profile.peso_bagagem_mao));
-          if (profile.responsavel_inscricao && profile.responsavel_inscricao !== 'O PRÓPRIO') {
-            setResponsavelInscricao(profile.responsavel_inscricao);
-          }
-          if (profile.parentesco) setParentesco(profile.parentesco);
-
-          toast({
-            title: "Dados encontrados",
-            description: "Informações do passageiro foram preenchidas automaticamente.",
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao buscar perfil do passageiro:', error);
-      } finally {
-        setIsLoadingProfile(false);
-      }
-    }
   };
 
   const formatTelefone = (value: string) => {
@@ -125,24 +69,7 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="cpf">CPF *</Label>
-          <Input 
-            id="cpf" 
-            value={cpf} 
-            onChange={handleCPFChange}
-            onBlur={handleCPFBlur}
-            placeholder="000.000.000-00"
-            maxLength={14}
-            required 
-            disabled={isLoadingProfile}
-          />
-          {isLoadingProfile && (
-            <p className="text-sm text-blue-600">Buscando dados do passageiro...</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="posto">Posto/Graduação *</Label>
+          <Label htmlFor="posto">Posto/Graduação</Label>
           <Select value={posto} onValueChange={setPosto}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione o posto" />
@@ -154,20 +81,32 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
             </SelectContent>
           </Select>
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="nome">Nome Completo *</Label>
-        <Input 
-          id="nome" 
-          value={nome} 
-          onChange={e => setNome(e.target.value)} 
-          placeholder="Nome completo do passageiro"
-          required 
-        />
+        <div className="space-y-2">
+          <Label htmlFor="nome">Nome Completo</Label>
+          <Input 
+            id="nome" 
+            value={nome} 
+            onChange={e => setNome(e.target.value)} 
+            placeholder="Nome completo do passageiro"
+            required 
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="cpf">CPF</Label>
+          <Input 
+            id="cpf" 
+            value={cpf} 
+            onChange={handleCPFChange}
+            placeholder="000.000.000-00"
+            maxLength={14}
+            required 
+          />
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="telefone">Telefone para Contato</Label>
           <Input 
@@ -178,58 +117,33 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
             maxLength={15}
           />
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="destino">Destino *</Label>
-          <Select value={destino} onValueChange={setDestino}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o destino" />
-            </SelectTrigger>
-            <SelectContent>
-              {AERODROMOS.map(aero => (
-                <SelectItem key={aero.code} value={aero.code}>
-                  {aero.code} - {aero.location}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="peso">Peso Corporal (kg) *</Label>
-          <Input 
-            id="peso" 
-            type="number" 
-            value={peso} 
-            onChange={e => setPeso(Number(e.target.value))} 
-            min="1"
-            required
-          />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="destino">Destino</Label>
+        <Select value={destino} onValueChange={setDestino}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o destino" />
+          </SelectTrigger>
+          <SelectContent>
+            {AERODROMOS.map(aero => (
+              <SelectItem key={aero.code} value={aero.code}>
+                {aero.code} - {aero.location}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="pesoBagagem">Peso Bagagem (kg)</Label>
-          <Input 
-            id="pesoBagagem" 
-            type="number" 
-            value={pesoBagagem} 
-            onChange={e => setPesoBagagem(Number(e.target.value))} 
-            min="0"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="pesoBagagemMao">Peso Bagagem de Mão (kg)</Label>
-          <Input 
-            id="pesoBagagemMao" 
-            type="number" 
-            value={pesoBagagemMao} 
-            onChange={e => setPesoBagagemMao(Number(e.target.value))} 
-            min="0"
-          />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="peso">Peso (kg)</Label>
+        <Input 
+          id="peso" 
+          type="number" 
+          value={peso} 
+          onChange={e => setPeso(Number(e.target.value))} 
+          min="1"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

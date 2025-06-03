@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,6 @@ import { User } from '../types/User';
 import { AIR_BASES } from '../utils/constants';
 import { toast } from '@/hooks/use-toast';
 import { Plane, Cloud, Shield } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import gladioImage from '../images/gladio.png';
 
 interface LoginFormProps {
@@ -19,11 +19,9 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
   const [username, setUsername] = useState('');
   const [senha, setSenha] = useState('');
   const [baseAerea, setBaseAerea] = useState('BASM');
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
     console.log('Tentativa de login:', { username, senha: '***', baseAerea });
     
@@ -33,7 +31,6 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         description: "Por favor, preencha username e senha.",
         variant: "destructive",
       });
-      setIsLoading(false);
       return;
     }
     
@@ -43,133 +40,73 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         description: "Por favor, selecione sua base aérea.",
         variant: "destructive",
       });
-      setIsLoading(false);
       return;
     }
     
-    try {
-      // Buscar usuário no Supabase
-      const { data: users, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('username', username.toLowerCase())
-        .eq('senha', senha);
-
-      if (error) {
-        console.error('Erro ao buscar usuário:', error);
-        toast({
-          title: "Erro no login",
-          description: "Erro interno do sistema. Tente novamente.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      if (!users || users.length === 0) {
-        // Fallback para localStorage se não encontrar no Supabase
-        let localUsers = JSON.parse(localStorage.getItem('users') || '[]');
-        
-        // DADOS DE USUARIO ADMIN PARA ACESSO INICIAL - só adiciona se não existir
-        const adminExists = localUsers.some((u: User) => u.username === 'admin');
-        if (!adminExists) {
-          const defaultAdmin: User = {
-            id: '1',
-            posto: 'TB',
-            nomeGuerra: 'admin',
-            nomeCompleto: 'Administrador do Sistema',
-            baseAerea: 'BASM',
-            perfil: 'Supervisor',
-            senha: 'admin',
-            username: 'admin'
-          };
-          localUsers.push(defaultAdmin);
-          localStorage.setItem('users', JSON.stringify(localUsers));
-          console.log('Usuário admin padrão criado no localStorage');
-        }
-        
-        const localUser = localUsers.find((u: User) => {
-          if (!u.username || !u.senha) return false;
-          
-          if (u.perfil === 'Supervisor') {
-            return u.username.toLowerCase() === username.toLowerCase() && u.senha === senha;
-          }
-          
-          if (!u.baseAerea) return false;
-          
-          return u.username.toLowerCase() === username.toLowerCase() && 
-                 u.senha === senha &&
-                 u.baseAerea === baseAerea;
-        });
-
-        if (localUser) {
-          const userToLogin = localUser.perfil === 'Supervisor' 
-            ? { ...localUser, baseAerea } 
-            : localUser;
-          
-          onLogin(userToLogin);
-          toast({
-            title: "Login realizado com sucesso",
-            description: `Bem-vindo, ${localUser.posto} ${localUser.nomeGuerra}!`,
-          });
-        } else {
-          toast({
-            title: "Erro no login",
-            description: "Username, senha ou base aérea incorretos.",
-            variant: "destructive",
-          });
-        }
-        setIsLoading(false);
-        return;
-      }
-
-      const user = users[0];
-      
-      // Mapear dados do Supabase para tipo User local
-      const mappedUser: User = {
-        id: user.id,
-        posto: user.posto,
-        nomeGuerra: user.nome_guerra,
-        nomeCompleto: user.nome_guerra, // Usar nome_guerra como fallback para nomeCompleto
-        baseAerea: user.base_aerea,
-        perfil: user.perfil as 'Administrador' | 'Operador' | 'Supervisor' | 'Secretario', // Cast para incluir Supervisor
-        senha: user.senha,
-        username: user.username || ''
+    // Get users from localStorage
+    let users = JSON.parse(localStorage.getItem('users') || '[]');
+    console.log('Usuários encontrados:', users);
+    
+    // DADOS DE USUARIO ADMIN PARA ACESSO INICIAL - só adiciona se não existir
+    const adminExists = users.some((u: User) => u.username === 'admin');
+    if (!adminExists) {
+      const defaultAdmin: User = {
+        id: '1',
+        posto: 'TB',
+        nomeGuerra: 'admin',
+        nomeCompleto: 'Administrador do Sistema',
+        baseAerea: 'BASM',
+        perfil: 'Supervisor',
+        senha: 'admin',
+        username: 'admin'
       };
-      
-      // Para administradores, permitir login em qualquer base
-      if (user.perfil === 'Administrador') {
-        const userToLogin = { ...mappedUser, baseAerea };
-        onLogin(userToLogin);
-        toast({
-          title: "Login realizado com sucesso",
-          description: `Bem-vindo, ${user.posto} ${user.nome_guerra}!`,
-        });
-      } else {
-        // Para outros perfis, verificar também a base aérea
-        if (user.base_aerea === baseAerea) {
-          onLogin(mappedUser);
-          toast({
-            title: "Login realizado com sucesso",
-            description: `Bem-vindo, ${user.posto} ${user.nome_guerra}!`,
-          });
-        } else {
-          toast({
-            title: "Erro no login",
-            description: "Base aérea incorreta para este usuário.",
-            variant: "destructive",
-          });
-        }
+      users.push(defaultAdmin);
+      localStorage.setItem('users', JSON.stringify(users));
+      console.log('Usuário admin padrão criado');
+    }
+    
+    const user = users.find((u: User) => {
+      // Add validation to ensure properties exist before calling toLowerCase
+      if (!u.username || !u.senha) {
+        console.log('Usuário com dados incompletos encontrado:', u);
+        return false;
       }
-    } catch (error) {
-      console.error('Erro durante login:', error);
+      
+      // Para supervisores, permitir login em qualquer base
+      if (u.perfil === 'Supervisor') {
+        return u.username.toLowerCase() === username.toLowerCase() && u.senha === senha;
+      }
+      
+      // Para outros perfis, verificar também a base aérea
+      if (!u.baseAerea) {
+        console.log('Usuário sem base aérea encontrado:', u);
+        return false;
+      }
+      
+      return u.username.toLowerCase() === username.toLowerCase() && 
+             u.senha === senha &&
+             u.baseAerea === baseAerea;
+    });
+    
+    console.log('Usuário encontrado:', user);
+    
+    if (user) {
+      // Se for supervisor, usar a base selecionada no login
+      const userToLogin = user.perfil === 'Supervisor' 
+        ? { ...user, baseAerea } 
+        : user;
+      
+      onLogin(userToLogin);
+      toast({
+        title: "Login realizado com sucesso",
+        description: `Bem-vindo, ${user.posto} ${user.nomeGuerra}!`,
+      });
+    } else {
       toast({
         title: "Erro no login",
-        description: "Erro interno do sistema. Tente novamente.",
+        description: "Username, senha ou base aérea incorretos.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -189,7 +126,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
         <Card className="w-full max-w-md aviation-card aviation-pulse">
           <CardHeader className="text-center pb-6">
-            <div className="mx-auto mb-3 w-24 h-24 flex items-center justify-center rounded-full">
+            <div className="mx-auto mb-6 w-24 h-24 flex items-center justify-center rounded-full">
               <img 
                 src={gladioImage} 
                 alt="Gládio FAB" 
@@ -216,7 +153,6 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Digite seu username"
                   required
-                  disabled={isLoading}
                   className="aviation-input transition-all duration-200 border-slate-300"
                 />
               </div>
@@ -229,13 +165,12 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                   onChange={(e) => setSenha(e.target.value)}
                   placeholder="Digite sua senha"
                   required
-                  disabled={isLoading}
                   className="aviation-input transition-all duration-200 border-slate-300"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="baseAerea" className="text-slate-700 font-semibold">Base Aérea</Label>
-                <Select value={baseAerea} onValueChange={setBaseAerea} disabled={isLoading}>
+                <Select value={baseAerea} onValueChange={setBaseAerea}>
                   <SelectTrigger className="aviation-input transition-all duration-200 border-slate-300">
                     <SelectValue placeholder="Selecione sua base" />
                   </SelectTrigger>
@@ -250,10 +185,9 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
               </div>
               <Button 
                 type="submit" 
-                disabled={isLoading}
                 className="w-full aviation-button text-white font-semibold py-3 px-4 rounded-lg"
               >
-                {isLoading ? 'Entrando...' : 'Entrar no Sistema'}
+                Entrar no Sistema
               </Button>
             </form>
           </CardContent>

@@ -54,7 +54,6 @@ export type Database = {
       can_waitlist: {
         Row: {
           base_aerea: Database["public"]["Enums"]["base_aerea"]
-          cpf: number | null
           created_at: string
           data_inscricao: string
           destino: string
@@ -63,18 +62,12 @@ export type Database = {
           nome: string
           observacoes: string | null
           origem: string
-          parentesco: string | null
-          peso: number | null
-          peso_bagagem: number | null
-          peso_bagagem_mao: number | null
           posto: Database["public"]["Enums"]["posto_militar"]
           prioridade: Database["public"]["Enums"]["prioridade_can"]
-          responsavel_inscricao: string | null
           telefone: string | null
         }
         Insert: {
           base_aerea: Database["public"]["Enums"]["base_aerea"]
-          cpf?: number | null
           created_at?: string
           data_inscricao?: string
           destino: string
@@ -83,18 +76,12 @@ export type Database = {
           nome: string
           observacoes?: string | null
           origem: string
-          parentesco?: string | null
-          peso?: number | null
-          peso_bagagem?: number | null
-          peso_bagagem_mao?: number | null
           posto: Database["public"]["Enums"]["posto_militar"]
           prioridade?: Database["public"]["Enums"]["prioridade_can"]
-          responsavel_inscricao?: string | null
           telefone?: string | null
         }
         Update: {
           base_aerea?: Database["public"]["Enums"]["base_aerea"]
-          cpf?: number | null
           created_at?: string
           data_inscricao?: string
           destino?: string
@@ -103,13 +90,8 @@ export type Database = {
           nome?: string
           observacoes?: string | null
           origem?: string
-          parentesco?: string | null
-          peso?: number | null
-          peso_bagagem?: number | null
-          peso_bagagem_mao?: number | null
           posto?: Database["public"]["Enums"]["posto_militar"]
           prioridade?: Database["public"]["Enums"]["prioridade_can"]
-          responsavel_inscricao?: string | null
           telefone?: string | null
         }
         Relationships: []
@@ -170,58 +152,8 @@ export type Database = {
           },
         ]
       }
-      passenger_profiles: {
-        Row: {
-          cpf: number
-          created_at: string
-          email: string | null
-          id: string
-          nome: string
-          parentesco: string | null
-          peso: number | null
-          peso_bagagem: number | null
-          peso_bagagem_mao: number | null
-          posto: Database["public"]["Enums"]["posto_militar"]
-          responsavel_inscricao: string | null
-          telefone: string | null
-          updated_at: string
-        }
-        Insert: {
-          cpf: number
-          created_at?: string
-          email?: string | null
-          id?: string
-          nome: string
-          parentesco?: string | null
-          peso?: number | null
-          peso_bagagem?: number | null
-          peso_bagagem_mao?: number | null
-          posto: Database["public"]["Enums"]["posto_militar"]
-          responsavel_inscricao?: string | null
-          telefone?: string | null
-          updated_at?: string
-        }
-        Update: {
-          cpf?: number
-          created_at?: string
-          email?: string | null
-          id?: string
-          nome?: string
-          parentesco?: string | null
-          peso?: number | null
-          peso_bagagem?: number | null
-          peso_bagagem_mao?: number | null
-          posto?: Database["public"]["Enums"]["posto_militar"]
-          responsavel_inscricao?: string | null
-          telefone?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       passengers: {
         Row: {
-          checked_in: boolean | null
-          cpf: number | null
           created_at: string
           destino: string
           from_waitlist: boolean | null
@@ -229,18 +161,10 @@ export type Database = {
           mission_id: string | null
           nome: string
           observacoes: string | null
-          parentesco: string | null
-          peso: number | null
-          peso_bagagem: number | null
-          peso_bagagem_mao: number | null
           posto: Database["public"]["Enums"]["posto_militar"]
-          prioridade: number | null
-          responsavel_inscricao: string | null
           waitlist_id: string | null
         }
         Insert: {
-          checked_in?: boolean | null
-          cpf?: number | null
           created_at?: string
           destino: string
           from_waitlist?: boolean | null
@@ -248,18 +172,10 @@ export type Database = {
           mission_id?: string | null
           nome: string
           observacoes?: string | null
-          parentesco?: string | null
-          peso?: number | null
-          peso_bagagem?: number | null
-          peso_bagagem_mao?: number | null
           posto: Database["public"]["Enums"]["posto_militar"]
-          prioridade?: number | null
-          responsavel_inscricao?: string | null
           waitlist_id?: string | null
         }
         Update: {
-          checked_in?: boolean | null
-          cpf?: number | null
           created_at?: string
           destino?: string
           from_waitlist?: boolean | null
@@ -267,13 +183,7 @@ export type Database = {
           mission_id?: string | null
           nome?: string
           observacoes?: string | null
-          parentesco?: string | null
-          peso?: number | null
-          peso_bagagem?: number | null
-          peso_bagagem_mao?: number | null
           posto?: Database["public"]["Enums"]["posto_militar"]
-          prioridade?: number | null
-          responsavel_inscricao?: string | null
           waitlist_id?: string | null
         }
         Relationships: [
@@ -296,7 +206,6 @@ export type Database = {
           posto: Database["public"]["Enums"]["posto_militar"]
           senha: string
           updated_at: string
-          username: string | null
         }
         Insert: {
           base_aerea: Database["public"]["Enums"]["base_aerea"]
@@ -307,7 +216,6 @@ export type Database = {
           posto: Database["public"]["Enums"]["posto_militar"]
           senha: string
           updated_at?: string
-          username?: string | null
         }
         Update: {
           base_aerea?: Database["public"]["Enums"]["base_aerea"]
@@ -318,7 +226,6 @@ export type Database = {
           posto?: Database["public"]["Enums"]["posto_militar"]
           senha?: string
           updated_at?: string
-          username?: string | null
         }
         Relationships: []
       }
@@ -327,36 +234,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_passenger_by_cpf: {
-        Args: { cpf_input: number }
-        Returns: {
-          cpf: number
-          posto: Database["public"]["Enums"]["posto_militar"]
-          nome: string
-          telefone: string
-          email: string
-          peso: number
-          peso_bagagem: number
-          peso_bagagem_mao: number
-          responsavel_inscricao: string
-          parentesco: string
-        }[]
-      }
-      upsert_passenger_profile: {
-        Args: {
-          cpf_input: number
-          posto_input: Database["public"]["Enums"]["posto_militar"]
-          nome_input: string
-          telefone_input?: string
-          email_input?: string
-          peso_input?: number
-          peso_bagagem_input?: number
-          peso_bagagem_mao_input?: number
-          responsavel_input?: string
-          parentesco_input?: string
-        }
-        Returns: string
-      }
+      [_ in never]: never
     }
     Enums: {
       base_aerea:
