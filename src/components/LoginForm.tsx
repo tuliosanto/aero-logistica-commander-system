@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -126,9 +125,21 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
 
       const user = users[0];
       
-      // Para supervisores, permitir login em qualquer base
-      if (user.perfil === 'Supervisor') {
-        const userToLogin = { ...user, baseAerea };
+      // Mapear dados do Supabase para tipo User local
+      const mappedUser: User = {
+        id: user.id,
+        posto: user.posto,
+        nomeGuerra: user.nome_guerra,
+        nomeCompleto: user.nome_guerra, // Usar nome_guerra como fallback para nomeCompleto
+        baseAerea: user.base_aerea,
+        perfil: user.perfil as 'Administrador' | 'Operador' | 'Supervisor' | 'Secretario', // Cast para incluir Supervisor
+        senha: user.senha,
+        username: user.username || ''
+      };
+      
+      // Para administradores, permitir login em qualquer base
+      if (user.perfil === 'Administrador') {
+        const userToLogin = { ...mappedUser, baseAerea };
         onLogin(userToLogin);
         toast({
           title: "Login realizado com sucesso",
@@ -137,16 +148,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       } else {
         // Para outros perfis, verificar também a base aérea
         if (user.base_aerea === baseAerea) {
-          onLogin({
-            id: user.id,
-            posto: user.posto,
-            nomeGuerra: user.nome_guerra,
-            nomeCompleto: user.nome_guerra, // Usar nome_guerra como fallback
-            baseAerea: user.base_aerea,
-            perfil: user.perfil,
-            senha: user.senha,
-            username: user.username
-          });
+          onLogin(mappedUser);
           toast({
             title: "Login realizado com sucesso",
             description: `Bem-vindo, ${user.posto} ${user.nome_guerra}!`,
