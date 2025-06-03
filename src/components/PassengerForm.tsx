@@ -56,7 +56,7 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
     setPeso('');
     setPesoBagagem('');
     setPesoBagagemMao('');
-    setPrioridade('');
+    setPrioridade('6');
     setResponsavelInscricao('');
     setParentesco('');
     setOpen(false);
@@ -121,7 +121,7 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
                 value={cpf}
                 onChange={(e) => setCpf(e.target.value)}
                 onChange={handleCPFChange}
-                placeholder="000.000.000-00"
+                placeholder="Apenas Números"
                 required
               />
             </div>
@@ -150,9 +150,7 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
                 type="number"
                 value={peso}
                 onChange={(e) => setPeso(e.target.value)}
-                placeholder="75"
                 min="0"
-                required
               />
             </div>
             <div className="space-y-2">
@@ -162,9 +160,7 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
                 type="number"
                 value={pesoBagagem}
                 onChange={(e) => setPesoBagagem(e.target.value)}
-                placeholder="20"
                 min="0"
-                required
               />
             </div>
             <div className="space-y-2">
@@ -174,9 +170,7 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
                 type="number"
                 value={pesoBagagemMao}
                 onChange={(e) => setPesoBagagemMao(e.target.value)}
-                placeholder="5"
                 min="0"
-                required
               />
             </div>
           </div>
