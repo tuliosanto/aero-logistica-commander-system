@@ -310,12 +310,12 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="username">Username *</Label>
+                  <Label htmlFor="username">Username</Label>
                   <Input
                     id="username"
                     value={formData.username}
                     onChange={(e) => setFormData({...formData, username: e.target.value})}
-                    placeholder="Username único para login"
+                    placeholder="Nome a ser usado no Login"
                     required
                   />
                 </div>
@@ -323,16 +323,15 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nomeGuerra">Nome de Guerra *</Label>
+                  <Label htmlFor="nomeGuerra">Nome de Guerra</Label>
                   <Input
                     id="nomeGuerra"
                     value={formData.nomeGuerra}
                     onChange={(e) => setFormData({...formData, nomeGuerra: e.target.value})}
-                    placeholder="Nome de guerra"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nomeCompleto">Nome Completo *</Label>
+                  <Label htmlFor="nomeCompleto">Nome Completo</Label>
                   <Input
                     id="nomeCompleto"
                     value={formData.nomeCompleto}
@@ -368,7 +367,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="perfil">Perfil de Acesso *</Label>
+                  <Label htmlFor="perfil">Perfil de Acesso</Label>
                   <Select value={formData.perfil} onValueChange={(value: 'Operador' | 'Administrador' | 'Supervisor' | 'Secretario') => setFormData({...formData, perfil: value})}>
                     <SelectTrigger>
                       <SelectValue />
@@ -383,7 +382,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="senha">Senha *</Label>
+                <Label htmlFor="senha">Senha</Label>
                 <Input
                   id="senha"
                   type="password"
