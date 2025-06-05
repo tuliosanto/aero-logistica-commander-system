@@ -21,9 +21,9 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
   const [cpf, setCpf] = useState(passenger?.cpf || '');
   const [telefone, setTelefone] = useState(passenger?.telefone || '');
   const [destino, setDestino] = useState(passenger?.destino || '');
-  const [peso, setPeso] = useState<number>(passenger?.peso || '');
-  const [pesoBagagem, setPesoBagagem] = useState(passenger?.pesoBagagem || '');
-  const [pesoBagagemMao, setPesoBagagemMao] = useState(passenger?.pesoBagagemMao || '');
+  const [peso, setPeso] = useState<string>(passenger?.peso?.toString() || '');
+  const [pesoBagagem, setPesoBagagem] = useState<string>(passenger?.pesoBagagem?.toString() || '');
+  const [pesoBagagemMao, setPesoBagagemMao] = useState<string>(passenger?.pesoBagagemMao?.toString() || '');
   const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || 'O PRÓPRIO');
   const [parentesco, setParentesco] = useState(passenger?.parentesco || '');
 
@@ -35,9 +35,9 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
       cpf,
       telefone,
       destino,
-      peso,
-      pesoBagagem,
-      pesoBagagemMao,
+      peso: Number(peso),
+      pesoBagagem: Number(pesoBagagem),
+      pesoBagagemMao: Number(pesoBagagemMao),
       prioridade: 13, // Valor padrão
       responsavelInscricao,
       parentesco
@@ -144,9 +144,33 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
           id="peso" 
           type="number" 
           value={peso} 
-          onChange={e => setPeso(Number(e.target.value))} 
+          onChange={e => setPeso(e.target.value)} 
           min="1"
         />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="pesoBagagem">Peso da Bagagem (kg)</Label>
+          <Input 
+            id="pesoBagagem" 
+            type="number" 
+            value={pesoBagagem} 
+            onChange={e => setPesoBagagem(e.target.value)} 
+            min="0"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="pesoBagagemMao">Peso da Bagagem de Mão (kg)</Label>
+          <Input 
+            id="pesoBagagemMao" 
+            type="number" 
+            value={pesoBagagemMao} 
+            onChange={e => setPesoBagagemMao(e.target.value)} 
+            min="0"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
