@@ -57,12 +57,12 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
     setPesoBagagem('');
     setPesoBagagemMao('');
     setPrioridade('6');
-    setResponsavelInscricao('');
+    setResponsavelInscricao('O PRÓPRIO');
     setParentesco('');
     setOpen(false);
   };
 
-  const formatCPF = (value: string) => {
+    const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
@@ -119,8 +119,9 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
               <Input
                 id="cpf"
                 value={cpf}
+                onChange={(e) => setCpf(e.target.value)}
                 onChange={handleCPFChange}
-                placeholder="000.000.000-00"
+                placeholder="Apenas Números"
                 maxLength={14}
                 required
               />
