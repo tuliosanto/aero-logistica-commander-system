@@ -21,9 +21,8 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
   const [cpf, setCpf] = useState(passenger?.cpf || '');
   const [telefone, setTelefone] = useState(passenger?.telefone || '');
   const [destino, setDestino] = useState(passenger?.destino || '');
-  const [peso, setPeso] = useState<number>(passenger?.peso || '');
-  const [pesoBagagem, setPesoBagagem] = useState(passenger?.pesoBagagem || '');
-  const [pesoBagagemMao, setPesoBagagemMao] = useState(passenger?.pesoBagagemMao || '');
+  const [peso, setPeso] = useState(passenger?.peso || '');
+  const [prioridade, setPrioridade] = useState(passenger?.prioridade || '13');
   const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || 'O PRÓPRIO');
   const [parentesco, setParentesco] = useState(passenger?.parentesco || '');
 
