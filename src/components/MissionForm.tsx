@@ -86,23 +86,27 @@ const MissionForm = ({
     const filteredPassengers = waitlist.filter(passenger => {
       console.log(`\n--- Checking passenger: ${passenger.nome} ---`);
       
+      // Verificar se não está alocado (se isAllocated for undefined, considerar como não alocado)
       const notAllocated = !passenger.isAllocated;
       console.log('Not allocated:', notAllocated);
       
-      const destinationMatch = trechos.includes(passenger.destino);
-      console.log('Destination match:', destinationMatch, `(passenger destination: ${passenger.destino}, mission trechos: ${trechos.join(', ')})`);
+      // Verificar se o destino coincide com algum dos trechos da missão (excluindo origem)
+      const destinationsOnly = trechos.slice(1); // Remove a origem, só considera destinos
+      const destinationMatch = destinationsOnly.includes(passenger.destino);
+      console.log('Destination match:', destinationMatch, `(passenger destination: ${passenger.destino}, mission destinations: ${destinationsOnly.join(', ')})`);
       
+      // Verificar se não está já na lista de passageiros da missão
       const notInMission = !passageiros.some(p => p.cpf === passenger.cpf);
       console.log('Not in mission:', notInMission);
       
       // Verificar se a data da missão está dentro do período de validade da inscrição
-      let dateValidityCheck = false;
+      let dateValidityCheck = true; // Por padrão, considerar válido se não houver datas de validade
       if (passenger.dataInicioValidade && passenger.dataFimValidade) {
         dateValidityCheck = isMissionDateWithinValidity(dataVoo, passenger.dataInicioValidade, passenger.dataFimValidade);
         console.log('Date validity check:', dateValidityCheck);
         console.log(`Mission date: ${dataVoo}, Validity: ${passenger.dataInicioValidade} to ${passenger.dataFimValidade}`);
       } else {
-        console.log('Missing validity dates for passenger');
+        console.log('No validity dates for passenger - considering as valid');
       }
       
       const isCompatible = notAllocated && destinationMatch && notInMission && dateValidityCheck;

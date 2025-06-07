@@ -1,4 +1,3 @@
-
 import { addDays, isAfter, isBefore, isToday, isWithinInterval, parseISO, isSameDay } from 'date-fns';
 
 export const calculateEndDate = (startDate: string, days: number = 10): string => {
@@ -51,20 +50,19 @@ export const isMissionDateWithinValidity = (
   }
   
   try {
-    // Converter as strings para objetos Date
-    const mission = new Date(missionDate);
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    // Normalizar as datas para comparação (apenas a parte da data, sem horário)
+    const missionDateObj = new Date(missionDate + 'T00:00:00');
+    const startDateObj = new Date(startDate + 'T00:00:00');
+    const endDateObj = new Date(endDate + 'T23:59:59');
     
     console.log('Date comparison:', {
-      missionDate: mission.toISOString().split('T')[0],
-      startDate: start.toISOString().split('T')[0], 
-      endDate: end.toISOString().split('T')[0]
+      missionDate: missionDateObj.toISOString().split('T')[0],
+      startDate: startDateObj.toISOString().split('T')[0], 
+      endDate: endDateObj.toISOString().split('T')[0]
     });
     
     // Verificar se a data da missão está dentro do intervalo (inclusive)
-    // A data da missão deve ser >= data de início E <= data de fim
-    const isWithinRange = mission >= start && mission <= end;
+    const isWithinRange = missionDateObj >= startDateObj && missionDateObj <= endDateObj;
     
     console.log('Is mission date within validity range?', isWithinRange);
     
