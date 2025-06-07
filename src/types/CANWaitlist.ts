@@ -4,18 +4,21 @@ export interface CANWaitlistPassenger {
   posto: string;
   nome: string;
   cpf: string;
-  telefone: string; // Novo campo de telefone
+  telefone: string;
   destino: string;
   peso: number;
   pesoBagagem: number;
   pesoBagagemMao: number;
-  prioridade: number; // 1-13 como nas missões
+  prioridade: number;
   responsavelInscricao: string;
   parentesco: string;
   dataInscricao: string;
+  dataInicioValidade: string; // Nova data de início da validade
+  dataFimValidade: string; // Data calculada automaticamente (início + 10 dias)
   baseAerea: string;
-  isAllocated?: boolean; // Nova propriedade para indicar se está alocado em uma missão
-  missionId?: string; // ID da missão onde está alocado
+  isAllocated?: boolean;
+  missionId?: string;
+  isExpired?: boolean; // Para verificar se a inscrição expirou
 }
 
 // Alias for backward compatibility

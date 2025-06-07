@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +6,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, ChevronRight, Trash2, UserPlus, Edit } from 'lucide-react';
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import { getRankOrder } from '../utils/constants';
+import { isValidityExpired } from '../utils/validityUtils';
 import PriorityTooltip from './PriorityTooltip';
+import ValidityStatus from './ValidityStatus';
 
 interface CANWaitlistProps {
   waitlist: CANWaitlistPassenger[];
@@ -31,8 +32,13 @@ const CANWaitlist = ({ waitlist, onAddToMission, onRemove, onEdit }: CANWaitlist
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
   const groupedWaitlist = useMemo(() => {
-    // Filtrar apenas passageiros não alocados
-    const availablePassengers = waitlist.filter(entry => !entry.isAllocated);
+    // Filtrar passageiros não alocados e adicionar status de expiração
+    const availablePassengers = waitlist
+      .filter(entry => !entry.isAllocated)
+      .map(entry => ({
+        ...entry,
+        isExpired: entry.dataFimValidade ? isValidityExpired(entry.dataFimValidade) : false
+      }));
     
     const groups = availablePassengers.reduce((acc, entry) => {
       if (!acc[entry.destino]) {
@@ -42,13 +48,20 @@ const CANWaitlist = ({ waitlist, onAddToMission, onRemove, onEdit }: CANWaitlist
       return acc;
     }, {} as Record<string, CANWaitlistPassenger[]>);
 
-    // Sort each group by priority first, then by military rank
+    // Ordenar cada grupo por prioridade, posto militar e status de validade
     Object.keys(groups).forEach(destino => {
       groups[destino].sort((a, b) => {
+        // Primeiro: inscrições não expiradas
+        if (a.isExpired !== b.isExpired) {
+          return a.isExpired ? 1 : -1;
+        }
+        
+        // Segundo: prioridade
         if (a.prioridade !== b.prioridade) {
           return a.prioridade - b.prioridade;
         }
         
+        // Terceiro: posto militar
         const rankOrderA = getRankOrder(a.posto);
         const rankOrderB = getRankOrder(b.posto);
         
@@ -134,10 +147,10 @@ const CANWaitlist = ({ waitlist, onAddToMission, onRemove, onEdit }: CANWaitlist
                         key={entry.id}
                         className={`p-3 flex items-center justify-between ${
                           index !== entries.length - 1 ? 'border-b' : ''
-                        }`}
+                        } ${entry.isExpired ? 'bg-red-50' : ''}`}
                       >
                         <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
+                          <div className="flex items-center space-x-2 mb-2">
                             <span className="font-medium">
                               {entry.posto} {entry.nome}
                             </span>
@@ -146,11 +159,24 @@ const CANWaitlist = ({ waitlist, onAddToMission, onRemove, onEdit }: CANWaitlist
                                 Prioridade {entry.prioridade}
                               </Badge>
                             </PriorityTooltip>
+                            {entry.dataFimValidade && (
+                              <ValidityStatus 
+                                endDate={entry.dataFimValidade} 
+                                size="sm"
+                              />
+                            )}
                           </div>
                           <div className="text-sm text-gray-600">
                             <p>CPF: {entry.cpf}</p>
                             <p>Peso: {entry.peso}kg | Bagagem: {entry.pesoBagagem + entry.pesoBagagemMao}kg</p>
                             <p>Data de Inscrição: {new Date(entry.dataInscricao).toLocaleDateString('pt-BR')}</p>
+                            {entry.dataInicioValidade && entry.dataFimValidade && (
+                              <p>
+                                Validade: {new Date(entry.dataInicioValidade).toLocaleDateString('pt-BR')} 
+                                {' até '} 
+                                {new Date(entry.dataFimValidade).toLocaleDateString('pt-BR')}
+                              </p>
+                            )}
                             {entry.telefone && <p>Telefone: {entry.telefone}</p>}
                           </div>
                         </div>
@@ -169,6 +195,7 @@ const CANWaitlist = ({ waitlist, onAddToMission, onRemove, onEdit }: CANWaitlist
                             variant="outline"
                             onClick={() => onAddToMission(entry)}
                             className="bg-green-50 hover:bg-green-100 text-green-700"
+                            disabled={entry.isExpired}
                           >
                             <UserPlus className="w-4 h-4 mr-1" />
                             Adicionar

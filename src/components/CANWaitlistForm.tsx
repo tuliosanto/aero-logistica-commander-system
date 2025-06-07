@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,10 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import { User } from '../types/User';
 import { MILITARY_RANKS, AERODROMOS } from '../utils/constants';
+import { calculateEndDate } from '../utils/validityUtils';
 
 interface CANWaitlistFormProps {
   passenger?: CANWaitlistPassenger | null;
-  onSave: (passenger: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea'>) => void;
+  onSave: (passenger: Omit<CANWaitlistPassenger, 'id' | 'dataInscricao' | 'baseAerea' | 'dataFimValidade'>) => void;
   onCancel: () => void;
   currentUser: User;
 }
@@ -26,6 +26,18 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
   const [pesoBagagemMao, setPesoBagagemMao] = useState<string>(passenger?.pesoBagagemMao?.toString() || '');
   const [responsavelInscricao, setResponsavelInscricao] = useState(passenger?.responsavelInscricao || 'O PRÓPRIO');
   const [parentesco, setParentesco] = useState(passenger?.parentesco || '');
+  
+  const [dataInicioValidade, setDataInicioValidade] = useState(
+    passenger?.dataInicioValidade || new Date().toISOString().split('T')[0]
+  );
+  const [dataFimValidade, setDataFimValidade] = useState(passenger?.dataFimValidade || '');
+
+  useEffect(() => {
+    if (dataInicioValidade) {
+      const endDate = calculateEndDate(dataInicioValidade);
+      setDataFimValidade(endDate);
+    }
+  }, [dataInicioValidade]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,9 +50,11 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
       peso: Number(peso),
       pesoBagagem: Number(pesoBagagem),
       pesoBagagemMao: Number(pesoBagagemMao),
-      prioridade: 13, // Valor padrão
+      prioridade: 13,
       responsavelInscricao,
-      parentesco
+      parentesco,
+      dataInicioValidade,
+      dataFimValidade
     });
   };
 
@@ -119,6 +133,36 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
             maxLength={15}
             required
           />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="space-y-2">
+          <Label htmlFor="dataInicioValidade">Data de Início da Validade</Label>
+          <Input 
+            id="dataInicioValidade" 
+            type="date"
+            value={dataInicioValidade} 
+            onChange={e => setDataInicioValidade(e.target.value)}
+            required
+          />
+          <p className="text-xs text-gray-600">
+            Data a partir da qual a inscrição é válida
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="dataFimValidade">Data de Fim da Validade</Label>
+          <Input 
+            id="dataFimValidade" 
+            type="date"
+            value={dataFimValidade}
+            readOnly
+            className="bg-gray-100"
+          />
+          <p className="text-xs text-gray-600">
+            Calculado automaticamente: início + 10 dias
+          </p>
         </div>
       </div>
 
