@@ -73,17 +73,32 @@ const MissionForm = ({
     const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
     if (trechos.length === 0 || !dataVoo) return [];
     
+    console.log('Filtering waitlist for mission date:', dataVoo);
+    
     // Filtrar passageiros não alocados em missões ativas/concluídas e cujo destino coincida com qualquer um dos trechos
     // Também filtrar por data da missão dentro do período de validade
-    return waitlist.filter(passenger => 
-      !passenger.isAllocated &&
-      trechos.includes(passenger.destino) &&
-      !passageiros.some(p => p.cpf === passenger.cpf) &&
+    return waitlist.filter(passenger => {
+      const notAllocated = !passenger.isAllocated;
+      const destinationMatch = trechos.includes(passenger.destino);
+      const notInMission = !passageiros.some(p => p.cpf === passenger.cpf);
+      
       // Verificar se a data da missão está dentro do período de validade da inscrição
-      (passenger.dataInicioValidade && passenger.dataFimValidade 
+      const dateValidityCheck = passenger.dataInicioValidade && passenger.dataFimValidade 
         ? isMissionDateWithinValidity(dataVoo, passenger.dataInicioValidade, passenger.dataFimValidade)
-        : false)
-    ).sort((a, b) => a.prioridade - b.prioridade);
+        : false;
+      
+      console.log(`Passenger ${passenger.nome}:`, {
+        notAllocated,
+        destinationMatch,
+        notInMission,
+        dateValidityCheck,
+        missionDate: dataVoo,
+        startDate: passenger.dataInicioValidade,
+        endDate: passenger.dataFimValidade
+      });
+      
+      return notAllocated && destinationMatch && notInMission && dateValidityCheck;
+    }).sort((a, b) => a.prioridade - b.prioridade);
   };
 
   const getDestinationsText = () => {

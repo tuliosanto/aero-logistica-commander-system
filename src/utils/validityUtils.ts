@@ -1,10 +1,10 @@
 
-import { addDays, isAfter, isBefore, isToday, isWithinInterval, parseISO } from 'date-fns';
+import { addDays, isAfter, isBefore, isToday, isWithinInterval, parseISO, isSameDay } from 'date-fns';
 
-export const calculateEndDate = (startDate: string): string => {
+export const calculateEndDate = (startDate: string, days: number = 10): string => {
   const start = new Date(startDate);
-  const end = addDays(start, 10);
-  return end.toISOString().split('T')[0]; // Retorna apenas a data no formato YYYY-MM-DD
+  const end = addDays(start, days);
+  return end.toISOString().split('T')[0];
 };
 
 export const isValidityExpired = (endDate: string): boolean => {
@@ -39,7 +39,7 @@ export const getValidityStatus = (endDate: string): 'active' | 'expiring' | 'exp
   return 'active';
 };
 
-// Nova função para verificar se a data da missão está dentro do período de validade da inscrição
+// Função corrigida para verificar se a data da missão está dentro do período de validade da inscrição
 export const isMissionDateWithinValidity = (
   missionDate: string, 
   startDate: string, 
@@ -52,7 +52,10 @@ export const isMissionDateWithinValidity = (
     const start = parseISO(startDate);
     const end = parseISO(endDate);
     
-    return isWithinInterval(mission, { start, end });
+    // Verificar se a data da missão está dentro do intervalo (inclusive)
+    return isWithinInterval(mission, { start, end }) || 
+           isSameDay(mission, start) || 
+           isSameDay(mission, end);
   } catch (error) {
     console.error('Error checking mission date validity:', error);
     return false;

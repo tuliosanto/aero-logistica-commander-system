@@ -1,12 +1,14 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from 'lucide-react';
 import { CANWaitlistPassenger } from '../types/CANWaitlist';
 import { User } from '../types/User';
 import { MILITARY_RANKS, AERODROMOS } from '../utils/constants';
-import { calculateEndDate } from '../utils/validityUtils';
+import { addDays } from 'date-fns';
 
 interface CANWaitlistFormProps {
   passenger?: CANWaitlistPassenger | null;
@@ -30,14 +32,25 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
   const [dataInicioValidade, setDataInicioValidade] = useState(
     passenger?.dataInicioValidade || ''
   );
+  const [diasValidade, setDiasValidade] = useState<string>(
+    passenger?.dataInicioValidade && passenger?.dataFimValidade 
+      ? Math.ceil((new Date(passenger.dataFimValidade).getTime() - new Date(passenger.dataInicioValidade).getTime()) / (1000 * 60 * 60 * 24)).toString()
+      : '10'
+  );
   const [dataFimValidade, setDataFimValidade] = useState(passenger?.dataFimValidade || '');
 
   useEffect(() => {
-    if (dataInicioValidade) {
-      const endDate = calculateEndDate(dataInicioValidade);
-      setDataFimValidade(endDate);
+    if (dataInicioValidade && diasValidade) {
+      const start = new Date(dataInicioValidade);
+      const end = addDays(start, parseInt(diasValidade));
+      setDataFimValidade(end.toISOString().split('T')[0]);
     }
-  }, [dataInicioValidade]);
+  }, [dataInicioValidade, diasValidade]);
+
+  const setTodayDate = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setDataInicioValidade(today);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,33 +148,68 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div className="space-y-2">
-          <Label htmlFor="dataInicioValidade">Data de Início da Validade</Label>
-          <Input 
-            id="dataInicioValidade" 
-            type="date"
-            value={dataInicioValidade} 
-            onChange={e => setDataInicioValidade(e.target.value)}
-            required
-          />
-          <p className="text-xs text-gray-600">
-            Escolha a data de início do período de validade da inscrição
-          </p>
-        </div>
+      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 space-y-4">
+        <h3 className="font-medium text-blue-900">Período de Validade da Inscrição</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="dataInicioValidade">Data de Início</Label>
+            <div className="flex gap-2">
+              <Input 
+                id="dataInicioValidade" 
+                type="date"
+                value={dataInicioValidade} 
+                onChange={e => setDataInicioValidade(e.target.value)}
+                className="flex-1"
+                required
+              />
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={setTodayDate}
+                className="flex items-center gap-1"
+              >
+                <Calendar className="w-4 h-4" />
+                Hoje
+              </Button>
+            </div>
+            <p className="text-xs text-gray-600">
+              Escolha a data de início do período de validade
+            </p>
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="dataFimValidade">Data de Fim da Validade</Label>
-          <Input 
-            id="dataFimValidade" 
-            type="date"
-            value={dataFimValidade}
-            readOnly
-            className="bg-gray-100"
-          />
-          <p className="text-xs text-gray-600">
-            Calculado automaticamente: início + 10 dias
-          </p>
+          <div className="space-y-2">
+            <Label htmlFor="diasValidade">Período (dias)</Label>
+            <Select value={diasValidade} onValueChange={setDiasValidade}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione os dias" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 10 }, (_, i) => i + 1).map(day => (
+                  <SelectItem key={day} value={day.toString()}>
+                    {day} dia{day !== 1 ? 's' : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-600">
+              Máximo de 10 dias
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dataFimValidade">Data de Fim</Label>
+            <Input 
+              id="dataFimValidade" 
+              type="date"
+              value={dataFimValidade}
+              readOnly
+              className="bg-gray-100"
+            />
+            <p className="text-xs text-gray-600">
+              Calculado automaticamente
+            </p>
+          </div>
         </div>
       </div>
 
