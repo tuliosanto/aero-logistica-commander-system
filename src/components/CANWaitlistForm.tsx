@@ -53,8 +53,7 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
       prioridade: 13,
       responsavelInscricao,
       parentesco,
-      dataInicioValidade,
-      dataFimValidade
+      dataInicioValidade
     });
   };
 
