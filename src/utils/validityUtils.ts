@@ -1,5 +1,5 @@
 
-import { addDays, isAfter, isBefore, isToday } from 'date-fns';
+import { addDays, isAfter, isBefore, isToday, isWithinInterval, parseISO } from 'date-fns';
 
 export const calculateEndDate = (startDate: string): string => {
   const start = new Date(startDate);
@@ -37,4 +37,24 @@ export const getValidityStatus = (endDate: string): 'active' | 'expiring' | 'exp
     return 'expiring';
   }
   return 'active';
+};
+
+// Nova função para verificar se a data da missão está dentro do período de validade da inscrição
+export const isMissionDateWithinValidity = (
+  missionDate: string, 
+  startDate: string, 
+  endDate: string
+): boolean => {
+  if (!missionDate || !startDate || !endDate) return false;
+  
+  try {
+    const mission = parseISO(missionDate);
+    const start = parseISO(startDate);
+    const end = parseISO(endDate);
+    
+    return isWithinInterval(mission, { start, end });
+  } catch (error) {
+    console.error('Error checking mission date validity:', error);
+    return false;
+  }
 };

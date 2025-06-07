@@ -28,7 +28,7 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
   const [parentesco, setParentesco] = useState(passenger?.parentesco || '');
   
   const [dataInicioValidade, setDataInicioValidade] = useState(
-    passenger?.dataInicioValidade || new Date().toISOString().split('T')[0]
+    passenger?.dataInicioValidade || ''
   );
   const [dataFimValidade, setDataFimValidade] = useState(passenger?.dataFimValidade || '');
 
@@ -146,7 +146,7 @@ const CANWaitlistForm = ({ passenger, onSave, onCancel, currentUser }: CANWaitli
             required
           />
           <p className="text-xs text-gray-600">
-            Data a partir da qual a inscrição é válida
+            Escolha a data de início do período de validade da inscrição
           </p>
         </div>
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +14,7 @@ import PassengerList from './PassengerList';
 import PassengerForm from './PassengerForm';
 import { toast } from '@/hooks/use-toast';
 import { AERODROMOS, getAerodromoByBase } from '../utils/constants';
+import { isMissionDateWithinValidity } from '../utils/validityUtils';
 
 interface MissionFormProps {
   onSave: (mission: Mission) => void;
@@ -71,13 +71,18 @@ const MissionForm = ({
 
   const getCompatibleWaitlistPassengers = () => {
     const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
-    if (trechos.length === 0) return [];
+    if (trechos.length === 0 || !dataVoo) return [];
     
     // Filtrar passageiros não alocados em missões ativas/concluídas e cujo destino coincida com qualquer um dos trechos
+    // Também filtrar por data da missão dentro do período de validade
     return waitlist.filter(passenger => 
       !passenger.isAllocated &&
       trechos.includes(passenger.destino) &&
-      !passageiros.some(p => p.cpf === passenger.cpf)
+      !passageiros.some(p => p.cpf === passenger.cpf) &&
+      // Verificar se a data da missão está dentro do período de validade da inscrição
+      (passenger.dataInicioValidade && passenger.dataFimValidade 
+        ? isMissionDateWithinValidity(dataVoo, passenger.dataInicioValidade, passenger.dataFimValidade)
+        : false)
     ).sort((a, b) => a.prioridade - b.prioridade);
   };
 
@@ -413,6 +418,11 @@ const MissionForm = ({
               Passageiros na Lista de Espera - Destinos: {getDestinationsText()}
               <Badge variant="secondary">{compatiblePassengers.length}</Badge>
             </CardTitle>
+            {dataVoo && (
+              <p className="text-sm text-gray-600">
+                Mostrando apenas passageiros com inscrições válidas para a data da missão: {new Date(dataVoo).toLocaleDateString('pt-BR')}
+              </p>
+            )}
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
