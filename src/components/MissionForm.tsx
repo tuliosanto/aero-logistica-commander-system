@@ -71,34 +71,51 @@ const MissionForm = ({
 
   const getCompatibleWaitlistPassengers = () => {
     const trechos = [origem, trecho1, trecho2, trecho3, trecho4, trecho5, trecho6].filter(t => t.trim());
-    if (trechos.length === 0 || !dataVoo) return [];
+    if (trechos.length === 0 || !dataVoo) {
+      console.log('No trechos or dataVoo, returning empty array');
+      return [];
+    }
     
-    console.log('Filtering waitlist for mission date:', dataVoo);
+    console.log('=== DEBUGGING WAITLIST FILTERING ===');
+    console.log('Mission date:', dataVoo);
+    console.log('Mission trechos:', trechos);
+    console.log('Total waitlist passengers:', waitlist.length);
     
     // Filtrar passageiros não alocados em missões ativas/concluídas e cujo destino coincida com qualquer um dos trechos
     // Também filtrar por data da missão dentro do período de validade
-    return waitlist.filter(passenger => {
+    const filteredPassengers = waitlist.filter(passenger => {
+      console.log(`\n--- Checking passenger: ${passenger.nome} ---`);
+      
       const notAllocated = !passenger.isAllocated;
+      console.log('Not allocated:', notAllocated);
+      
       const destinationMatch = trechos.includes(passenger.destino);
+      console.log('Destination match:', destinationMatch, `(passenger destination: ${passenger.destino}, mission trechos: ${trechos.join(', ')})`);
+      
       const notInMission = !passageiros.some(p => p.cpf === passenger.cpf);
+      console.log('Not in mission:', notInMission);
       
       // Verificar se a data da missão está dentro do período de validade da inscrição
-      const dateValidityCheck = passenger.dataInicioValidade && passenger.dataFimValidade 
-        ? isMissionDateWithinValidity(dataVoo, passenger.dataInicioValidade, passenger.dataFimValidade)
-        : false;
+      let dateValidityCheck = false;
+      if (passenger.dataInicioValidade && passenger.dataFimValidade) {
+        dateValidityCheck = isMissionDateWithinValidity(dataVoo, passenger.dataInicioValidade, passenger.dataFimValidade);
+        console.log('Date validity check:', dateValidityCheck);
+        console.log(`Mission date: ${dataVoo}, Validity: ${passenger.dataInicioValidade} to ${passenger.dataFimValidade}`);
+      } else {
+        console.log('Missing validity dates for passenger');
+      }
       
-      console.log(`Passenger ${passenger.nome}:`, {
-        notAllocated,
-        destinationMatch,
-        notInMission,
-        dateValidityCheck,
-        missionDate: dataVoo,
-        startDate: passenger.dataInicioValidade,
-        endDate: passenger.dataFimValidade
-      });
+      const isCompatible = notAllocated && destinationMatch && notInMission && dateValidityCheck;
+      console.log('Final result - Is compatible:', isCompatible);
       
-      return notAllocated && destinationMatch && notInMission && dateValidityCheck;
+      return isCompatible;
     }).sort((a, b) => a.prioridade - b.prioridade);
+    
+    console.log('=== FILTERING COMPLETE ===');
+    console.log('Compatible passengers found:', filteredPassengers.length);
+    console.log('Compatible passengers:', filteredPassengers.map(p => `${p.nome} (${p.destino})`));
+    
+    return filteredPassengers;
   };
 
   const getDestinationsText = () => {

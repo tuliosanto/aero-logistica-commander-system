@@ -45,17 +45,30 @@ export const isMissionDateWithinValidity = (
   startDate: string, 
   endDate: string
 ): boolean => {
-  if (!missionDate || !startDate || !endDate) return false;
+  if (!missionDate || !startDate || !endDate) {
+    console.log('Missing dates:', { missionDate, startDate, endDate });
+    return false;
+  }
   
   try {
-    const mission = parseISO(missionDate);
-    const start = parseISO(startDate);
-    const end = parseISO(endDate);
+    // Converter as strings para objetos Date
+    const mission = new Date(missionDate);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    console.log('Date comparison:', {
+      missionDate: mission.toISOString().split('T')[0],
+      startDate: start.toISOString().split('T')[0], 
+      endDate: end.toISOString().split('T')[0]
+    });
     
     // Verificar se a data da missão está dentro do intervalo (inclusive)
-    return isWithinInterval(mission, { start, end }) || 
-           isSameDay(mission, start) || 
-           isSameDay(mission, end);
+    // A data da missão deve ser >= data de início E <= data de fim
+    const isWithinRange = mission >= start && mission <= end;
+    
+    console.log('Is mission date within validity range?', isWithinRange);
+    
+    return isWithinRange;
   } catch (error) {
     console.error('Error checking mission date validity:', error);
     return false;
