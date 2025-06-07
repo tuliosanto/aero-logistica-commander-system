@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,7 +61,7 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
     setOpen(false);
   };
 
-    const formatCPF = (value: string) => {
+  const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
@@ -119,7 +118,6 @@ const PassengerForm = ({ onAddPassenger, destinations }: PassengerFormProps) => 
               <Input
                 id="cpf"
                 value={cpf}
-                onChange={(e) => setCpf(e.target.value)}
                 onChange={handleCPFChange}
                 placeholder="Apenas Números"
                 maxLength={14}
